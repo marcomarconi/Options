@@ -1,0 +1,83 @@
+---
+title: "Trading with GARCH Forecast"
+output: html_notebook
+---
+
+
+
+Read the Data
+Import the file options_daily_sp500_2018_2022.csv using the read_csv method of pandas. It has the details of all monthly expiry options contracts available for the S&P 500 index from 2018 till 2022. For SPX options, the expiry date of monthly contract is the last trading day of the month.
+The data includes the strike price of the options contract, the implied volatility and the price of calls, puts of the strike price.
+
+This CSV file is available in the zip file of the unit 'Python Codes and Data' in the 'Course Summary' section.
+
+```{r}
+library(tidyverse)
+# Read the data
+options_data = read_csv("../../Quantra/data_modules/options_daily_sp500_2018_2022.csv")
+
+# Change the index type to datetime
+options_data <- rename(options_data, Date=`...1`) %>% mutate(Date=as.Date(Date))
+
+# Import the S&P 500 index daily data
+daily_data_SP500 = read_csv("../../Quantra/data_modules/daily_sp500_2018_2022.csv")
+
+# Merge both dataframes to include the information of underlying data into options data
+options_data <- merge(options_data, daily_data_SP500, by="Date")
+
+# Display the data
+options_data %>% tail
+```
+Generate the Trading Signals
+For every day in the last one year of data in options_data, perform the following steps to generate trading signals.
+
+Step-1: Select the 4 years of daily options data before the selected date
+Step-2: Resample the daily data into monthly data
+Step-3: Estimate the monthly volatility using Parkinson volatility estimator
+Step-4: Considering the estimated volatility as the input, estimate the parameters of the GARCH(1,1) model
+Step-5: Forecast the volatility for the next month with GARCH(1,1) model with estimated parameters.
+Step-6: If the forecasted volatility is greater than the implied volatility of ATM call and put options, buy a straddle. On the other hand, if the forecasted volatility is less than the implied volatility of ATM call and put options, sell a straddle.
+Step-7: Once a long or short position is opened, close it after a week.
+Step-8: Once the position is closed, re-estimate the model using the rolling 4 years of data, forecast volatility again for one month and generate the trading signals.
+Before implementing the above steps, create the signal column in the options_data dataframe to store the trading signals.
+
+signal = 1 if a long straddle position is to be opened.
+signal = -1 if a short straddle position is to be opened.
+signal = 0 if a long or short straddle position is to be closed.
+Also, define the initial parameter values and their bounds for estimation of GARCH (1,1) parameters.
+
+```{r}
+# Create `signal_iv` column in the options_data dataframe
+options_data['signal'] = 0
+
+# Define the initial parameter values gamma, alpha, beta
+initial_parameters = c(0.1, 0.1, 0.1)
+
+# Bounds for gamma, alpha, beta
+parameter_bounds = list(c(0, 1), c(0, 1), c(0, 1))
+```
+
+Since the trading signals are to be generated for the last one year of the options data, select the last one year of data from options_data and store it in data_last_one_year.
+Since the trade should be held for one week, you need not check for trading signals every single day. So, create a counter days_since_last_signal to keep track of the number of days since the last trading signal.
+Once the counter reaches 5, conditions to generate trade signals will be checked. This ensures that the trading signals are generated a week apart and no trading signal is generated when a position is open.
+Initiate the counter with 5.
+Reset the counter to 0 once a position is opened.
+
+```{r}
+# Select the last one year of data from options_data
+last_one_year = options_data %>% tail(252*4)
+
+# Initiate the counter with five
+days_since_last_signal = 5
+```
+
+
+```{r}
+options_data_monthly <-  group_by(options_data, M) %>% mutate(Days=n()-(1:n())+1, IV=C_IV*sqrt(Days)); options_data_monthly$RV=runSD(log(options_data_monthly$Close/lag(options_data_monthly$Close)), 20)*sqrt(252)
+
+options_data_monthly <-  group_by(options_data, M) %>% reframe(M_High=max(High), M_Low=min(Low), M_HL=log(M_High/M_Low), M_Close=last(Close))
+options_data_pk <- merge(options_data, options_data_monthly, by="M", all=T) %>% mutate(IV=C_IV*sqrt(Days))
+
+# )
+```
+
