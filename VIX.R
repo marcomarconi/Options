@@ -2,7 +2,7 @@ library(tidyverse)
 library(tsibble)
 library(roll)
 library(TTR)
-
+library(Rfast)
 # Here I replicate RW "VIX_Futures_vs_SPX_Options_Basis_.ipynb" analysis using my own data to calculate the constant maturity contract
 {
 setwd("/home/marco/trading/Systems/Options/")
@@ -57,7 +57,7 @@ final <- premium %>%
     mutate(lag_premium_zscore = lag(premium_zscore, 1)) %>%
     mutate(tr30 = vx30_tr) %>% 
     mutate(Volatility = calculate_volatility(vx30_tr), Position = (0.2 / Volatility) %>% lag(1) %>% replace(.,is.na(.), 0) ) %>% 
-    arrange(Date) %>%
+    arrange(Date) %>% na.omit %>% 
     mutate(
         cutoff_1_0 = case_when(lag_premium_zscore <= -1  ~ tr30 , lag_premium_zscore > -1 ~ -tr30, TRUE ~ 0),
         cutoff_1_25 = case_when(lag_premium_zscore <= -1.25  ~ tr30, lag_premium_zscore > -1.25 ~ -tr30, TRUE ~ 0),
@@ -65,8 +65,7 @@ final <- premium %>%
         cutoff_1_75 = case_when(lag_premium_zscore <= -1.75  ~ tr30 , lag_premium_zscore > -1.75 ~ -tr30, TRUE ~ 0),
         cutoff_2 = case_when(lag_premium_zscore <= -2  ~ tr30 , lag_premium_zscore > -2 ~ -tr30, TRUE ~ 0),
         cutoff_no = -tr30,
-        cutoff_1_5_position = Position * case_when(lag_premium_zscore <= -1.5  ~ tr30, lag_premium_zscore > -1.5 ~ -tr30, TRUE ~ 0),
-        test = Position * case_when(lag_premium_zscore <= -1.5  ~ 1, lag_premium_zscore > -1.5 ~ -1, TRUE ~ 0),
+        cutoff_1_5_test = case_when(lag_premium_zscore <= -1.5  ~ 0, lag_premium_zscore > -1.5 ~ -tr30, TRUE ~ 0),
     ) %>%
     select(c(Date, starts_with('cutoff'))) %>%
     pivot_longer(-Date, names_to = 'zscore_cutoff', values_to = 'returns') %>% group_by(zscore_cutoff) %>% reframe(Date=Date, returns=returns, cumreturns=cumsum(returns)) 
