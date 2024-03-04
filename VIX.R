@@ -1,8 +1,155 @@
+{
 library(tidyverse)
 library(tsibble)
 library(roll)
 library(TTR)
 library(Rfast)
+library(zoo)
+library(data.table)
+library(ggthemes)
+    library(PerformanceAnalytics)
+    source("/home/marco/trading/Systems//Monopoly//Futures.R")
+    
+    }
+
+    
+running_ntile <- function(x, n=252, k=4) {
+    rv <- runquantile(x, k = n, probs = seq(0, 1, length.out=k+1), align = "right")
+    q <- sapply(1:(ncol(rv)-1), function(j) ifelse(x >= rv[,j] & x < rv[,j+1] , j, 0))
+    q[,(ncol(rv)-1)] <- ifelse(x == rv[ ,ncol(rv)], ncol(rv)-1, q[,(ncol(rv)-1)])
+    fc <- rowSums(q)
+    return(fc)
+}
+
+# Random
+{
+    symbol <- "ZL"
+    dir <- "/home/marco/trading/HistoricalData/Barchart/Soyoil///"
+    df <- load_future_contracts_long(symbol, dir)
+    df_ <- load_future_contracts_wide(symbol, dir)
+    spreads <- build_spreads(df, C = list(c(1,2),c(2,3),c(3,4),c(4,5))) %>% filter(between(Date, "2001-01-01", "2023-01-01"))
+    backadj <- backadjust_future(df_, N = 2)
+    
+    plot.ts(cumsum(na.omit((backadj$Return * lag(backadj$Basis)))))
+    
+    # Plot the spreads
+    spreads %>% na.omit %>% #filter(Date > "2020-01-01") %>% 
+        group_by(Contracts) %>%
+        mutate(slope_zscore = (SpreadLog - roll::roll_mean(SpreadLog, 252))/roll::roll_sd(SpreadLog, 252)) %>%
+        mutate(slope_zscore = SpreadLog) %>%
+        ggplot(aes(x=Date, y=slope_zscore, color=Contracts)) + geom_line(linewidth=1)  + scale_color_colorblind()
+
+    # Plot performance by spread
+    spreads %>%
+        group_by(Contracts) %>%
+        arrange(Date) %>%
+        mutate(
+            spreadvol = roll::roll_sd(SpreadReturn, 32) * sqrt(252),
+            scaledreturns = 0.2 / lag(spreadvol) * SpreadReturn
+        ) %>%
+        na.omit() %>%
+        group_by(Contracts) %>%
+        arrange(Date) %>%
+        mutate(cumreturns = cumsum(-scaledreturns)) %>%
+        ggplot(aes(x=Date, y=cumreturns, color=Contracts)) + geom_line(linewidth=2) + ggtitle('VX spreads volatility adjusted - cumulative returns') + scale_color_colorblind()
+    
+    # Returns performance by slope strenght
+    spreads %>% na.omit %>% 
+        group_by(Contracts) %>%
+        mutate(
+            slope_zscore = (SpreadLog - roll::roll_mean(SpreadLog, 252))/roll::roll_sd(SpreadLog, 252),
+        ) %>%
+        mutate(lagbasis = ntile(lag(slope_zscore), 5)) %>%
+        group_by(Contracts, lagbasis) %>%
+        summarize(meanreturn = mean(SpreadReturn), sdreturn = sd(SpreadReturn)/sqrt(n())) %>%
+        ggplot(aes(x=lagbasis, y=meanreturn)) + geom_bar(stat='identity') +
+        geom_errorbar(aes(ymin=meanreturn-sdreturn,ymax=meanreturn+sdreturn), width=0.25)+ facet_wrap(~Contracts)
+    
+    # Returns performance by slope strenght
+    spreads %>% na.omit %>% 
+        group_by(Contracts) %>%
+        mutate(
+            slope_zscore = (SpreadLog - roll::roll_mean(SpreadLog, 252))/roll::roll_sd(SpreadLog, 252),
+            spreadvol = roll::roll_sd(SpreadReturn, 32) * sqrt(252),
+            scaledreturns = 0.2 / lag(spreadvol) * SpreadReturn
+        ) %>%na.omit %>% 
+        mutate(lagbasis = ntile(lag(slope_zscore), 10), returns = scaledreturns*(lag(slope_zscore))/10) %>% na.omit %>% 
+        #group_by(Contracts) %>% reframe(SR=mean(returns)/sd(returns)*16)
+        mutate(cumreturns = cumsum(returns)) %>%
+        ggplot(aes(x=Date, y=cumreturns, color=Contracts)) + geom_line(linewidth=2) + ggtitle('VX spreads volatility adjusted - cumulative returns') + scale_color_colorblind()
+    
+    spreads  %>% na.omit %>% 
+        filter(Contracts == 'c_12') %>%
+        group_by(x=month(Date)) %>%
+        summarize(M =  mean(SpreadReturn), S = sd(SpreadReturn) / sqrt(n())) %>%
+        ggplot(aes(x=x, y=M)) + geom_bar(stat="identity") + geom_errorbar(aes(ymin=M-S, ymax=M+S), width=0.25)
+
+}
+
+
+# Here I replicate "VIX_Calendars_for_Fun_and_Profit.ipynb"
+{
+    vx <- load_future_contracts_long("VI", "/home/marco/trading/HistoricalData/Barchart/VIX/")
+    
+    spreads <- build_spreads(vx, C = list(c(1,2),c(2,3),c(3,4),c(4,5),c(5,6)))
+    
+    # Plot performance by spread
+    spreads %>%
+        group_by(Contracts) %>%
+        arrange(Date) %>%
+        mutate(
+            spreadvol = roll::roll_sd(SpreadReturn, 32) * sqrt(252),
+            scaledreturns = 0.2 / lag(spreadvol) * SpreadReturn
+        ) %>%
+        na.omit() %>%
+        group_by(Contracts) %>%
+        arrange(Date) %>%
+        mutate(cumreturns = cumsum(scaledreturns)) %>%
+        ggplot(aes(x=Date, y=cumreturns, color=Contracts)) + geom_line(linewidth=2) + ggtitle('VX spreads volatility adjusted - cumulative returns') + scale_color_colorblind()
+    
+    # All spreads performance 
+    spreads %>%
+        group_by(Contracts) %>%
+        arrange(Date) %>%
+        mutate(
+            spreadvol = roll::roll_sd(SpreadReturn, 60) * sqrt(252),
+            scaledreturns = 0.2 / lag(spreadvol) * SpreadReturn
+        ) %>%
+        na.omit() %>%
+        group_by(Date) %>%
+        mutate(returns = mean(scaledreturns)) %>%
+        ungroup() %>%
+        mutate(cumreturns = cumsum(scaledreturns)) %>%
+        ggplot(aes(x=Date, y=cumreturns)) + geom_line() + ggtitle('VX spreads volatility adjusted traded together - cumulative returns')
+    
+    # Returns performance by slope strenght
+    spreads %>% na.omit %>% 
+        group_by(Contracts) %>%
+        mutate(
+            slope_zscore = (SpreadLog - roll::roll_mean(SpreadLog, 252))/roll::roll_sd(SpreadLog, 252),
+        ) %>%
+        mutate(lagbasis = ntile(lag(slope_zscore), 10)) %>%
+        group_by(Contracts, lagbasis) %>%
+        summarize(meanreturn = mean(SpreadReturn), sdreturn = sd(SpreadReturn)/sqrt(n())) %>%
+        ggplot(aes(x=lagbasis, y=meanreturn)) + geom_bar(stat='identity') +
+        geom_errorbar(aes(ymin=meanreturn-sdreturn,ymax=meanreturn+sdreturn), width=0.25)+ facet_wrap(~Contracts)
+    
+    # Split the previous by year for a sigle spread
+    spreads %>%
+        filter(Contracts == 'c_34') %>%
+        mutate(year=year(Date)) %>%
+        mutate(
+            slope_zscore = (SpreadLog - roll::roll_mean(SpreadLog, 252))/roll::roll_sd(SpreadLog, 252),
+        ) %>%
+        mutate(lagbasis = ntile(lag(slope_zscore), 10)) %>%
+        group_by(year, lagbasis) %>%
+        summarize(meanreturn = mean(SpreadReturn)) %>%
+        ggplot(aes(x=lagbasis, y=meanreturn)) + geom_bar(stat='identity') + facet_wrap(~year)
+    
+}
+
+
+
 # Here I replicate RW "VIX_Futures_vs_SPX_Options_Basis_.ipynb" analysis using my own data to calculate the constant maturity contract
 {
 setwd("/home/marco/trading/Systems/Options/")

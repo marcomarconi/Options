@@ -1,3 +1,4 @@
+{
 suppressMessages(library(tidyverse))
 suppressMessages(library(data.table))
 suppressMessages(library(lubridate))
@@ -7,6 +8,7 @@ suppressMessages(library(zoo))
 suppressMessages(library(optparse))
 
 source("/home/marco/trading/Systems/Common/RiskManagement.R")
+}
 
 # Functions
 {
@@ -53,7 +55,7 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
                 ) %>% 
         mutate(W = ((Dist1 + Dist2) - Dist1) / (Dist1 + Dist2)) %>% 
         mutate(W = case_when(DTE1 >= 30  ~ 1, TRUE ~ W)) %>% 
-        mutate(CM = W*VX1 + (1-W)*VX2, CMr = W * Return1 + (1-W) * Return2, VX1r=Return1) 
+        mutate(VX30 = W*VX1 + (1-W)*VX2, VX30r = W * Return1 + (1-W) * Return2, VX1r=Return1) 
     return(constant_maturity_contract)
 }
 }
@@ -95,39 +97,58 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     setwd(main_dir)
     
     # Create constant maturity contract
-    print("Downloading contracts from Barchart and create constant maturity contract.")
-    if(!dry_run)
+    
+    if(!dry_run){
+        print("Downloading contracts from Barchart and create constant maturity contract.")
         system(paste("python3", scrape_barchart_script, scrape_barchart_dir))
-    CM <- constant_maturity(scrape_barchart_dir, expity_file)
+    }
+    VX30 <- constant_maturity(scrape_barchart_dir, expity_file)
     
     # Load indices
-    print("Downloading indices from Yahoo and load.")
-    if(!dry_run)
+    if(!dry_run) {
+        print("Downloading indices from Yahoo and load.")
         system(paste("bash", scrape_yahoo_script, scrape_yahoo_dir, scrape_yahoo_file))
+    }
     VIX <- read_csv(paste0(scrape_yahoo_dir, "^VIX.csv"), show_col_types = F) %>% select(Date, `Adj Close`) %>% rename(VIX=`Adj Close`)
     VIX3M <- read_csv(paste0(scrape_yahoo_dir, "^VIX3M.csv"), show_col_types = F) %>% select(Date, `Adj Close`) %>% rename(VIX3M=`Adj Close`)
     VVIX <- read_csv(paste0(scrape_yahoo_dir, "^VVIX.csv"), show_col_types = F) %>% select(Date, `Adj Close`) %>% rename(VVIX=`Adj Close`)
     
     # Merge all the data
-    total <- Reduce(function(...) full_join(..., by = "Date"), list(CM, VIX, VIX3M, VVIX)) %>% arrange(Date) %>% na.omits
-    total <- mutate(total, 
-                    Premium = log(CM / VIX3M), 
-                    VIX_Basis = log(VIX / VIX3M), 
-                    VX_basis = log(VX1 / VX2), 
+    total <- Reduce(function(...) full_join(..., by = "Date"), list(VX30, VIX, VIX3M, VVIX)) %>% arrange(Date) %>% na.omit
+    results <- mutate(total, 
+                    VX30_Premium = log(VX30 / VIX3M), 
+                    VIX_Basis = log(VIX3M / VIX), 
+                    VX_Basis = log(VX2 / VX1), 
                     logVVIX = log(VVIX), 
                     logVIX = log(VIX), 
-                    Return = VX1r, leadReturn = lead(Return),
-                    Volatility = calculate_volatility(VX1r))
-    total <- mutate(total, 
-                    Premium = na.locf(Premium, na.rm = F), 
-                    Premium_zscore = (Premium - runMean(Premium, 252)) / runSD(Premium, 252),
-                    Forecast = case_when(Premium_zscore <= cutoff ~ 1, Premium_zscore > cutoff ~ -1, TRUE ~ 0),
+                    Return = VX1r, 
+                    Volatility = calculate_volatility(VX1r),
+                    #Premium = na.locf(Premium, na.rm = F), 
+                    VX30_Premium_zscore = (VX30_Premium - runMean(VX30_Premium, 252)) / runSD(VX30_Premium, 252),
+                    VIX_Basis_zscore = (VIX_Basis - runMean(VIX_Basis, 252)) / runSD(VIX_Basis, 252),
+                    VX_Basis_zscore = (VX_Basis - runMean(VX_Basis, 252)) / runSD(VX_Basis, 252),
+                    Forecast = case_when(VX30_Premium_zscore <= cutoff ~ 1, VX30_Premium_zscore > cutoff ~ -1, TRUE ~ 0),
                     Exposure = capital * target_vol / Volatility,
-                    PositionOptimal = (Exposure * fx * Forecast) / (1 * VX1),
+                    PositionOptimal = (Exposure * fx * Forecast) / (1 * VX1)
                     )
-    total <- arrange(total, desc(Date))
+    if(!dry_run) {
+        p <- results   %>% ggplot(aes(x=VX30_Premium_zscore)) + geom_histogram(bins = 50) + 
+            geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VX30_Premium_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VX30_Premium_zscore.png"), p, width = 12, height = 9)
+        p <- results  %>% ggplot(aes(x=VIX)) + geom_histogram(bins = 50) + geom_vline(xintercept = 0) + 
+            geom_vline(xintercept = tail(results$VIX, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VIX.png"), p, width = 12, height = 9)
+        p <- results   %>% ggplot(aes(x=VIX_Basis_zscore)) + geom_histogram(bins = 50) + 
+            geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VIX_Basis_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VIX_Basis_zscore.png"), p, width = 12, height = 9)
+        p <- results   %>% ggplot(aes(x=VX_Basis_zscore)) + geom_histogram(bins = 50) + 
+            geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VX_Basis_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VX_Basis_zscore.png"), p, width = 12, height = 9)
+        
+    }
+    results <- arrange(results, desc(Date)) 
     if(!dry_run)
-        write_csv(total, paste0(logs_dir, "/", now_string, ".POSITIONS.csv"))
-    print(total, width=Inf)
+        write_csv(results, paste0(logs_dir, "/", now_string, ".POSITIONS.csv"))
+    print(results, width=Inf)
     
 }
