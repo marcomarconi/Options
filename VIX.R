@@ -322,4 +322,17 @@ final %>%     ggplot(aes(x=Date, y=cumreturns, color = zscore_cutoff)) + geom_li
         ggtitle('Simulation (cost-free) taking SPVIXSTR position in proportion to signal')
 }
 
-
+# Election Day Analysis
+VI <- load_future_contracts_long("VI", "/home/marco/trading/HistoricalData/Barchart/VIX")
+VI$Month <- sub("..(.)..", "\\1", VI$Symbol)
+month_code <- setNames(1:12,c("f", "g", "h", "j", "k", "m", "n", "q", "u", "v", "x", "z"))
+VI$Month <- month_code[VI$Month]
+VI$Year <- sub("...(..)", "\\1", VI$Symbol) %>% as.integer()
+SPX <- read_csv("Data/SPX.csv", show_col_types = F)
+SPX <- mutate(SPX, Return=log(`Adj Close` / lag(`Adj Close`)), RealVol = runSD(Return, 30)*16)
+VIX <- read_csv("Data/VIX.csv", show_col_types = F)  
+SPX <- mutate(SPX, YearMonth = yearmonth(Date), WeekDay = wday(Date)) %>% group_by(YearMonth, WeekDay) %>% mutate(Occ=row_number(), FirstMonday = case_when(Occ==1 & WeekDay == 2 ~ TRUE, TRUE ~ FALSE)) %>% ungroup %>% mutate(FirstMonday = lag(FirstMonday), ElectionDay = case_when(FirstMonday == TRUE & WeekDay == 3 & month(Date) == 11 & year(Date) %in% c(2004,2008,2012,2016,2020,2024)~ TRUE, TRUE ~ FALSE)) 
+SPX %>% filter(ElectionDay == TRUE) %>% pull(RealVol) %>% mean
+SPX %>% mutate(RealVol = lag(RealVol,30)) %>% filter(ElectionDay == TRUE) %>% pull(RealVol) %>% mean
+SPX %>% mutate(RealVol = lead(RealVol,30)) %>% filter(ElectionDay == TRUE) %>% pull(RealVol) %>% mean
+VI %>% group_by(yearmonth(Date)) %>% mutate(m=min(Date), check=Date==m) %>% filter(check==TRUE, month(Date)==5 & year(Date)  %in% c(2004,2008,2012,2016,2020,2024) & between(Month, 1, 12)) %>% mutate(Y=year(Date)) %>% ggplot(aes(Month, Close)) + geom_line() + facet_wrap(~Y)
