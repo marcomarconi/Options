@@ -71,7 +71,7 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     scrape_barchart_script <- paste0(main_dir, "Download_Barchart.py")
     scrape_yahoo_script <- paste0(main_dir, "Download_Yahoo.sh")
     scrape_yahoo_file <- paste0(main_dir, "Instruments_yahoo.txt")
-    target_vol <- 0.25
+    target_vol <- 0.5
     cutoff <- -1.5
     dry_run <- FALSE
 }
