@@ -74,6 +74,7 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     target_vol <- 0.5
     cutoff <- -1.5
     dry_run <- FALSE
+    skip_download <- FALSE
 }
 
 {
@@ -81,15 +82,17 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     option_list = list(
         make_option(c("-c", "--capital"),  type="double", help="Account Capital."),
         make_option(c("-f", "--fx"),  default=1.0, type="double", help="FX."),
-        make_option(c("-d", "--dryrun"), action="store_true", default=FALSE, help="Do not write any file.")
+        make_option(c("-d", "--dryrun"), action="store_true", default=FALSE, help="Do not write any file."),
+        make_option(c("-s", "--skipdownload"), action="store_true", default=FALSE, help="Do not download data.")
     );
     opt_parser = OptionParser(option_list=option_list);
     opt = parse_args(opt_parser);
     capital <- opt$capital
     fx <- opt$fx
     dry_run <- opt$dryrun
+    skip_download <- opt$skipdownload
     
-    print(paste("Capital:", capital, "Target Volatility:", target_vol, "Dry run:", dry_run))
+    print(paste("Capital:", capital, "Target Volatility:", target_vol, "Dry run:", dry_run, "Skip download:", dry_run))
     
     # Set general variables and the current directory
     today_string <- gsub("-", "", today())
@@ -97,15 +100,14 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     setwd(main_dir)
     
     # Create constant maturity contract
-    
-    if(!dry_run){
+    if(!skip_download){
         print("Downloading contracts from Barchart and create constant maturity contract.")
         system(paste("python3", scrape_barchart_script, scrape_barchart_dir))
     }
     VX30 <- constant_maturity(scrape_barchart_dir, expity_file)
     
     # Load indices
-    if(!dry_run) {
+    if(!skip_download) {
         print("Downloading indices from Yahoo and load.")
         system(paste("bash", scrape_yahoo_script, scrape_yahoo_dir, scrape_yahoo_file))
     }
@@ -134,16 +136,25 @@ constant_maturity <- function(dir, expiry_file, contract="VI", year_str=6:7, mon
     if(!dry_run) {
         p <- results   %>% ggplot(aes(x=VX30_Premium_zscore)) + geom_histogram(bins = 50) + 
             geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VX30_Premium_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
-        ggsave(filename = paste0(plots_dir, "/VX30_Premium_zscore.png"), p, width = 12, height = 9)
+        ggsave(filename = paste0(plots_dir, "/VX30_Premium_zscore_hist.png"), p, width = 12, height = 9)
         p <- results  %>% ggplot(aes(x=VIX)) + geom_histogram(bins = 50) + geom_vline(xintercept = 0) + 
             geom_vline(xintercept = tail(results$VIX, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
-        ggsave(filename = paste0(plots_dir, "/VIX.png"), p, width = 12, height = 9)
+        ggsave(filename = paste0(plots_dir, "/VIX_hist.png"), p, width = 12, height = 9)
         p <- results   %>% ggplot(aes(x=VIX_Basis_zscore)) + geom_histogram(bins = 50) + 
             geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VIX_Basis_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
-        ggsave(filename = paste0(plots_dir, "/VIX_Basis_zscore.png"), p, width = 12, height = 9)
+        ggsave(filename = paste0(plots_dir, "/VIX_Basis_zscore_hist.png"), p, width = 12, height = 9)
         p <- results   %>% ggplot(aes(x=VX_Basis_zscore)) + geom_histogram(bins = 50) + 
             geom_vline(xintercept = 0) + geom_vline(xintercept = tail(results$VX_Basis_zscore, 1), color="red", linewidth= 2) + theme(text = element_text(size=24))
-        ggsave(filename = paste0(plots_dir, "/VX_Basis_zscore.png"), p, width = 12, height = 9)
+        ggsave(filename = paste0(plots_dir, "/VX_Basis_zscore_hist.png"), p, width = 12, height = 9)
+        
+        p <- results %>% tail(500)  %>% ggplot(aes(x=Date, y=VX30_Premium_zscore)) + geom_line() +  geom_hline(yintercept = 0) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VX30_Premium_zscore_ts.png"), p, width = 12, height = 9)
+        p <- results %>% tail(500)  %>% ggplot(aes(x=Date, y=VIX)) + geom_line() +  geom_hline(yintercept = 0) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VIX_ts.png"), p, width = 12, height = 9)
+        p <- results %>% tail(500)  %>% ggplot(aes(x=Date, y=VX30_Premium_zscore)) + geom_line() +  geom_hline(yintercept = 0) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VIX_Basis_zscore_ts.png"), p, width = 12, height = 9)
+        p <- results %>% tail(500)  %>% ggplot(aes(x=Date, y=VX_Basis_zscore)) + geom_line() +  geom_hline(yintercept = 0) + theme(text = element_text(size=24))
+        ggsave(filename = paste0(plots_dir, "/VX_Basis_zscore_ts.png"), p, width = 12, height = 9)
         
     }
     results <- arrange(results, desc(Date)) 
