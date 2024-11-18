@@ -8,6 +8,7 @@
     library(Rfast)
     library(tsibble)
     library(ggthemes)
+    library(bizdays)
     source("/home/marco/trading/Systems/Common/RiskManagement.R")
     source("/home/marco/trading/Systems/Common/Common.R")
     source("/home/marco/trading/Systems/Common/Indicators.R")
@@ -378,12 +379,16 @@ option_sim_profit <- function(gbm, type="call", premium = NULL, X = 100, tt = 1,
     dir <- "/media/marco/Elements/ORATS/cores/"
     files <- list.files(dir, pattern = "orats_core_202..*gz")
     ORATS_core <- files %>% purrr::map_df(.f = load_orats_day, cols_to_extract)
+    ### The following lines will calculate estimated straddle returns as abs(returns) - (straddle / price)
+    # The calendar
+    us_holidays <- seq(as.Date("2000-01-01"), as.Date("2025-12-31"), 1) %>% grep("....-01-01|....-07-04|....-12-31",., value=TRUE) # Add other holidays as needed
+    create.calendar("US", weekdays = c("saturday", "sunday"), holidays = us_holidays)
     # Calculate price returns
     ORATS_core <- ORATS_core  %>% mutate(tradeDate=as.Date(tradeDate)) %>% mutate(pxAtmIv = case_when(pxAtmIv < 0 ~ 0, TRUE ~ pxAtmIv)) %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(retAtmIv = c(0, diff(log(pxAtmIv))), .after = pxAtmIv)
-    # Remove returns > 0.05, as they are usually from stock splits
-    ORATS_core <- ORATS_core  %>% mutate(retAtmIv = case_when(abs(retAtmIv) > 0.1  | retAtmIv == 0 ~ NA, TRUE ~ retAtmIv)) 
+    # Remove returns > 0.05 as they are usually from stock splits (maybe set them to zero?). Also removes returns == 0? CHECK THIS
+    ORATS_core <- ORATS_core  %>% mutate(retAtmIv = case_when(abs(retAtmIv) > 0.1 ~ NA, TRUE ~ retAtmIv)) #| retAtmIv == 0 
     # Calculate cumulative price returns from current date to expiry
-    ORATS_core <- ORATS_core  %>% mutate(cumRetAtmIv = map_dbl(1:n(), ~ sum(retAtmIv[(.x+1):min(.x + dtExM1[.x] - 1, n())])), .after = retAtmIv)  #%>% mutate(cumRetAtmIv = case_when(dtExM1 == 1 ~ NA, TRUE ~ cumRetAtmIv))
+    ORATS_core <- ORATS_core  %>% group_by(ticker) %>% mutate(daysToExpire = bizdays(tradeDate, tradeDate+dtExM1, "US"), cumRetAtmIv = map_dbl(1:n(), ~ sum(retAtmIv[(.x+1):min(.x + daysToExpire[.x], "US", n())])), .after = retAtmIv)  #%>% mutate(cumRetAtmIv = case_when(dtExM1 == 1 ~ NA, TRUE ~ cumRetAtmIv))
     # Calculate expected straddle returns, ignore when straddle price is bigger than stock price
     ORATS_core <- ORATS_core %>% mutate(straRetM1 = abs(cumRetAtmIv) - straPxM1 / pxAtmIv, straRetM1 = case_when(straPxM1 > pxAtmIv ~ NA, TRUE ~ straRetM1)) %>% ungroup
     write_csv(ORATS_core, "/home/marco/trading/HistoricalData/ORATS/ORATS_core.csv")
@@ -540,8 +545,8 @@ option_sim_profit <- function(gbm, type="call", premium = NULL, X = 100, tt = 1,
     # Straddles return by month day
     ORATS_core %>% mutate(Decile = mday(tradeDate)) %>% group_by(ticker, Decile, Year=year(tradeDate)) %>% reframe(VRP=median(straRetM1/(dtExM1+1) , na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(VRP, na.rm=T), S=sd(VRP, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year)
     # Straddles return by stock return - inter ticker and intra ticker 
-    ORATS_core  %>%  mutate(Decile = factor(ntile(retAtmIv %>% na.locf(na.rm = F) , 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
-    ORATS_core  %>% group_by(ticker) %>%  mutate(Decile = factor(ntile(retAtmIv %>% na.locf(na.rm = F) , 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
+    ORATS_core  %>%  mutate(Decile = factor(ntile(retAtmIv %>% replace_na(0) , 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
+    ORATS_core  %>% group_by(ticker) %>%  mutate(Decile = factor(ntile(retAtmIv  %>% replace_na(0)  , 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
     # Straddles return by stock price momentum - inter ticker and intra ticker ARRANGE IS IMPORTANT!!!
     ORATS_core %>% arrange(ticker, tradeDate) %>%  mutate(Decile = factor(ntile(pxAtmIv %>% na.locf(na.rm = F) %>% RSI2(., 60, maType=EMA), 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
     ORATS_core %>% group_by(ticker) %>% filter(n()>252) %>% arrange(ticker, tradeDate) %>%  mutate(Decile = factor(ntile(pxAtmIv %>% na.locf(na.rm = F) %>% RSI2(., 60, maType=EMA), 5))) %>% na.omit %>% ggplot(aes(x=straRetM1/(dtExM1+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.05,0.05))
@@ -625,6 +630,9 @@ option_sim_profit <- function(gbm, type="call", premium = NULL, X = 100, tt = 1,
     straddles_we %>% ggplot(aes(tradeDate, PnL)) + geom_line() + geom_point() + geom_line(aes(y=PnL0), color="purple") + geom_point(aes(y=PnL0), color="purple")
 }
 
+
+
+
 # Straddles returns for ORATS data
 {
     smvstrikes <- rbind(read_csv("/home/marco/trading/HistoricalData/ORATS/SPY/2020.csv"),
@@ -632,19 +640,21 @@ option_sim_profit <- function(gbm, type="call", premium = NULL, X = 100, tt = 1,
                     read_csv("/home/marco/trading/HistoricalData/ORATS/SPY/2022.csv"),
                     read_csv("/home/marco/trading/HistoricalData/ORATS/SPY/2023.csv"),
                     read_csv("/home/marco/trading/HistoricalData/ORATS/SPY/2024.csv"))
-    smvstrikes <- read_csv("/media/marco/Elements/ORATS/smvstrikes/2024.csv")
+    smvstrikes <- read_csv("/home/marco/trading/HistoricalData/ORATS/TOPs.csv")
     smvstrikes <- smvstrikes %>% rename(tradeDate = trade_date) %>% mutate(tradeDate = as.Date(tradeDate, format="%m/%d/%Y"), expirDate = as.Date(expirDate, format="%m/%d/%Y"), dte = as.integer(expirDate - tradeDate + 1))  %>% arrange(tradeDate)
     smvstrikes <- smvstrikes %>% filter(dte <= 50)
     smvstrikes <- mutate(smvstrikes, id=paste(ticker, strike, expirDate, sep="_"), delta_ = abs(round_to_nearest(delta, 0.1)), .after = ticker)
     smvstrikes <- mutate(smvstrikes, value=(cAskPx+cBidPx)/2+(pAskPx+pBidPx)/2, cost=(cAskPx-cBidPx)+(pAskPx-pBidPx), .after = id)
-    smvstrikes <- smvstrikes %>% group_by(id) %>% arrange(tradeDate) %>% mutate(profit = c(diff(value), 0), profit_pct = profit / stkPx * 100, 
-                                                                                profit_log = c(diff(log(value)), 0), 
-                                                                                profit_cum = rev(cumsum(rev(profit))), profit_pct_cum = rev(cumsum(rev(profit_pct))), .after = ticker)
-    smvstrikes_straddles <- smvstrikes %>% filter(delta_ == 0.5 & between(dte, 1, 90))
-    smvstrikes_straddles %>% mutate(decile=round(dte/7))  %>%  ggplot(aes(x=profit_pct)) + geom_density() + facet_wrap(~decile)  + geom_vline(xintercept = 0) + xlim(c(-1,1))
+    smvstrikes <- smvstrikes %>% group_by(id) %>% arrange(tradeDate) %>% mutate(profit = c(diff(value), 0), profit_pct =  c(diff(value/stkPx), 0) * 100, profit_log = c(diff(log(value)), 0), 
+                                                                                profit_cum = rev(cumsum(rev(profit))), profit_pct_cum = rev(cumsum(rev(profit_pct))), profit_log_cum = rev(cumsum(rev(profit_log))), .after = ticker)
+    smvstrikes_straddles <- smvstrikes %>% filter(delta_ == 0.5 & between(dte, 1, 90)) %>% select(-c(profit, profit_pct, profit_log))
+    smvstrikes_straddles %>% mutate(decile=round(dte/7))  %>%  ggplot(aes(x=profit_pct_cum)) + geom_density() + facet_wrap(~decile)  + geom_vline(xintercept = 0) + xlim(c(-1,1))
     smvstrikes_w <-  smvstrikes %>% mutate(dist = abs(dte - 30)+1) %>% group_by(tradeDate) %>%  filter(delta_==0.5 & dte <= 30) %>% arrange(tradeDate, expirDate) %>% group_by(tradeDate, expirDate) %>% reframe(M=mean(smoothSmvVol), dist=first(dist), dte=first(dte)) %>% group_by(tradeDate) %>% mutate(W = (dist / sum(dist))) 
     smvstrikes_iv <- group_by(smvstrikes_w, tradeDate) %>% reframe(IV = sum(M*W, na.rm=T), Slope = log(last(M)/first(M))) %>% mutate(IVRank=ntile(IV, 10))
     smvstrikes_straddles_final <- full_join(smvstrikes_straddles, smvstrikes_iv, by="tradeDate")
+    # Single stock backtest by dte?
+    smvstrikes_straddles %>% filter(ticker=="BITO") %>% group_by(dte=round(dte/7), tradeDate) %>% reframe(P=median(profit_cum/dte)) %>% group_by(dte) %>% mutate(PnL=cumsum(P)) %>% ggplot(aes(tradeDate, PnL)) + geom_line() + facet_wrap(~dte, scales = "free")
+    
 }
 
 
