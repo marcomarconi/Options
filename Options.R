@@ -12,6 +12,7 @@
     library(PerformanceAnalytics)
     library(bizdays)
     library(patchwork)
+    library(magrittr)
     source("/home/marco/trading/Systems/Common/RiskManagement.R")
     source("/home/marco/trading/Systems/Common/Common.R")
     source("/home/marco/trading/Systems/Common/Indicators.R")
@@ -167,7 +168,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
                          "orHv10d", "orHv20d", "clsHv20d", "clsHv60d", "clsHv120d", "clsHv252d",
                          "exErnIv30d", "orHvXern20d", # ex-Ern VRP
                          "ivHvXernRatio", "ivEtfRatio", "etfIvHvXernRatio", "ivPctile1y", 
-                         "fbfexErn30_20", "fbfexErn60_30", "fbfexErn90_30",
+                         "fbfexErn60_30", 
                          "slope", "etfSlopeRatio", "contango", "deriv", "confidence", "borrow30"
                          )
     # Loads all ORATS core files, selecting interesting columns
@@ -241,11 +242,6 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     write_parquet(ORATS_core, "/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
 }
 
-
-
-
-
-
 # ORATS core data general observations 
 {
     ORATS_core <- read_parquet("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
@@ -255,7 +251,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     ORATS_core %>% mutate(VRP_30 = log(iv30d / lead(clsHv20d, 20)), VRP_90 = log(iv90d / lead(clsHv60d, 60)), VRP_180 = log(iv6m / lead(clsHv120d, 120)), VRP_365 = log(iv1yr / lead(clsHv252d, 252))) %>% 
         select(tradeDate, ticker, VRP_30, VRP_90, VRP_180, VRP_365) %>% pivot_longer(cols = c(VRP_30,  VRP_90,  VRP_180, VRP_365)) %>%  
         mutate(value = replace(value, is.infinite(value) | is.nan(value), NA)) %>% group_by(name, ticker) %>% reframe(M=mean(value, na.rm=T)) %>%  group_by(name) %>%  reframe(Mean=mean(M, na.rm=T), SD=sd(M, na.rm=T)/sqrt(n()), N=n())  %>% mutate(name = factor(name, levels=c("VRP_30", "VRP_90", "VRP_180", "VRP_365"))) %>% ggplot(aes(name, ymin=Mean-SD, ymax=Mean+SD)) + geom_errorbar(width = 0.5)
-    ## Straddles return over tradeDate - all moments
+    ## Straddles cross-sectional return over tradeDate - all moments
     ORATS_core %>% group_by(tradeDate) %>% mutate(Decile = ntile(mktCap, 8)) %>% group_by(ticker, Decile, Year=year(tradeDate)) %>% reframe(Value=mean(straRetM1 , na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year)
     ORATS_core %>% group_by(tradeDate) %>% mutate(Decile = ntile(mktCap, 8)) %>% group_by(ticker, Decile, Year=year(tradeDate)) %>% reframe(Value=sd(straRetM1, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year)
     ORATS_core %>% group_by(tradeDate) %>% mutate(Decile = ntile(mktCap, 8)) %>% group_by(ticker, Decile, Year=year(tradeDate)) %>% reframe(Value=skewness(straRetM1 %>% replace(.,is.infinite(.), NA), na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year)
@@ -324,6 +320,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
 
 # Plotting several observations
 {
+            
     # Cross sectional predictors, useful to select which stocks to trade
     dir <- "/home/marco/trading/Systems/Options/Plots/byDate/"
     setwd(dir)
@@ -350,10 +347,69 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
         p <- a+b+d
         ggsave(paste0(predictor, ".png"), p, width = 12, height = 6)
     }
-    # Two-dimensional plotting
-    ETFs <- ORATS_core %>% filter(ticker %in% etfs) %>% collect
-    ETFs <- ETFs %>% group_by(ticker) %>% filter(n()>252) %>% arrange(tradeDate) %>% mutate(IVpct = EMA(runPercentRank(iv30d, 252), 10), HVpct = EMA(runPercentRank(clsHv20d, 252), 10), CTpct = EMA(runPercentRank(contango, 252), 10), VRPhist = lag(VRP, 21))
-    ETFs %>% filter(tradeDate == "2025-03-03") %>% ggplot(aes(HVpct, CTpct)) + geom_label(aes(label = ticker))
+    ## EFTs
+    ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq") 
+    etfs_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-04-02-2025.csv", show_col_types = F) 
+    etfs_list <- etfs_screener %>% group_by(Symbol) %>% reframe(Volume = mean(`Options Vol`, na.rm=T)) %>% filter(Volume > 100) %>% pull(Symbol)
+    ORATS_ETFs <- ORATS_core_ds %>% filter(ticker %in% etfs_list) %>% arrange(ticker, tradeDate) %>% collect
+    # Cross-sections by year
+    dir <- "/home/marco/trading/Systems/Options/Plots/ETFs/CrossSectional/byYear/"
+    setwd(dir)
+    for(predictor in c("mktCap", "beta1y", "pxAtmIv", "correlSpy1y", "confidence", "deriv", "slope", "contango", "borrow30", "avgOptVolu20d", "ivHvXernRatio", "iv30d", "clsHv20d", "volOfIvol", "fbfexErn60_30")) {
+        print(predictor)
+        df <- ORATS_ETFs %>% group_by(tradeDate) %>% mutate(Decile = ntile(!!sym(predictor), 8)) %>% group_by(ticker, Decile, Year=year(tradeDate))
+        a <- df %>% reframe(Value=mean(straRetM1, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=mean(VRP, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0(predictor, ".png"), p, width = 12, height = 6)
+    }
+    # Cross-sections by volume
+    dir <- "/home/marco/trading/Systems/Options/Plots/ETFs/CrossSectional/byVolume/"
+    setwd(dir)
+    for(predictor in c("mktCap", "beta1y", "pxAtmIv", "correlSpy1y", "confidence", "deriv", "slope", "contango", "borrow30", "avgOptVolu20d", "ivHvXernRatio", "iv30d", "clsHv20d", "volOfIvol", "fbfexErn60_30")) {
+        print(predictor)
+        df <- ORATS_ETFs %>% group_by(tradeDate) %>% mutate(Decile = ntile(!!sym(predictor), 8), Volume= round(log(avgOptVolu20d, 10), 0), Volume = case_when(Volume > 6 ~ 6, Volume < 1 ~ 1, TRUE ~ Volume)) %>% group_by(ticker, Decile, Volume) # I do not summarize volume here because it results in gaps in the final plots
+        a <- df %>% reframe(Value=mean(straRetM1, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=mean(VRP, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0(predictor, ".png"), p, width = 12, height = 6)
+    }
+    # Time series by year
+    dir <- "/home/marco/trading/Systems/Options/Plots/ETFs/TimeSeries/byYear/"
+    setwd(dir)
+    for(predictor in c("mktCap", "beta1y", "pxAtmIv", "correlSpy1y", "correlEtf1y", "etfSlopeRatio", "etfIvHvXernRatio", "ivEtfRatio",  "confidence", "deriv", "slope", "contango", "borrow30", "avgOptVolu20d", "ivHvXernRatio", "ivPctile1y", "iv30d", "clsHv20d", "volOfIvol", "fbfexErn60_30")) {
+        print(predictor)
+        df <- ORATS_ETFs %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(Decile = ntile(!!sym(predictor), 8)) %>% group_by(ticker, Decile, Year=year(tradeDate))
+        a <- df %>% reframe(Value=mean(straRetM1, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=mean(VRP, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0("Mean/", predictor, ".png"), p, width = 12, height = 6)
+        a <- df %>% reframe(Value=sd(straRetM1, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=sd(VRP, na.rm=T))  %>% group_by(Decile, Year) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Year) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0("Std/", predictor, ".png"), p, width = 12, height = 6)
+    }
+    # Time series by volume (Cross-sectional makes little sense)
+    dir <- "/home/marco/trading/Systems/Options/Plots/ETFs/TimeSeries/byVolume/"
+    setwd(dir)
+    for(predictor in c("mktCap", "beta1y", "pxAtmIv", "correlSpy1y", "correlEtf1y", "etfSlopeRatio", "etfIvHvXernRatio", "ivEtfRatio",  "confidence", "deriv", "slope", "contango", "borrow30", "ivHvXernRatio", "ivPctile1y", "iv30d", "clsHv20d", "volOfIvol", "fbfexErn60_30")) {
+        print(predictor)
+        df <- ORATS_ETFs %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(Volume = round(log(mean(avgOptVolu20d, na.rm=T), 10), 0), Volume = case_when(Volume > 6 ~ 6, TRUE ~ Volume), Decile = ntile(!!sym(predictor), 8)) %>% group_by(ticker, Decile, Volume)
+        a <- df %>% reframe(Value=mean(straRetM1, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=mean(VRP, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0("Mean/", predictor, ".png"), p, width = 12, height = 6)
+        a <- df %>% reframe(Value=sd(straRetM1, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=sd(VRP, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0("Std/", predictor, ".png"), p, width = 12, height = 6)
+        a <- df %>% reframe(Value=skewness(straRetM1, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("straRetM1") + ggtitle(predictor)
+        b <- df %>% reframe(Value=skewness(VRP, na.rm=T))  %>% group_by(Decile, Volume) %>% reframe(M=mean(Value, na.rm=T), S=sd(Value, na.rm=T)/sqrt(n())*2, N=n()) %>% na.omit %>% ggplot(aes(x=Decile, ymin=M-S, ymax=M+S)) + geom_errorbar() + facet_wrap(~Volume) + ggtitle(predictor) + theme(axis.title.x = element_blank(), axis.text.y = element_text(size=8), axis.text.x = element_blank(), strip.text = element_text(size=8)) + ylab("VRP") + ggtitle("")
+        p <- a+b
+        ggsave(paste0("Skew/", predictor, ".png"), p, width = 12, height = 6)
+    }
+    
+    
 }
 
 # ORATS strikes bid-ask spreads (Not good, better use a list of tradable stock from somewhere else)
@@ -451,6 +507,68 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     tickers_selection <- full_join(tickers_performance %>% full_join(Info, by="ticker"), last_day_fundamentals %>% select(-tradeDate), by="ticker") 
     # Final criteria
     tickers_selection %>% filter(Mstra1 > 10 & Mvrp > 0.2 & tradeDate == "2025-01-16"  & ticker %in% ORATS_tradable & beta1y < 1) %>% View
+    
+    
+    {
+    volume_filter <- 100
+    ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
+    etf_screens <- read_csv("/home/marco/trading/Systems/Options/etf-screener-04-02-2025.csv", show_col_types = F) 
+    # Select ETFs only
+    ORATS_ETF <- ORATS_core_ds %>% filter(ticker %in% etf_screens$Symbol) %>% collect
+    avg_volume_filter <- ORATS_ETF %>% group_by(ticker) %>% reframe(M=mean(avgOptVolu20d)) %>% filter(M>volume_filter) %>% pull(ticker)
+    # Filter low volume and short time
+    ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% filter(ticker %in% avg_volume_filter & n() > 1000)
+    # Calculate some value before filtering by DTE
+    ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(ivPctile1y = (ivPctile1y/100-0.5)*2, logivHvRatio = log(ivHvXernRatio + 0.001), confidence = (confidence/50-1), logVolatility = log(calculate_volatility(retAtmIv)), RSI20 = RSI2(pxAtmIv, 20, maType = EMA), RSI252 = RSI2(pxAtmIv, 252, maType = EMA), VRP = VRPXern) %>% ungroup
+    print(paste("A total of",length(unique(ORATS_ETF$ticker)), "assets"))
+    }
+    
+    {
+        ### CAREFUL: no daily calculation after this point, we have filtered only for days where dte == 25
+        ORATS_df <- ORATS_ETF %>% filter(dtExM1 == 25 & !is.na(VRPXern)) %>% 
+            select(ticker, tradeDate, pxAtmIv, retAtmIv, straRetM1, straRetM2, VRP, iv30d, iv90d, orHv20d, logVolatility, ivHvXernRatio, logivHvRatio, etfIvHvXernRatio, ivPctile1y, contango, slope, fbfexErn60_30, volOfIvol, deriv, confidence, borrow30, mktCap, beta1y, correlSpy1y, avgOptVolu20d, RSI20, RSI252)
+        # Arrange necessary to calculate ar coefficient
+        ORATS_df <- ORATS_df %>% arrange(ticker, tradeDate) %>% group_by(ticker) %>% mutate(VRPd = lag(VRP,1)-lag(VRP,2), VRPm = EMA(lag(VRP), 12)) %>% mutate(VRPd = replace_na(VRPd, 0), VRPm = replace_na(VRPm, mean(VRPm, na.rm=T))) %>% ungroup
+        # Correlations
+        # Calculate here correlation to create groups?
+        # Last placeholder
+        ORATS_df <- ORATS_df %>% mutate(Z = rnorm(nrow(ORATS_df)))                                      
+        # Time series predictors correlation
+        ORATS_df %>% select(VRP:Z) %>% cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+        # Cross-sectional predictors correlation
+        ORATS_df %>% group_by(tradeDate) %>% mutate(across(iv30d:avgOptVolu20d, ~ntile(., 8), .names = "{.col}_N")) %>% ungroup %>% select(VRP, contains("_N")) %>%  cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+        # ETFs general performance
+        ETFs_performance <- ORATS_df %>% group_by(ticker) %>% 
+            reframe(straddle1_m = mean(straRetM1*100, na.rm=T), straddle1_s = sd(straRetM1*100, na.rm=T)/sqrt(n()), straddle2_m = mean(straRetM2*100, na.rm=T), straddle2_s = sd(straRetM2*100, na.rm=T)/sqrt(n()), vrp_m=mean(VRP, na.rm=T), vrp_s = sd(VRP)/sqrt(n()), volume=mean(avgOptVolu20d, na.rm=T), tradeDate=last(tradeDate), N=n())
+    }
+    
+    {
+        ORATS_df_scale <- ORATS_df %>% dplyr::select(ticker, tradeDate, VRP,  iv30d, orHv20d, volOfIvol, ivHvXernRatio, etfIvHvXernRatio, contango, slope, fbfexErn60_30, VRPm, avgOptVolu20d, confidence) %>% group_by(ticker) %>% 
+            mutate(
+                iv30d = scale(log(iv30d)) %>% as.vector,  ivHvXernRatio = scale(log(ivHvXernRatio)) %>% as.vector, etfIvHvXernRatio = scale(log(etfIvHvXernRatio)) %>% as.vector,
+                contango = scale(contango) %>% as.vector, VRPm = scale(VRPm) %>% as.vector
+            ) %>% group_by(tradeDate) %>% 
+            mutate(Volume = ntile(avgOptVolu20d+1, 6)) %>% ungroup() 
+        fit_glm <- glm(VRP ~ 1 + VRPm + iv30d + ivHvXernRatio + contango + (VRPm + iv30d + ivHvXernRatio + contango):Volume,  data=ORATS_df_scale)
+        
+        {
+            curr_day <- "2025-06-26"
+            curr_df <- read_csv("/media/marco/Elements/ORATS/core/orats_core_20250626.csv.gz", show_col_types = F)
+            curr_df <- curr_df %>% filter(ticker %in% ORATS_df_scale$ticker) %>%  dplyr::select(ticker, tradeDate, iv30d,  ivHvXernRatio, etfIvHvXernRatio, contango, avgOptVolu20d) %>% mutate(VRPm=0, VRP=NA)
+            ORATS_df_predict <- ORATS_df %>% dplyr::select(ticker, tradeDate, VRP,  iv30d, ivHvXernRatio, etfIvHvXernRatio, contango, VRPm, avgOptVolu20d)
+            curr_df <- curr_df[, colnames(ORATS_df_predict)]
+            df_merged <- bind_rows(ORATS_df_predict, curr_df) %>% group_by(ticker) %>%
+                mutate(
+                    iv30d = scale(log(iv30d+0.01)) %>% as.vector, ivHvXernRatio = scale(log(ivHvXernRatio+0.01))%>% as.vector, etfIvHvXernRatio = scale(log(etfIvHvXernRatio+0.01))%>% as.vector,
+                    contango = scale(contango)%>% as.vector, VRPm = 0 ) %>% group_by(tradeDate) %>%
+                mutate(Volume = ntile(avgOptVolu20d+1, 6)) %>% ungroup()
+            curr_data <- df_merged %>% filter(tradeDate == curr_day)
+            pred <- predict(fit_glm, curr_data [,c("VRPm", "iv30d", "ivHvXernRatio", "etfIvHvXernRatio", "contango", "Volume")]) %>% as.data.frame
+            pred_full <- pred %>% mutate(ticker = curr_data %>% pull(ticker), .before=1) %>% full_join(curr_data, by="ticker")
+        }
+    }
+    
+    
 }
 
 
@@ -600,235 +718,6 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     
 }
 
-
-# Simulating option prices similar to ORATS
-{
-    # Black-Scholes delta function for a call
-    call_delta <- function(S, K, r, tt, sigma) {
-        d1 <- (log(S / K) + (r + 0.5 * sigma^2) * tt) / (sigma * sqrt(tt))
-        return(pnorm(d1))  # Cumulative standard normal distribution
-    }
-    
-    # Function to solve for strike price K given delta
-    find_strike <- function(S, r, tt, sigma, target_delta) {
-        uniroot(
-            function(K) call_delta(S, K, r, tt, sigma) - target_delta,  # Solve for delta = target_delta
-            lower = 1e-6,  # Avoid log(0) issues
-            upper = S * 2  # Arbitrary upper limit
-        )$root
-    }
-    
-    {
-    year_length <- 252
-    years_num <- 2
-    N <- year_length*years_num
-    garch_vol <- FALSE
-    target_vol <- 0.3
-    if(!garch_vol) {
-        price <- gbm_vec(1, mu=0, t = N, sigma = target_vol, dt = 1/year_length) %>% as.vector
-        sigma <- rep(target_vol, N)
-    } else {
-        gbm_gv <- gbm_garch_vec(1, mu=0, t = N, target_vol = target_vol, alpha = 0.2, beta = 0.75, dt = 1/year_length)
-        price <- gbm_gv$gbm %>% as.vector
-        sigma <- gbm_gv$vol %>% as.vector
-    }
-    ticker <- "XYZ"
-    rates <- 0
-    vrp <- 0.1
-    expiry_dates <- seq(21, N, 21)
-    svm_sim <- matrix(NA, ncol=19, nrow=N*length(expiry_dates)*1)
-    colnames(svm_sim) <- c("stkPx", "sigma", "expirDate", "dte", "yte", "strike", "cValue", "pValue",  "cIV", "pIV", "delta", "gamma", "vega", "rho", "theta", "tradeDate", "topStk", "bottomStk", "atmStk")
-    count <- 1
-    for(i in 1:N){
-        print(i)
-        tradeDate <- i
-        stkPx <- price[i]
-        bottomStk <- 1#round(find_strike(stkPx, r, 1, sigma, 0.95))
-        topStk <- 100#round(find_strike(stkPx, r, 1, sigma, 0.05))
-        atmStk <- round(stkPx)
-        for(e in expiry_dates){
-            if(e < i | (e - i) > year_length) next
-            expirDate <- e
-            dte <- (e - i)
-            yte <- dte / year_length
-            # for strikes....
-            {
-                strike <- atmStk
-                res <- bsopt(stkPx, strike, sigma[i], rates, ifelse(yte == 0, 0.001, yte), 0)
-                cValue <- exp(log(res$Call["Premium",]) + vrp * log(strike) + 0*log(sigma[i]) )
-                pValue <- exp(log(res$Put["Premium",])  + vrp * log(strike) + 0*log(sigma[i]) )
-                cIV <- bscallimpvol(stkPx, strike, rates, ifelse(yte == 0, 0.001, yte), 0, cValue)
-                pIV <- bsputimpvol(stkPx, strike, rates, ifelse(yte == 0, 0.001, yte), 0, pValue)
-                svm_sim[count,] <- c(stkPx, sigma[i], expirDate, dte, yte, strike, cValue, pValue, cIV, pIV, res$Call[2:6], tradeDate, topStk, bottomStk, atmStk)
-                count <- count + 1
-            }
-        }
-    }
-    {
-    # Replicate the data in ORATS core (see the section "ORATS core data loading")
-    svm_sim_core <- svm_sim %>% as.data.frame() %>% mutate(ticker = ticker, Value = cValue+pValue, .before=cValue) %>% group_by(tradeDate) %>% mutate(closest = min(dte)) %>% filter(dte == closest)
-    svm_sim_core <- svm_sim_core  %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(return = c(0, diff(log(stkPx))), .after = stkPx)
-    svm_sim_core <- svm_sim_core %>% group_by(ticker, expirDate) %>% arrange(tradeDate) %>% mutate(cumRet = map_dbl(1:n(), ~ sum(return[(.x+1):n()])), .after = return) %>% ungroup 
-    #svm_sim_core <- svm_sim_core  %>% group_by(ticker) %>% mutate(cumRet = map_dbl(1:n(), ~ sum(return[(.x+1):min(.x + dte[.x], n())])), cumRet = case_when(dte == 0 ~ NA, TRUE ~ cumRet), .after = return)
-    svm_sim_core <- svm_sim_core %>% mutate(straRet = abs(cumRet) - Value / stkPx ) 
-    }
-    # {
-    # # Check no bias in straddle price
-    # svm_sim_core$straRet  %>% plot.ts
-    # # No edge here! Known predictors show no predictive power
-    # svm_sim_core %>% mutate(Decile = factor(ntile(stkPx, 5))) %>% ggplot(aes(x=straRet/dte, color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.025,0.025))
-    # svm_sim_core %>% mutate(clsHv20d = runSD(return, 20)) %>% mutate(Decile = factor(ntile(clsHv20d, 5))) %>% ggplot(aes(x=straRet/(dte+1), color=Decile, group=Decile)) + geom_density(linewidth=1) + geom_vline(xintercept = 0) + scale_color_colorblind() + xlim(c(-0.02,0.02))
-    # }
-    {
-    svm_sim_core$straRet %>% na.omit %>% density %>% plot
-    (aapl$straRetM1) %>% na.omit %>% density %>% lines(col="red")
-    (tpb$straRetM1) %>% na.omit %>% density %>% lines(col="blue")
-    }
-}
-}
-
-
-
-# Simulating options outcomes
-{
-    # Put spread
-    {
-        S0 <- 100
-        d1 <- 0.3
-        d2 <- 0.1
-        days <- 30
-        iv1 <- 0.40
-        iv2 <- 0.45
-        rv <- 0.35
-        r <- 0.045
-        X1 <- get_delta_put(S0, days/365, sigma = iv1, r = r, delta_target = d1)
-        X2 <- get_delta_put(S0, days/365, sigma = iv2, r = r, delta_target = d2)
-        gbm <- gbm_vec(10000, t = days, S0 = S0, dt = 1/252, sigma = rv)
-        put1 <- option_sim_profit(gbm, type = "put", X = X1, tt_start = days/365, tt_end = 1/365, v = iv1); 
-        put2 <- option_sim_profit(gbm, type = "put", X = X2, tt_start = days/365, tt_end = 1/365, v = iv2); 
-        profit <- (-put1$profit -put1$profit   + -put2$profit -put2$profit ) * 100
-        profit %>% hist
-        profit %>% summary
-    }
-    # Calendars
-    {
-        S0 <- 35.51
-        X <- 35
-        front_days <- 24
-        back_days <- 53
-        front_IV <- 0.415
-        back_IV <- 0.30
-        sigma <- 0.2
-        gbm <- gbm_vec(10000, front_days, S0 = S0, dt = 1/252, sigma = sigma)
-        front_put <- option_sim_profit(gbm, type = "put", X = X, tt_start = front_days/365, tt_end = 1/365, v = front_IV); 
-        front_call <- option_sim_profit(gbm, type = "call", X = X,tt_start = front_days/365, tt_end = 1/365, v = front_IV); 
-        back_put <- option_sim_profit(gbm, type = "put", X = X, tt_start = back_days/365, tt_end = (back_days-front_days)/365, v = back_IV); 
-        back_call <- option_sim_profit(gbm, type = "call", X = X, tt_start = back_days/365, tt_end = (back_days-front_days)/365, v = back_IV); 
-        profit <- (-front_put$profit -front_call$profit   + back_put$value - back_put$premium + back_call$value - back_call$premium) * 100
-        profit %>% hist
-    }
-    # Predicting alpha strategy: https://predictingalpha.com/profitable-option-selling-strategy/ 
-    {
-        S0 <- 100
-        X <- 100
-        r <- 0
-        iv_f <- 0.30
-        iv_b <- 0.22
-        rv <- 0.2
-        front_days <- 7 # Our strangle
-        back_days <- 90 # The hedge
-        K1_f <- get_delta_put(S0, front_days/365, sigma = iv_f, r = r, delta_target = 0.2)
-        K2_f <- get_delta_call(S0, front_days/365, sigma = iv_f, r = r, delta_target = 0.2)
-        K1_b <- get_delta_put(S0, back_days/365, sigma = iv_b, r = r, delta_target = 0.2)
-        K2_b <- get_delta_call(S0, back_days/365, sigma = iv_b, r = r, delta_target = 0.2)
-        print(c(K1_f, K2_f, K1_b, K2_b))
-        gbm <- gbm_vec(10000, front_days, S0 = S0, dt = 1/252, sigma = rv)
-        front_put <- option_sim_profit(gbm, type = "put", X = K1_f, tt_start = front_days/365, tt_end = 1/365, v = iv_f); 
-        front_call <- option_sim_profit(gbm, type = "call", X = K2_f, tt_start = front_days/365, tt_end = 1/365, v = iv_f);
-        back_put <- option_sim_profit(gbm, type = "put", X = K1_b, tt_start = back_days/365, tt_end = (back_days-front_days*4)/365, v = iv_b); 
-        back_call <- option_sim_profit(gbm, type = "call", X = K2_b, tt_start = back_days/365, tt_end = (back_days-front_days*4)/365, v = iv_b); 
-        front_profit <- 4*(-front_put$profit -front_call$profit) * 100
-        back_profit <- (back_put$value - back_put$premium + back_call$value - back_call$premium) * 100
-        profit <- front_profit+back_profit
-        profit %>% summary
-    }
-}
-
-
-# Simulate some strategies like E.Sinclair in Positional Options Trading
-{
-    
-    ## Good Straddle  
-    gbm <- gbm_vec(100, sigma = 0.2)
-    option_sim_profit(gbm, type="call") -> a
-    option_sim_profit(gbm, type="put") -> b
-    profit <- (-a$profit-b$profit)*100
-    hist(profit, 50); summary(profit)
-    ## Good Strangle
-    gbm <- gbm_vec(10000)
-    option_sim_profit(gbm, type="put", X = 70) -> a
-    option_sim_profit(gbm, type="call", X = 130) -> b
-    profit <- (-a$profit-b$profit)*100*1.68
-    hist(profit, 50)
-    ## Bad Straddle Vol  
-    gbm <- gbm_vec(10000, sigma = 0.7)
-    option_sim_profit(gbm, type="call") -> a
-    option_sim_profit(gbm, type="put") -> b
-    profit <- (-a$profit-b$profit)*100
-    hist(profit, 50)
-    ## Bad Strangle Vol
-    gbm <- gbm_vec(10000, sigma = 0.7)
-    option_sim_profit(gbm, type="put", X = 70) -> a
-    option_sim_profit(gbm, type="call", X = 130) -> b
-    profit <- (-a$profit-b$profit)*100*1.68
-    hist(profit, 50)
-    ## Bad Straddle Drift  
-    gbm <- gbm_vec(10000, mu = 0.2)
-    option_sim_profit(gbm, type="call") -> a
-    option_sim_profit(gbm, type="put") -> b
-    profit_straddle <- (-a$profit-b$profit)*100
-    ## Bad Strangle Drift
-    gbm <- gbm_vec(10000, mu = 0.2)
-    option_sim_profit(gbm, type="put", X = 70) -> a
-    option_sim_profit(gbm, type="call", X = 130) -> b
-    profit_strangle <-(-a$profit-b$profit)*100*1.68
-    plot(density(profit_straddle), xlim=c(-20000, 3000), lwd=2); lines(density(profit_strangle), col="blue", lwd=2)
-    ## Covered Call
-    gbm <- gbm_vec(10000, mu = 0.1, sigma = 0.15, t = 252, dt=1./252)
-    call <- option_sim_profit(gbm, type="call", v=0.2)
-    stock_profit <- as.vector(tail(gbm, 1))
-    call_profit <- call$profit
-    covered_call_profit <- stock_profit - call_profit
-    hist(covered_call_profit) # terminal profit
-    summary(covered_call_profit/100-1)
-    ## Calendat Straddle
-    gbm <- gbm_vec(10000, 30, dt = 1/252, sigma = 0.3)
-    front_iv <- 0.3
-    back_iv <- 0.3
-    front_call <- option_sim_profit(gbm, type = "call", tt_start = 30/365, tt_end = 1/365, v = front_iv); 
-    front_put <- option_sim_profit(gbm, type = "put", tt_start = 30/365, tt_end = 1/365, v = front_iv); 
-    back_call <- option_sim_profit(gbm, type = "call", tt_start = 60/365, tt_end = 31/365, v = back_iv); 
-    back_put <- option_sim_profit(gbm, type = "put", tt_start = 60/365, tt_end = 31/365, v = back_iv); 
-    front_straddle <- (front_call$payoff + front_put$payoff) 
-    back_straddle <- (back_call$value + back_put$value)
-    # Figure 6.14
-    plot(front_call$price, -front_straddle + back_straddle)
-    # Profit at the expiration of the front option (Table 6.14)
-    front_profit <- -(front_call$profit + front_put$profit)
-    back_profit <- (back_call$value + back_put$value) - (back_call$premium + back_put$premium)
-    profit <- (front_profit  + back_profit) * 100
-    hist(profit, 50); summary(profit)
-    # calendar spread path (not just final profit as before), it is the same...
-    gbm <- gbm_vec(1, 30, dt = 1/252, sigma = 0.3) %>% as.vector
-    call_path_short <- bscall(gbm, 100, 0.3, 0, seq(30/365, 1/365, length.out=30), 0)
-    call_path_long <- bscall(gbm, 100, 0.3, 0, seq(60/365, 31/365, length.out=30), 0)
-    call_spread <- call_path_long - call_path_short 
-    put_path_short <- bsput(gbm, 100, 0.3, 0, seq(30/365, 1/365, length.out=30), 0)
-    put_path_long <- bsput(gbm, 100, 0.3, 0, seq(60/365, 31/365, length.out=30), 0)
-    put_spread <- put_path_long - put_path_short365
-    straddle_path <- -call_path_short-put_path_short + call_path_long+put_path_long
-    matplot2(cbind(call_spread, put_spread, straddle_path/2))
-}
 
 # Clustering
 {
