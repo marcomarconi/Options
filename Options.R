@@ -155,7 +155,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     load_orats_day <- function(filename, cols_to_extract) {
         print(filename)
         # quiet_read_csv(glue::glue("/media/marco/Elements/ORATS/cores/{filename}")) #%>%
-        quiet_fread(glue::glue("/media/marco/Elements/ORATS/cores/{filename}")) %>%
+        quiet_fread(glue::glue("/media/marco/Elements/ORATS/core/{filename}")) %>%
             purrr::pluck("result")  %>%   select(all_of(cols_to_extract)) %>% mutate(across(4:ncol(.), as.numeric)) # choose the right starting numeric column
     }
     
@@ -172,7 +172,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
                          "slope", "etfSlopeRatio", "contango", "deriv", "confidence", "borrow30"
                          )
     # Loads all ORATS core files, selecting interesting columns
-    dir <- "/media/marco/Elements/ORATS/cores/"
+    dir <- "/media/marco/Elements/ORATS/core/"
     files <- c(list.files(dir, pattern = "orats_core_201[3-9].*gz"), list.files(dir, "orats_core_202[0-9].*gz"))
     ORATS_core <- files %>% purrr::map_df(.f = load_orats_day, cols_to_extract)
     # Reduce the size by removing short and low-liquidity tickers
@@ -350,7 +350,7 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     ## EFTs
     ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq") 
     etfs_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-04-02-2025.csv", show_col_types = F) 
-    etfs_list <- etfs_screener %>% group_by(Symbol) %>% reframe(Volume = mean(`Options Vol`, na.rm=T)) %>% filter(Volume > 100) %>% pull(Symbol)
+    etfs_list <- etfs_screener %>% group_by(Symbol) %>% reframe(Volume = mean(`Options Vol`, na.rm=T)) %>% filter(Volume > 10) %>% pull(Symbol)
     ORATS_ETFs <- ORATS_core_ds %>% filter(ticker %in% etfs_list) %>% arrange(ticker, tradeDate) %>% collect
     # Cross-sections by year
     dir <- "/home/marco/trading/Systems/Options/Plots/ETFs/CrossSectional/byYear/"
@@ -408,6 +408,12 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
         p <- a+b
         ggsave(paste0("Skew/", predictor, ".png"), p, width = 12, height = 6)
     }
+    # Double plots
+    ORATS_ETFs %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+        mutate(VRPm = EMA(lag(VRP) %>% na.locf(na.rm=F), 252), Volume = round(log(avgOptVolu20d+1, 10), 0), Volume = case_when(Volume > 6 ~ 6, TRUE ~ Volume), 
+               DecileX = ntile(VRPm, 8), DecileY = ntile(iv30d, 8)) %>% 
+        group_by(DecileX, DecileY, Volume)  %>%reframe(Value = mean(VRP, na.rm=T)) %>% ggplot(aes(x=DecileX, y = DecileY, fill = Value)) + geom_tile()  + facet_wrap(~Volume, scales="free")+  scale_fill_gradient2(low = "blue",mid = "white",high = "red")
+
     
     
 }
@@ -485,6 +491,333 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     df_orats_fundamentals %>% mutate(pred = mktCap, signal = case_when(pred == 1 ~ -1, pred == 10 ~ 1, TRUE ~ 0)) %>% mutate(profit = straLogM1*(signal))  %>% group_by(tradeDate) %>% reframe(M=mean(profit, na.rm=T)) %>% pull(M) %>% ts %>% SharpeRatio()
 }
 
+
+# Calculating signals
+{
+    {
+    IV_signal <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(across(iv10d:iv1yr, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(IV_S =  rowSums(across(iv10d_S:iv1yr_S)) %>% ntile(n)) %>% {if(!keep) select(., -(iv10d_S:iv1yr_S)) else .}
+    }
+    HV_signal <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(across(orHv10d:clsHv252d, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(HV_S =  rowSums(across(orHv10d_S:clsHv252d_S)) %>% ntile(n))  %>% {if(!keep) select(., -(orHv10d_S:clsHv252d_S)) else .}
+    }
+    IVHV_signal <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(ivhvRatio10d = log(iv10d/orHv10d), ivhvRatio30d = log(iv30d/clsHv20d), ivhvRatio90d = log(iv90d/clsHv60d), ivhvRatio6m = log(iv6m/clsHv120d), ivhvRatio1yr = log(iv1yr/clsHv252d)) %>% 
+            mutate(across(ivhvRatio10d:ivhvRatio1yr, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(IVHV_S =  rowSums(across(ivhvRatio10d_S:ivhvRatio1yr_S)) %>% ntile(n))  %>% {if(!keep) select(., -(ivhvRatio10d:ivhvRatio1yr), -(ivhvRatio10d_S:ivhvRatio1yr_S)) else .}
+    }
+    contango_signal <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(contango5 = EMA(contango, 5), contango20 = EMA(contango, 20), contango60 = EMA(contango, 60), contango120 = EMA(contango, 120), contango252 = EMA(contango, 252)) %>% 
+            mutate(across(contango5:contango252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(contango_S =  rowSums(across(contango5_S:contango252_S)) %>% ntile(n))  %>% {if(!keep) select(., -(contango5:contango252), -(contango5_S:contango252_S)) else .}
+    }
+    volatility_signal  <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(vol5 = EMA(log(Volatility), 5), vol20 = EMA(log(Volatility), 20), vol60 = EMA(log(Volatility), 60), vol120 = EMA(log(Volatility), 120), vol252 = EMA(log(Volatility), 252)) %>% 
+            mutate(across(vol5:vol252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(volatility_S =  rowSums(across(vol5_S:vol252_S)) %>% ntile(n))  %>% {if(!keep) select(.,  -(vol5:vol252), -(vol5_S:vol252_S)) else .}
+    }
+    etf_signal  <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(etf5 = EMA(log(etfIvHvXernRatio), 5), etf20 = EMA(log(etfIvHvXernRatio), 20), etf60 = EMA(log(etfIvHvXernRatio), 60), etf120 = EMA(log(etfIvHvXernRatio), 120), etf252 = EMA(log(etfIvHvXernRatio), 252)) %>% 
+            mutate(across(etf5:etf252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(etfIvHv_S =  rowSums(across(etf5_S:etf252_S)) %>% ntile(n))  %>% {if(!keep) select(., -(etf5:etf252), -(etf5_S:etf252_S)) else .}
+    }
+    rsi_signal  <- function(df, n=7, keep=F) {
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(rsi1 = RSI2(pxAtmIv, 5, maType = EMA), 
+                   rsi2 = RSI2(pxAtmIv, 20, maType = EMA), 
+                   rsi3 = RSI2(pxAtmIv, 60, maType = EMA), 
+                   rsi4 = RSI2(pxAtmIv, 120, maType = EMA), 
+                   rsi5 = RSI2(pxAtmIv, 252, maType = EMA)) %>%  
+            mutate(across(rsi1:rsi5, ~round(abs(cap_forecast(as.vector(scale(.)), cap = 2)*3)+1), .names = "{.col}_S")) %>% 
+            mutate(rsi_S =  rowMeans(across(rsi1_S:rsi5_S)) %>% round(0))  %>% {if(!keep) select(., -(rsi1:rsi5), -(rsi1_S:rsi5_S)) else .}
+    }
+    fbf_signal  <- function(df, n=7, keep=F) {
+        df  %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(fbf5 = EMA(fbfexErn60_30, 5), 
+                   fbf20 = EMA(fbfexErn60_30, 20), 
+                   fbf60 = EMA(fbfexErn60_30, 60), 
+                   fbf120 = EMA(fbfexErn60_30, 180), 
+                   fbf252 = EMA(fbfexErn60_30, 252)) %>% 
+            mutate(across(fbf5:fbf252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(fbf_S =  rowSums(across(fbf5_S:fbf252_S)) %>% ntile(n))  %>% {if(!keep) select(., -(fbf5:fbf252), -(fbf5_S:fbf252_S)) else .}
+    }
+    vvol_signal  <- function(df, n=7, keep=F) {
+        df  %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(vvol5 = EMA(volOfIvol, 5), 
+                   vvol20 = EMA(volOfIvol, 20), 
+                   vvol60 = EMA(volOfIvol, 60), 
+                   vvol120 = EMA(volOfIvol, 180), 
+                   vvol252 = EMA(volOfIvol, 252)) %>% 
+            mutate(across(vvol5:vvol252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(vvol_S =  rowSums(across(vvol5_S:vvol252_S)) %>% ntile(n))  %>% {if(!keep) select(., -(vvol5:vvol252), -(vvol5_S:vvol252_S)) else .}
+    }
+    VRP_signal  <- function(df, n=7, k=22, keep=F) { 
+        df %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(lagVRP =  lag(VRP, 22) %>% na.locf(na.rm=F)) %>% 
+            mutate(VRPm5 = EMA(lagVRP, 5), 
+                   VRPm20 = EMA(lagVRP, 20), 
+                   VRPm60 = EMA(lagVRP, 60), 
+                   VRPm120 = EMA(lagVRP, 120), 
+                   VRPm252 = EMA(lagVRP, 252)) %>% 
+            mutate(across(VRPm5:VRPm252, ~ntile(., n), .names = "{.col}_S")) %>% 
+            mutate(VRP_S =  rowSums(across(VRPm5_S:VRPm252_S)) %>% ntile(n))  %>% {if(!keep) select(., -lagVRP, -(VRPm5:VRPm252), -(VRPm5_S:VRPm252_S)) else .}
+    }
+    
+    }
+    # Getting ETFs data
+    {
+        volume_filter <- 100; time_filter <- 1000
+        ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
+        etf_screens <- read_csv("/home/marco/trading/Systems/Options/etf-screener-07-09-2025.csv", show_col_types = F) 
+        # Select ETFs only
+        ORATS_ETF <- ORATS_core_ds %>% filter(ticker %in% etf_screens$Symbol) %>% collect
+        avg_volume_filter <- ORATS_ETF %>% group_by(ticker) %>% reframe(M=mean(avgOptVolu20d)) %>% filter(M>volume_filter) %>% pull(ticker)
+        # Filter low volume and short time
+        ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% filter(ticker %in% avg_volume_filter & n() > time_filter)
+        # Calculate some value before filtering by DTE
+        ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(Volume = round(mean(log(avgOptVolu20d+1, 10), na.rm=T)), Volatility = calculate_volatility(retAtmIv),  VRP = VRPXern) %>% ungroup
+        print(paste("A total of",length(unique(ORATS_ETF$ticker)), "assets"))
+        # Quick clustering
+        # cor_mat <- ORATS_ETF %>% filter(tradeDate>"2020-01-01") %>% pivot_wider(id_cols = tradeDate, values_from = retAtmIv, names_from = ticker) %>% select(-tradeDate) %>% cor(use="pairwise.complete.obs")
+        # dist_mat <- as.dist(1 - abs(cor_mat))
+        # hc <- hclust(dist_mat, method = "complete")  # method can also be "average", "ward.D2", etc.
+        # clusters <- cutree(hc, k = 10)
+        # table(clusters)
+        # write some data to the execution dir, only keep original ORATS columns
+        #ORATS_ETF %>% select(-c(dte1:expiryDate2),-c(pxAtmIvM1:retAtmIv),  -c(straPxM1:straRetM2), -c(Volume:Volatility)) %>% write_parquet("ExecuteETFvrp/ORATS_ETF.pq")
+    }
+    # recent VRP 
+    {
+        # Get the values
+        ORATS_ETF_signal <- VRP_signal(ORATS_ETF, keep = T)
+        signals <- c("VRP_S", paste0(c("VRPm5", "VRPm20", "VRPm60", "VRPm120", "VRPm252"), "_S"))
+        # Same, by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>%
+                reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% 
+                rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume, scales="free") + scale_color_colorblind()
+    }
+    # IV
+    {
+        # Get the values
+        ORATS_ETF_signal <- IV_signal(ORATS_ETF, keep = T)
+        # Example
+        ORATS_ETF_signal %>% filter(ticker == "SPY") %>% tail(500) %$% matplot2(cbind(IV_S,iv1yr_S))    
+        # Apply the function for each grouping variable and bind results
+        signals <- c("IV_S", paste0(c("iv10d", "iv30d", "iv90d", "iv6m", "iv1yr"), "_S"))
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>%  group_by(.data[[var]]) %>% reframe(mean_value = mean(VRP, na.rm=T)) %>% na.omit %>%  rename(group = 1, !!paste0("mean_by_", var) := mean_value)
+        }) %>% Reduce(function(x, y) full_join(x, y, by = "group"), .)
+        results[,-1] %>% matplot(type="o")
+        # Same, by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume, scales="free") + scale_color_colorblind()
+    }
+    # HV
+    {
+        # Get the values
+        ORATS_ETF_signal <- HV_signal(ORATS_ETF, keep=T)
+        signals <- c("HV_S", paste0(c("orHv10d", "orHv20d", "clsHv60d", "clsHv120d", "clsHv252d"), "_S"))
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume, scales="free") + scale_color_colorblind()
+    }
+    # IV/RV log ratio
+    {
+        # Get the values
+        ORATS_ETF_signal <- IVHV_signal(ORATS_ETF, keep = T)
+        signals <- c("IVHV_S", paste0(c("ivhvRatio10d", "ivhvRatio30d", "ivhvRatio90d", "ivhvRatio6m", "ivhvRatio1yr"), "_S"))
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # generic
+    {
+        # Get the values
+        n <- 7
+        ORATS_ETF_signal <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(signal1 = RSI2(pxAtmIv, 5, maType = EMA) , 
+                   signal2 = RSI2(pxAtmIv, 20, maType = EMA ), 
+                   signal3 = RSI2(pxAtmIv, 60, maType = EMA ), 
+                   signal4 = RSI2(pxAtmIv, 120, maType = EMA) , 
+                   signal5 = RSI2(pxAtmIv, 252, maType = EMA))  %>%  ungroup %>% 
+            mutate(across(signal1:signal5, ~abs(cap_forecast(scale(.), cap = 2)*3)+1, .names = "{.col}_S")) %>% group_by(ticker) %>% 
+            mutate(rsi_S =  rowMeans(across(signal1_S:signal5_S)))  
+        signals <- c("rsi_S", c("signal1_S", "signal2_S", "signal3_S", "signal4_S", "signal5_S"))
+        results <- lapply(signals, function(var) { 
+            ORATS_ETF_signal %>%  group_by(.data[[var]] %>% round(0)) %>% reframe(mean_value = mean(VRP, na.rm=T)) %>% na.omit %>%  rename(group = 1, !!paste0("mean_by_", var) := mean_value)
+        }) %>% Reduce(function(x, y) full_join(x, y, by = "group"), .)
+        results[,-1] %>% matplot(type="o")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]] %>% round(0), Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # RSI 
+    {
+        # Get the values
+        ORATS_ETF_signal <- rsi_signal(ORATS_ETF, keep = T)
+        signals <- c("rsi_S", c("rsi1_S", "rsi2_S", "rsi3_S", "rsi4_S", "rsi5_S"))
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # etfIvHvXernRatio
+    {
+        # Get the values
+        ORATS_ETF_signal <- etf_signal(ORATS_ETF, keep = T)
+        signals <- c("etfIvHv_S", "etf5_S", "etf20_S", "etf60_S", "etf120_S", "etf252_S")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # contango
+    {
+        # Get the values
+        ORATS_ETF_signal <- contango_signal(ORATS_ETF, keep = T)
+        signals <- c("contango_S", "contango5_S", "contango20_S", "contango60_S", "contango120_S", "contango252_S")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # Carver's Volatility
+    {
+        # Get the values
+        ORATS_ETF_signal <- volatility_signal(ORATS_ETF, keep = T)
+        # Apply the function for each grouping variable and bind results
+        signals <- c("volatility_S", "vol5_S", "vol20_S", "vol60_S", "vol120_S", "vol252_S")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # fbf
+    {
+        # Get the values
+        ORATS_ETF_signal <- fbf_signal(ORATS_ETF, keep = T)
+        # Apply the function for each grouping variable and bind results
+        signals <- c("fbf_S", "fbf5_S", "fbf20_S", "fbf60_S", "fbf120_S", "fbf252_S")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # vvol
+    {
+        # Get the values
+        ORATS_ETF_signal <- vvol_signal(ORATS_ETF, keep = T)
+        # Apply the function for each grouping variable and bind results
+        signals <- c("vvol_S", "vvol5_S", "vvol20_S", "vvol60_S", "vvol120_S", "vvol252_S")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+    }
+    # Cross-section generic
+    {
+        # Get the values
+        n <- 7
+        ORATS_ETF_signal <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% 
+            mutate(signal1 = iv10d , 
+                   signal2 = iv30d, 
+                   signal3 = iv90d, 
+                   signal4 = iv6m, 
+                   signal5 = iv1yr)  %>% 
+            mutate(across(signal1:signal5,  ~ntile(., n), .names = "{.col}_S")) %>%
+            mutate(rsi_S =  rowMeans(across(signal1_S:signal5_S)) %>% ntile(n))  
+        signals <- c("rsi_S", c("signal1_S", "signal2_S", "signal3_S", "signal4_S", "signal5_S"))
+        results <- lapply(signals, function(var) { 
+            ORATS_ETF_signal %>%  group_by(.data[[var]]) %>% reframe(mean_value = mean(VRP, na.rm=T)) %>% na.omit %>%  rename(group = 1, !!paste0("mean_by_", var) := mean_value)
+        }) %>% Reduce(function(x, y) full_join(x, y, by = "group"), .)
+        results[,-1] %>% matplot(type="o")
+        # by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume,  scales="free") + scale_color_colorblind()
+        
+    }
+    # sum
+    {
+        ORATS_ETF_signal <- IV_signal(ORATS_ETF) %>% etf_signal() %>% contango_signal() %>% volatility_signal() %>%  rsi_signal() %>% IVHV_signal() %>% VRP_signal() %>% vvol_signal() %>% fbf_signal() %>% 
+            group_by(ticker) %>% mutate(sum_S = ntile(IV_S+etfIvHv_S-contango_S+volatility_S-rsi_S+IVHV_S+VRP_S+vvol_S-fbf_S, 7))
+        # Example
+        ORATS_ETF_signal %>% filter(ticker == "SPY") %>% tail(252) %$% matplot2(cbind(IV_S,etfIvHv_S,contango_S,volatility_S,rsi_S,IVHV_S,VRP_S,sum_S), lwd=2)    
+        # Apply the function for each grouping variable and bind results
+        signals <- c("sum_S", "IV_S", "etfIvHv_S", "contango_S", "volatility_S", "rsi_S", "IVHV_S", "VRP_S", "vvol_S", "fbf_S")
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>%  group_by(.data[[var]]) %>% reframe(mean_value = mean(VRP, na.rm=T)) %>% na.omit %>%  rename(group = 1, !!paste0("mean_by_", var) := mean_value)
+        }) %>% Reduce(function(x, y) full_join(x, y, by = "group"), .)
+        results[,-1] %>% matplot(type="o")
+        # Same, by Volume
+        results <- lapply(signals, function(var) {
+            ORATS_ETF_signal %>% #filter(dtExM1 == 25) %>%  # optional dte filter
+                group_by(.data[[var]], Volume) %>% reframe(signal = !!var, mean_value = mean(VRP, na.rm=T)) %>% na.omit %>% rename(X = 1)
+        }) %>% bind_rows() %>% mutate(signal = factor(signal, levels=signals)) 
+        results %>%  ggplot(aes(X, mean_value, color=signal)) + geom_path(linewidth = 1.5) + facet_wrap(~Volume, scales="free") + scale_color_colorblind()
+        ORATS_ETF_signal %>% ungroup %>% select(IV_S:fbf_S) %>% cor(use="pairwise.complete.obs") %>% corrplot::corrplot()
+    }
+    
+    
+    
+    {
+        ### CAREFUL: no daily calculation after this point, we have filtered only for days where dte == 25
+        ORATS_df <- ORATS_ETF %>% filter(dtExM1 == 25 & !is.na(VRPXern)) %>% 
+            select(ticker, tradeDate, pxAtmIv, retAtmIv, straRetM1, straRetM2, VRP, iv30d, iv90d, orHv20d, logVolatility, ivHvXernRatio, logivHvRatio, etfIvHvXernRatio, ivPctile1y, contango, slope, fbfexErn60_30, volOfIvol, deriv, confidence, borrow30, mktCap, beta1y, correlSpy1y, avgOptVolu20d, RSI20, RSI252)
+        # Arrange necessary to calculate ar coefficient
+        ORATS_df <- ORATS_df %>% arrange(ticker, tradeDate) %>% group_by(ticker) %>% mutate(VRPd = lag(VRP,1)-lag(VRP,2), VRPm = EMA(lag(VRP), 12)) %>% mutate(VRPd = replace_na(VRPd, 0), VRPm = replace_na(VRPm, mean(VRPm, na.rm=T))) %>% ungroup
+        # Correlations
+        # Calculate here correlation to create groups?
+        # Last placeholder
+        ORATS_df <- ORATS_df %>% mutate(Z = rnorm(nrow(ORATS_df)))                                      
+        # Time series predictors correlation
+        ORATS_df %>% select(VRP:Z) %>% cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+        # Cross-sectional predictors correlation
+        ORATS_df %>% group_by(tradeDate) %>% mutate(across(iv30d:avgOptVolu20d, ~ntile(., 8), .names = "{.col}_N")) %>% ungroup %>% select(VRP, contains("_N")) %>%  cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+        # ETFs general performance
+        ETFs_performance <- ORATS_df %>% group_by(ticker) %>% 
+            reframe(straddle1_m = mean(straRetM1*100, na.rm=T), straddle1_s = sd(straRetM1*100, na.rm=T)/sqrt(n()), straddle2_m = mean(straRetM2*100, na.rm=T), straddle2_s = sd(straRetM2*100, na.rm=T)/sqrt(n()), vrp_m=mean(VRP, na.rm=T), vrp_s = sd(VRP)/sqrt(n()), volume=mean(avgOptVolu20d, na.rm=T), tradeDate=last(tradeDate), N=n())
+    }
+}
+
 # Ticker general performance  and FINAL list
 {
     start_year <- 2021; 
@@ -509,64 +842,8 @@ option_sim_values <- function(gbm, type="call", X = 100, tt = 1, v=0.3, r = 0, d
     tickers_selection %>% filter(Mstra1 > 10 & Mvrp > 0.2 & tradeDate == "2025-01-16"  & ticker %in% ORATS_tradable & beta1y < 1) %>% View
     
     
-    {
-    volume_filter <- 100
-    ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
-    etf_screens <- read_csv("/home/marco/trading/Systems/Options/etf-screener-04-02-2025.csv", show_col_types = F) 
-    # Select ETFs only
-    ORATS_ETF <- ORATS_core_ds %>% filter(ticker %in% etf_screens$Symbol) %>% collect
-    avg_volume_filter <- ORATS_ETF %>% group_by(ticker) %>% reframe(M=mean(avgOptVolu20d)) %>% filter(M>volume_filter) %>% pull(ticker)
-    # Filter low volume and short time
-    ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% filter(ticker %in% avg_volume_filter & n() > 1000)
-    # Calculate some value before filtering by DTE
-    ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(ivPctile1y = (ivPctile1y/100-0.5)*2, logivHvRatio = log(ivHvXernRatio + 0.001), confidence = (confidence/50-1), logVolatility = log(calculate_volatility(retAtmIv)), RSI20 = RSI2(pxAtmIv, 20, maType = EMA), RSI252 = RSI2(pxAtmIv, 252, maType = EMA), VRP = VRPXern) %>% ungroup
-    print(paste("A total of",length(unique(ORATS_ETF$ticker)), "assets"))
-    }
+  
     
-    {
-        ### CAREFUL: no daily calculation after this point, we have filtered only for days where dte == 25
-        ORATS_df <- ORATS_ETF %>% filter(dtExM1 == 25 & !is.na(VRPXern)) %>% 
-            select(ticker, tradeDate, pxAtmIv, retAtmIv, straRetM1, straRetM2, VRP, iv30d, iv90d, orHv20d, logVolatility, ivHvXernRatio, logivHvRatio, etfIvHvXernRatio, ivPctile1y, contango, slope, fbfexErn60_30, volOfIvol, deriv, confidence, borrow30, mktCap, beta1y, correlSpy1y, avgOptVolu20d, RSI20, RSI252)
-        # Arrange necessary to calculate ar coefficient
-        ORATS_df <- ORATS_df %>% arrange(ticker, tradeDate) %>% group_by(ticker) %>% mutate(VRPd = lag(VRP,1)-lag(VRP,2), VRPm = EMA(lag(VRP), 12)) %>% mutate(VRPd = replace_na(VRPd, 0), VRPm = replace_na(VRPm, mean(VRPm, na.rm=T))) %>% ungroup
-        # Correlations
-        # Calculate here correlation to create groups?
-        # Last placeholder
-        ORATS_df <- ORATS_df %>% mutate(Z = rnorm(nrow(ORATS_df)))                                      
-        # Time series predictors correlation
-        ORATS_df %>% select(VRP:Z) %>% cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
-        # Cross-sectional predictors correlation
-        ORATS_df %>% group_by(tradeDate) %>% mutate(across(iv30d:avgOptVolu20d, ~ntile(., 8), .names = "{.col}_N")) %>% ungroup %>% select(VRP, contains("_N")) %>%  cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
-        # ETFs general performance
-        ETFs_performance <- ORATS_df %>% group_by(ticker) %>% 
-            reframe(straddle1_m = mean(straRetM1*100, na.rm=T), straddle1_s = sd(straRetM1*100, na.rm=T)/sqrt(n()), straddle2_m = mean(straRetM2*100, na.rm=T), straddle2_s = sd(straRetM2*100, na.rm=T)/sqrt(n()), vrp_m=mean(VRP, na.rm=T), vrp_s = sd(VRP)/sqrt(n()), volume=mean(avgOptVolu20d, na.rm=T), tradeDate=last(tradeDate), N=n())
-    }
-    
-    {
-        ORATS_df_scale <- ORATS_df %>% dplyr::select(ticker, tradeDate, VRP,  iv30d, orHv20d, volOfIvol, ivHvXernRatio, etfIvHvXernRatio, contango, slope, fbfexErn60_30, VRPm, avgOptVolu20d, confidence) %>% group_by(ticker) %>% 
-            mutate(
-                iv30d = scale(log(iv30d)) %>% as.vector,  ivHvXernRatio = scale(log(ivHvXernRatio)) %>% as.vector, etfIvHvXernRatio = scale(log(etfIvHvXernRatio)) %>% as.vector,
-                contango = scale(contango) %>% as.vector, VRPm = scale(VRPm) %>% as.vector
-            ) %>% group_by(tradeDate) %>% 
-            mutate(Volume = ntile(avgOptVolu20d+1, 6)) %>% ungroup() 
-        fit_glm <- glm(VRP ~ 1 + VRPm + iv30d + ivHvXernRatio + contango + (VRPm + iv30d + ivHvXernRatio + contango):Volume,  data=ORATS_df_scale)
-        
-        {
-            curr_day <- "2025-06-26"
-            curr_df <- read_csv("/media/marco/Elements/ORATS/core/orats_core_20250626.csv.gz", show_col_types = F)
-            curr_df <- curr_df %>% filter(ticker %in% ORATS_df_scale$ticker) %>%  dplyr::select(ticker, tradeDate, iv30d,  ivHvXernRatio, etfIvHvXernRatio, contango, avgOptVolu20d) %>% mutate(VRPm=0, VRP=NA)
-            ORATS_df_predict <- ORATS_df %>% dplyr::select(ticker, tradeDate, VRP,  iv30d, ivHvXernRatio, etfIvHvXernRatio, contango, VRPm, avgOptVolu20d)
-            curr_df <- curr_df[, colnames(ORATS_df_predict)]
-            df_merged <- bind_rows(ORATS_df_predict, curr_df) %>% group_by(ticker) %>%
-                mutate(
-                    iv30d = scale(log(iv30d+0.01)) %>% as.vector, ivHvXernRatio = scale(log(ivHvXernRatio+0.01))%>% as.vector, etfIvHvXernRatio = scale(log(etfIvHvXernRatio+0.01))%>% as.vector,
-                    contango = scale(contango)%>% as.vector, VRPm = 0 ) %>% group_by(tradeDate) %>%
-                mutate(Volume = ntile(avgOptVolu20d+1, 6)) %>% ungroup()
-            curr_data <- df_merged %>% filter(tradeDate == curr_day)
-            pred <- predict(fit_glm, curr_data [,c("VRPm", "iv30d", "ivHvXernRatio", "etfIvHvXernRatio", "contango", "Volume")]) %>% as.data.frame
-            pred_full <- pred %>% mutate(ticker = curr_data %>% pull(ticker), .before=1) %>% full_join(curr_data, by="ticker")
-        }
-    }
     
     
 }
