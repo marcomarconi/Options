@@ -1,0 +1,3 @@
+^VIX
+^VVIX
+^VIX3M

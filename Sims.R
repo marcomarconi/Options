@@ -147,11 +147,11 @@
     }
     # Calendars
     {
-        S0 <- 43.34
-        X1 <- 43
-        X2 <- 43
-        front_days <- 11
-        back_days <- 39
+        S0 <- 46
+        X1 <- 46
+        X2 <- 46
+        front_days <- 3
+        back_days <- 10
         front_IV <- 90.37/100
         back_IV <- 76.50/100
         rv <- mean(c(90))/100
@@ -165,30 +165,56 @@
         profit %>% hist(50)
         table(profit>0)/length(profit)
     }
+    # Calendars (with prices)
+    {
+        S0 <- 29
+        X1 <- 29
+        X2 <- 29
+        price1 <- 0.7
+        price2 <- 1.25
+        front_days <- 3
+        back_days <- 16
+        rv <- mean(c(43))/100
+        r <- 0
+        front_iv <- bscallimpvol(S0, X1, r=r, front_days/365, d=0, price = price1) # change to put if necessary
+        back_iv <- bscallimpvol(S0, X2, r=r, back_days/365, d=0, price = price2) # change to put if necessary
+        gbm <- simprice(s0 = S0, v = rv, r = 0, tt=front_days/252, d = 0, trials = 10000, periods = front_days-1, long = F)[,-1] %>% as.matrix() %>% t
+        front <- option_sim_profit(gbm, type = "call", X = X1, tt_start = front_days/365, tt_end = 1/365, v = front_iv); 
+        back <- option_sim_profit(gbm, type = "call", X = X2, tt_start = back_days/365, tt_end = (back_days-front_days)/365, v = back_iv); 
+        profit <- (-front$profit  + back$value - back$premium) * 100
+        print(paste("front IV:", round(front_iv*100, 2), "%"))
+        print(paste("back iv:", round(back_iv*100, 2), "%"))
+        print(summary(profit))
+        profit %>% hist(50)
+        table(profit>0)/length(profit)
+    }
     # Strangle/Straddle (with prices)
     {
-        S0 <- 33.07
-        X_call <- 33
-        X_put <- 33
-        days <- 48
-        price_call <- 2.08
-        price_put <- 1.80
+        S0 <- 133.07
+        X_call <- 133
+        X_put <- 133
+        days <- 32
+        price_call <- 4.85
+        price_put <- 4.15
         total_cost <- 0.0 # in case of iron condor
-        rv <- mean(c(31)) / 100
+        rv <- mean(c(27.6)) / 100
         r <- 0.02
+        pos <- +1
         iv_call <- bscallimpvol(S0, X_call, r=r, days/365, d=0, price = price_call)
         iv_put <- bsputimpvol(S0, X_put, r=r, days/365, d=0, price = price_put)
-        gbm <- gbm_vec(10000, t = days, S0 = S0, dt = 1/252, sigma = rv)
+        #gbm <- gbm_vec(10000, t = days, S0 = S0, dt = 1/252, sigma = rv)
         gbm <- simprice(s0 = S0, v = rv, r = 0, tt=days/252, d = 0, trials = 10000, periods = days-1, long = F)[,-1] %>% as.matrix() %>% t
         call <- option_sim_profit(gbm, type = "call", X = X_call, tt_start = days/365, tt_end = 1/365, v = iv_call, r = r); 
         put <- option_sim_profit(gbm, type = "put", X = X_put, tt_start = days/365, tt_end = 1/365, v = iv_put, r = r); 
-        print(paste("IV call:", round(iv_call, 2)))
-        print(paste("IV put:", round(iv_put, 2)))
-        profit <- (-call$profit -put$profit -total_cost ) 
-        profit %>% hist(50)
+        print(paste("IV call:", round(iv_call*100, 2), "%"))
+        print(paste("IV put:", round(iv_put*100, 2), "%"))
+        print(paste("RV:", round(rv*100, 2), "%"))
+        profit <- (call$profit + put$profit) * pos -total_cost  
+        profit %>% {.*100} %>% hist(50)
         print((profit*100) %>% summary)
-        print(paste("As percentage of premium: ", round(mean(profit) / (price_call + price_put) * 100, 2), "%"))
-        table(profit>0)/length(profit)
+        print(paste("Profit as percentage of premium:", round(mean(profit) / (price_call + price_put) * 100, 2), "%"))
+        print(paste("Probability of profit:", (table(profit>0)/length(profit))[2]*100, "%"))
+        print((mean(profit)/sd(profit)) * (1 + (skewness(profit) / 6) * SR - ((K - 3) / 24) * SR^2)
     }
     # Straddle (with cost, i.e. a butterfly)
     {
@@ -251,7 +277,7 @@
 {
     
     ## Good Straddle  
-    gbm <- gbm_vec(100, sigma = 0.2)
+    gbm <- gbm_vec(10000, sigma = 0.2)
     option_sim_profit(gbm, type="call") -> a
     option_sim_profit(gbm, type="put") -> b
     profit <- (-a$profit-b$profit)*100
@@ -321,3 +347,34 @@
     straddle_path <- -call_path_short-put_path_short + call_path_long+put_path_long
     matplot2(cbind(call_spread, put_spread, straddle_path/2))
 }
+
+# Calculating ROI, use target volatility 
+{
+    capital <- 10000
+    target_vol <- 0.2
+    S0 <- 20
+    X <- 20
+    days <- 30
+    iv_call <- 30/100
+    iv_put <- 30/100
+    total_cost <- 0
+    rv <- 20 / 100
+    r <- 0
+    set.seed(NULL)
+    gbm <- simprice(s0 = S0, v = rv, r = 0, tt=days/252, d = 0, trials = 10000, periods = days-1, long = F)[,-1] %>% as.matrix() %>% t
+    call <- option_sim_profit(gbm, type = "call", X = X, tt_start = days/365, tt_end = 1/365, v = iv_call, r = r); 
+    put <- option_sim_profit(gbm, type = "put", X = X, tt_start = days/365, tt_end = 1/365, v = iv_put, r = r); 
+    profit <- (-call$profit -put$profit -total_cost ) * 100
+    total_profit <- profit * 12 # number of trades per year
+    q <- quantile(total_profit, c(0.16, 1-0.16)) # the corresponding quantile in a normal distribution (1 sd)
+    w <- (capital * target_vol)  / abs(q[1])  
+    weighted_total_profit <- w * total_profit
+    quantile(weighted_total_profit, c(0.16, 1-0.16)) # check it's target_vol * capital
+    # ROI
+    roi <- round(mean(weighted_total_profit) / capital * 100, 1)
+    print("Calculating ROI...")
+    print(paste0("IV: ", mean(iv_call, iv_put)*100, "%, RV: ",rv*100, "%"))
+    print(paste0("ROI: ", roi, "%"))
+}
+
+
