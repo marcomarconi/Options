@@ -1,0 +1,128 @@
+---
+title: "VRP_ETFs"
+output: html_document
+date: "2025-05-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(arrow)
+library(brms)
+options(brms.backend="cmdstanr")
+library(TTR)
+```
+
+
+
+```{r startup}
+volume_filter <- 100
+ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
+etf_screens <- read_csv("/home/marco/trading/Systems/Options/etf-screener-04-02-2025.csv", show_col_types = F) 
+# Select ETFs only
+ORATS_ETF <- ORATS_core_ds %>% filter(ticker %in% etf_screens$Symbol) %>% collect
+avg_volume_filter <- ORATS_ETF %>% group_by(ticker) %>% reframe(M=mean(avgOptVolu20d)) %>% filter(M>volume_filter) %>% pull(ticker)
+# Filter low volume and short time
+ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% filter(ticker %in% avg_volume_filter & n() > 1000)
+# Calculate some value before filtering by DTE
+ORATS_ETF <- ORATS_ETF %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(ivPctile1y = (ivPctile1y/100-0.5)*2, logivHvRatio = log(ivHvXernRatio + 0.001), confidence = (confidence/50-1), logVolatility = log(calculate_volatility(retAtmIv)), RSI20 = RSI2(pxAtmIv, 20, maType = EMA), RSI252 = RSI2(pxAtmIv, 252, maType = EMA), VRP = VRPXern) %>% ungroup
+print(paste("A total of",length(unique(ORATS_ETF$ticker)), "assets"))
+```
+```{r overview}
+### CAREFUL: no daily calculation after this point, we have filtered only for days where dte == 25
+ORATS_df <- ORATS_ETF %>% filter(dtExM1 == 25 & !is.na(VRPXern)) %>% 
+    select(ticker, tradeDate, pxAtmIv, retAtmIv, straRetM1, straRetM2, VRP, iv30d, iv90d, orHv20d, logVolatility, ivHvXernRatio, logivHvRatio, etfIvHvXernRatio, ivPctile1y, contango, slope, fbfexErn60_30, volOfIvol, deriv, confidence, borrow30, mktCap, beta1y, correlSpy1y, avgOptVolu20d, RSI20, RSI252)
+# Arrange necessary to calculate ar coefficient
+ORATS_df <- ORATS_df %>% arrange(ticker, tradeDate) %>% group_by(ticker) %>% mutate(VRPd = lag(VRP,1)-lag(VRP,2), VRPm = EMA(lag(VRP), 12)) %>% mutate(VRPd = replace_na(VRPd, 0), VRPm = replace_na(VRPm, mean(VRPm, na.rm=T))) %>% ungroup
+# Correlations
+# Calculate here correlation to create groups?
+# Last placeholder
+ORATS_df <- ORATS_df %>% mutate(Z = rnorm(nrow(ORATS_df)))                                      
+# Time series predictors correlation
+ORATS_df %>% select(VRP:Z) %>% cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+# Cross-sectional predictors correlation
+ORATS_df %>% group_by(tradeDate) %>% mutate(across(iv30d:avgOptVolu20d, ~ntile(., 8), .names = "{.col}_N")) %>% ungroup %>% select(VRP, contains("_N")) %>%  cor(method = "spearman", use="pairwise.complete.obs") %>% corrplot::corrplot()
+# ETFs general performance
+ETFs_performance <- ORATS_df %>% group_by(ticker) %>% 
+        reframe(straddle1_m = mean(straRetM1*100, na.rm=T), straddle1_s = sd(straRetM1*100, na.rm=T)/sqrt(n()), straddle2_m = mean(straRetM2*100, na.rm=T), straddle2_s = sd(straRetM2*100, na.rm=T)/sqrt(n()), vrp_m=mean(VRP, na.rm=T), vrp_s = sd(VRP)/sqrt(n()), volume=mean(avgOptVolu20d, na.rm=T), tradeDate=last(tradeDate), N=n())   
+```
+
+
+
+```{r backtests}
+ORATS_ETF  %>% group_by(ticker) %>% mutate(signal = ivHvXernRatio  %>% ntile(8) %>% as.vector, signal =  case_when(signal >= 7 ~ 1, TRUE ~ 0), return = (signal) * VRP) %>% filter(dtExM1 == 25) %>% mutate(cum_return = cumsum((return/sd(return, na.rm=T)) %>% replace_na(0))) %>% ungroup %>% ggplot(aes(tradeDate, cum_return, color=ticker)) + geom_line() + geom_hline(yintercept = 0) + theme(legend.position = "none")
+```
+
+```{r lmer}
+ORATS_df_scale <- ORATS_df %>% dplyr::select(ticker, tradeDate, VRP,  iv30d, orHv20d, volOfIvol, ivHvXernRatio, etfIvHvXernRatio, contango, slope, fbfexErn60_30, VRPm, avgOptVolu20d, confidence) %>% group_by(ticker) %>% 
+    mutate(
+        iv30d = scale(log(iv30d)), orHv20d = scale(log(orHv20d)), volOfIvol = scale(log(volOfIvol)), volume20d = scale(log(avgOptVolu20d+1)),
+        ivHvXernRatio = scale(log(ivHvXernRatio)), etfIvHvXernRatio = scale(log(etfIvHvXernRatio)),
+        contango = scale(contango), slope = scale(slope), fbfexErn60_30 = scale(fbfexErn60_30), VRPm = scale(VRPm), confidence = scale(confidence)
+        ) %>% group_by(tradeDate) %>% 
+    mutate(Volume = ntile(avgOptVolu20d+1, 6)) %>% ungroup() 
+fit_lmer <- lmer(VRP ~ 1 + confidence + VRPm + iv30d + slope + ivHvXernRatio + etfIvHvXernRatio + fbfexErn60_30 + contango + (1 | ticker),  data=ORATS_df_scale)
+{
+    name <- "SPY"; nn <- 50
+    ORATS_df %>% filter(ticker == name) %>% mutate(Ret = replace_na(straRetM1, 0) * -1) %>% pull(Ret) %>% tail(nn) -> a;
+    predict(fit_lmer_, ORATS_df_scale %>% filter(ticker == name)) %>% tail(nn) -> b; 
+    print(mean(a)/sd(a)*16);print(mean(a*b)/sd(a*b)*16);
+    matplot2(cbind(cumsum(a/sd(a)), cumsum((a*b)/sd(a*b))))
+}
+```
+
+```{r xgboost}
+library(xgboost)
+df <- ORATS_df %>% group_by(tradeDate) %>% mutate(across(iv30d:avgOptVolu20d, ~ntile(., 8), .names = "{.col}_N")) %>% ungroup %>% na.omit
+y <- as.numeric(df$straRetM1)  
+X <- as.matrix(df %>% select(iv30d:correlSpy1y_N))
+dtrain <- xgb.DMatrix(data = X, label = y)
+params <- list(
+  objective = "reg:squarederror",  # for regression
+  eval_metric = "rmse"             # root mean square error
+)
+model <- xgb.train(
+  params = params,
+  data = dtrain,
+  nrounds = 100  # Number of boosting iterations
+)
+preds <- predict(model, newdata = X)
+importance_matrix <- xgb.importance(model = model)
+xgb.plot.importance(importance_matrix)
+
+```
+
+```{r distributions}
+fit_intercept_normal <- brm(VRP ~ 1, data = ORATS_df, family = "normal", cores = 4)
+fit_intercept_skewnormal <- brm(VRP ~ 1, data = ORATS_df, family = "skew_normal", cores = 4)
+fit_intercept_laplace <- brm(VRP ~ 1, data = ORATS_df, family = "asym_laplace", cores = 4)
+loo_compare(loo(fit_intercept_normal), loo(fit_intercept_skewnormal), loo(fit_intercept_laplace))
+pp_check(fit_intercept_laplace)
+pp_check(fit_intercept_laplace, type = "error_scatter_avg")
+```
+
+
+```{r multilevel intercept}
+fit_intercept_cp <- brm(VRP ~ 1 + (1 | ticker), data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+fit_intercept_cp_sigma <- brm(bf(VRP ~ 1 + (1 | ticker), sigma ~ 1 + (1 | ticker)), data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+loo_compare(loo(fit_intercept_laplace), loo(fit_intercept_cp))
+pp_check(fit_intercept_cp)
+pp_check(fit_intercept_cp, type = "error_scatter_avg")
+```
+
+```{r one predictor}
+fit_pred_1 <- brm(VRP ~ 1 + logivHvRatio, data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+loo_compare(loo(fit_intercept_cp), loo(fit_pred_1))
+pp_check(fit_pred_1, type = "error_scatter_avg")
+fit_pred_1_cp <- brm(VRP ~ 1 + (1 | ticker) + logivHvRatio, data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+loo_compare(loo(fit_pred_1), loo(fit_pred_1_cp))
+pp_check(fit_pred_1_cp, type = "error_scatter_avg")
+fit_ar <- brm(VRP ~ 1 + VRPlag , data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+```
+
+```{r two predictor}
+fit_pred_2_cp <- brm(VRP ~ 1 + (1 | ticker) + logivHvRatio + VRPm, data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+fit_pred_4_cp <- brm(VRP ~ 1 + (1 | ticker) + logivHvRatio + scale(confidence) + scale(beta1y) + scale(contango), data = ORATS_df, family = "asym_laplace", cores = 4, algorithm = "sampling")
+loo_compare(loo(fit_pred_2_cp), loo(fit_pred_4_cp))
+pp_check(fit_pred_2_cp, type = "error_scatter_avg")
+```

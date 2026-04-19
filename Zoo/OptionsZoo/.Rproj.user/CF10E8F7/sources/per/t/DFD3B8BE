@@ -1,0 +1,27 @@
+{
+    "id": "DFD3B8BE",
+    "path": "~/trading/Systems/Options/Zoo/OptionsZoo/app_1.R",
+    "project_path": "app_1.R",
+    "type": "r_source",
+    "hash": "29760847",
+    "contents": "",
+    "dirty": false,
+    "created": 1717680164735.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "29,75",
+        "scrollLine": "18"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1717683644,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1717683644062,
+    "read_only": false,
+    "read_only_alternatives": []
+}
