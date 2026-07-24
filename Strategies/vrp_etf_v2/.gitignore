@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Regenerable data caches (parquet built by pipeline/) — ~216 MB. Rebuild locally:
+#   pipeline/build_panel.py          core day-files -> cache/panel.parquet   (~90s)
+#   pipeline/real_pnl.py [etf|stock] delta-hedged straddles from ../_data/strikes
+#   pipeline/restrike_pnl.py [etf|stock]  restrike-band sweep
+cache/
+
+# Build / run logs
+*.log
+out/*.log
+
+# Daily screener output — personal runtime state, not for a public repo
+out/screens/
