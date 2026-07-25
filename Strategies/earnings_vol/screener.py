@@ -43,11 +43,12 @@ Usage (run on a US trading day BEFORE the close, orders go in at/near close):
     python3 screener.py --capital 20000            # unit solved for 20% ann std
     python3 screener.py --capital 20000 --pct 15   # other risk target
     python3 screener.py --unit 800                 # fixed unit (overrides)
-    python3 screener.py --refit                    # also refit model betas
-Sizing: --capital/--pct solve the equal-premium unit from the lag-2 backtest
-(bisection on integer-contract realized ann-std, analysis/unit_for_risk.py);
-trades/day, clustering and rounding are all baked into the backtest, so no
-further inputs are needed.
+    python3 screener.py --capital 20000 --refit    # also refit model betas
+Sizing: one of --capital or --unit is REQUIRED (without a unit the quotes carry
+no contract count). --capital/--pct solve the equal-premium unit from the lag-2
+backtest (bisection on integer-contract realized ann-std,
+analysis/unit_for_risk.py); trades/day, clustering and rounding are all baked
+into the backtest, so no further inputs are needed.
 Appends every signal to out/live_signals.csv. Model betas cached in
 cache/live_model.json. Token is read from orats_downloader.py (not stored
 here).
@@ -316,6 +317,7 @@ def straddle_quote(tkr, jump_span, tok):
     return dict(spot=spot, expir=exps.min(), strike=r.strike,
                 mid=(r.callBidPrice + r.callAskPrice) / 2
                     + (r.putBidPrice + r.putAskPrice) / 2,
+                bid=r.callBidPrice + r.putBidPrice,
                 ask=r.callAskPrice + r.putAskPrice,
                 atm_dist=abs(r.strike - spot) / spot)
 
@@ -406,14 +408,17 @@ def fmt_quote(q, unit=0):
         warn.append(f"debit<${MIN_DEBIT:.2f} — fees eat it, SKIP")
     if q["spot"] < MIN_PX:
         warn.append("spot<$5")
+    # relative spread on the two-leg straddle: (ask-bid)/mid. You cross half of
+    # it entering and half exiting, so this is ~the round-trip cost in % of debit
+    spr = (q["ask"] - q["bid"]) / q["mid"] * 100 if q["mid"] > 0 else float("nan")
     size = ""
     n = n_contracts(q, unit)
     if n is not None:
         size = (f"  ->  {n}x = ${n * 100 * q['mid']:,.0f} premium" if n
                 else "  ->  0 contracts (unit < 1 straddle) — SKIP")
     return (f"spot {q['spot']:.2f}  exp {q['expir'].date()}  K {q['strike']:g}"
-            f"  straddle mid {q['mid']:.2f} / ask {q['ask']:.2f}"
-            f"  ({q['mid']/q['spot']*100:.1f}% of spot)"
+            f"  straddle {q['bid']:.2f}/{q['mid']:.2f}/{q['ask']:.2f}"
+            f"  (spread {spr:.1f}%, mid {q['mid']/q['spot']*100:.1f}% of spot)"
             + ("  !! " + ", ".join(warn) if warn else "") + size)
 
 
@@ -432,6 +437,16 @@ def main():
     ap.add_argument("--pct", type=float, default=20,
                     help="target annual std as %% of capital (default 20)")
     args = ap.parse_args()
+
+    # sizing is mandatory — without a unit every quote prints with no contract
+    # count, which is the whole point of the run
+    if not args.unit and not args.capital:
+        ap.error("sizing required: pass --capital (unit solved for --pct "
+                 "annual std) or --unit (fixed premium per trade)")
+    if args.unit < 0 or args.capital < 0:
+        ap.error("--unit and --capital must be positive")
+    if args.pct <= 0:
+        ap.error("--pct must be > 0 (it scales --capital into a risk target)")
 
     if not args.unit and args.capital:
         sys.path.insert(0, f"{HERE}/analysis")
