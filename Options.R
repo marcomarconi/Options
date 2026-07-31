@@ -64,11 +64,6 @@ source("/home/marco/trading/Systems/Options//OptionsCommon.R")
     ORATS_core <- ORATS_core %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(pxAtmIvM1 = pxAtmIv[match(expiryDate1, tradeDate)], pxAtmIvM2 = pxAtmIv[match(expiryDate2, tradeDate)] ,.after = pxAtmIv) %>% ungroup
     ORATS_core <- ORATS_core %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(pxAtmIvM1 = case_when(is.na(pxAtmIvM1) ~ pxAtmIv[match(expiryDate1-1, tradeDate)], TRUE ~ pxAtmIvM1), pxAtmIvM2 = case_when(is.na(pxAtmIvM2) ~ pxAtmIv[match(expiryDate2-1, tradeDate)], TRUE ~ pxAtmIvM2),.after = pxAtmIv) %>% ungroup
     # ORATS_core <- ORATS_core %>% mutate(retAtmIvM1 = 1.0 - pxAtmIv/pxAtmIvM1, retAtmIvM2 = 1.0 - pxAtmIv/pxAtmIvM2, .after = pxAtmIvM2)    
-    # Theoretical straddle prices
-    # ORATS_core <- ORATS_core  %>% group_by(ticker) %>% mutate(
-    #                                     straTheoM1 = 0.8 * pxAtmIv * mad(retAtmIv)*sqrt(252) * sqrt(dtExM1/365), 
-    #                                     straTheoM2 = 0.8 * pxAtmIv * mad(retAtmIv)*sqrt(252) * sqrt(dtExM1/365),
-    #                                     .after = retAtmIvM2) %>% ungroup
     # Calculate straddle returns, exclude straddle return when estimated daily returns during that period are > 10% (usually are stock splits) or straddle price > 10*stock price. Also, ignore 0DTEs. 
     ORATS_core <- ORATS_core %>% mutate(
                                         straProM1 = abs(pxAtmIvM1 - hiStrikeM1) - straPxM1, 
@@ -384,64 +379,6 @@ source("/home/marco/trading/Systems/Options//OptionsCommon.R")
 
 
 
-# Ticker general performance  and FINAL list
-{
-    # Fuse orats data with fundamentals
-    start_year <- 2021; 
-    ORATS_core <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq") %>% arrange(ticker, tradeDate)
-    barchart_dir <- "/home/marco/trading/HistoricalData/Barchart/Options/"
-    ETFs_Info <- read_csv(paste0(barchart_dir, "ETF_Info.csv"), show_col_types = FALSE) %>% select(Symbol, Name, Sector, Industry)
-    Stocks_Info <- read_csv(paste0(barchart_dir, "Stock_Info.csv"), show_col_types = FALSE)%>% select(Symbol, Name, Sector, Industry)
-    Info <- rbind(ETFs_Info, Stocks_Info) %>% rename(ticker=Symbol)
-    df_orats_fundamentals <- read_csv("/home/marco/trading/HistoricalData/ORATS/Fundamentals_ORATS.csv")
-    last_day_fundamentals <- df_orats_fundamentals %>%  group_by(ticker) %>% arrange(tradeDate) %>% slice_tail(n = 1) %>% 
-        select(ticker, tradeDate, mktCap,   ROA ,  ROE  ,  DE  , EPS) %>% ungroup
-    # We calculate average performance from 2021
-    ORATS_core_reduced <- ORATS_core %>% filter(year(tradeDate) >= start_year)
-    # Calculate mean straddle and logVRP by month, and later average again
-    tickers_performance <- ORATS_core_reduced  %>% filter(dte1 != 0 & dte2 != 0  & !is.na(logVRP) & !is.na(straLogM1) & !is.na(straLogM2)) %>% collect %>% 
-        group_by(ticker, ym=yearmonth(tradeDate)) %>% 
-        reframe(s1=mean(straLogM1/dtExM1*100, na.rm=T), s2=mean(straLogM2/dtExM2*100, na.rm=T), vrp=mean(logVRP, na.rm=T), pxAtmIv=last(pxAtmIv), beta1y=last(beta1y), tradeDate=last(tradeDate), n()) %>% 
-        group_by(ticker) %>% reframe(Mstra1 = mean(s1), Sstra1 = sd(s1)/sqrt(n()), Mstra2 = mean(s2), Sstra2 = sd(s2)/sqrt(n()), Mvrp = mean(vrp), Svrp = sd(vrp)/sqrt(n()), pxAtmIv=last(pxAtmIv), beta1y=last(beta1y), tradeDate=last(tradeDate), N=n())    # Merge with last day fundamentals 
-    # Merge with fundamentals
-    tickers_selection <- full_join(tickers_performance %>% full_join(Info, by="ticker"), last_day_fundamentals %>% select(-tradeDate), by="ticker") 
-    # Final criteria
-    tickers_selection %>% filter(Mstra1 > 10 & Mvrp > 0.2 & tradeDate == "2025-01-16"  & ticker %in% ORATS_tradable & beta1y < 1) %>% View
-    
-    
-    ORATS_df <- ORATS_ETF#ORATS_STOCK %>% filter(ticker %in% a)
-    ORATS_df <- ORATS_df %>% group_by(ticker, dtExM1) %>% mutate(logVRPd = logVRP - lag(logVRP, 1), .after=logVRP) %>% group_by(ticker)
-    long_VRP <- ORATS_df %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(
-        IV_signal = ntile(iv30d, 7),
-        HV_signal = ntile(orHv20d, 7),
-        IVHV_signal = ntile(ivHvXernRatio, 7),
-        fbf_signal = ntile(fbfexErn60_30, 7),
-        VRPd_signal = ntile(VRPd %>% na.locf(na.rm=F), 7)
-        )   %>% reframe(VRP_mean = mean(logVRP, na.rm=T), 
-                   logVRP_sd = sd(logVRP, na.rm=T), 
-                   logVRP_2025 = mean(if_else(tradeDate>"2025-01-01",logVRP,NA) , na.rm=T), 
-                   logVRPprev = last(logVRP %>% na.locf(na.rm=F)),
-                   logVRPd = last(logVRPd %>% na.locf(na.rm=F)),
-                   IV = last(iv30d), 
-                   RV = last(clsHv20d), 
-                   IV_signal = last(IV_signal)      ,
-                   HV_signal = last(HV_signal),
-                   IVHV_signal = 7-last(IVHV_signal)+1,
-                   fbf_signal = 7-last(fbf_signal)+1,
-                   logVRPd_signal = 7-last(logVRPd_signal)+1,
-                   Volume = median(if_else(tradeDate>"2025-01-01",avgOptVolu20d,NA) , na.rm=T), 
-                   pxAtmIv = last(pxAtmIv)             
-    ) %>% mutate( Signal = rowMeans(across(IV_signal:logVRPd_signal))-4)
-    selected <- long_logVRP %>% filter(logVRP_mean > 0 & logVRP_2025 > 0) %>% pull(ticker)
-    corr_mat <- ORATS_df %>% filter(ticker %in% selected) %>% select(tradeDate, ticker, retAtmIv) %>% pivot_wider(id_cols = tradeDate, names_from = ticker, values_from = retAtmIv) %>% select(-tradeDate) %>% cor(use = "pairwise.complete.obs") %>% abs 
-    corr_mat %>% corrplot::corrplot(order="hclust")
-    dist_mat <- as.dist(1 - corr_mat); hc <- hclust(dist_mat, method = "ward.D2")
-    plot(hc, main = "Hierarchical Clustering of Correlation Matrix")
-    clusters <- cutree(hc, k = 10)
-    long_logVRP_c <- merge(long_logVRP, data.frame(ticker=names(clusters), clusters)) 
-    long_logVRP_c %>% arrange(clusters, desc(logVRP_mean), desc(Signal)) %>% View
-}
-
 # General observation about returns and realized volatility
 {
     library(MASS)
@@ -508,7 +445,7 @@ source("/home/marco/trading/Systems/Options//OptionsCommon.R")
     
     ### Calculate RV forecast using current RV as predictors
     # Merge price data with core data       
-    etf_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-07-09-2025.csv", show_col_types = F)
+    etf_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-01-29-2026.csv", show_col_types = F)
     ORATS_core_ETFs <- read_parquet("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq") %>% 
         dplyr::filter(ticker %in% unique(etf_screener$Symbol)) %>% 
         dplyr::select(ticker, tradeDate, orFcst20d, orIvFcst20d, orFcstInf)
@@ -783,33 +720,119 @@ source("/home/marco/trading/Systems/Options//OptionsCommon.R")
 
 
 {
-    ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq")
-    df <- ORATS_core_ds  %>% filter(ticker == "SPY") %>% collect
+    library(slider)
+    ORATS_core_ds <- open_dataset("/home/marco/trading/HistoricalData/ORATS/ORATS_core.pq") 
+    etfs_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-weekly-options.csv", show_col_types = F) 
+    etfs_list <- etfs_screener %>% group_by(Symbol) %>% reframe(Volume = mean(`Options Vol`, na.rm=T)) %>% 
+        filter(Volume > 1000) %>% pull(Symbol)
+    ORATS_ETFs <- ORATS_core_ds %>% filter(ticker %in% etfs_list) %>% arrange(ticker, tradeDate) %>% 
+        collect  %>% group_by(ticker)%>% dplyr::filter(n()>1000) 
+    # Correlation between ETFs and SPY
+    spy_cor <- ORATS_ETFs %>% dplyr::select(tradeDate, ticker, retAtmIv) %>% pivot_wider(id_cols = tradeDate, names_from = ticker, values_from = retAtmIv) %>% dplyr::select(-tradeDate) %>% cor(use="pairwise.complete.obs") %>% {.[,"SPY", .drop=F]}
     w <- 252
-    df <-  df %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(
-        VRP = log(iv30d / lead(clsHv20d, 20)),
+    df <-  ORATS_ETFs %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(
+        VRP_5 = log(iv10d / lead(orHv5d, 6)) %>% if_else(is.infinite(.), NA, .) %>% na.locf(na.rm=F),
+        VRP_20 = log(iv30d / lead(clsHv20d, 21)) %>% if_else(is.infinite(.), NA, .) %>% na.locf(na.rm=F),
+        VRP_20_m = mean(VRP_20), #runMean(VRP_20, 252),
+        VRP_20_sd = sd(VRP_20), #runSD(VRP_20, 252),
+        VRPzscore = ((VRP_20 - VRP_20_m) / VRP_20_sd) %>% cap_forecast(),
+        VRPntile = ntile(VRP_20, 7),
+        volatility = calculate_volatility(retAtmIv),
+        retAtmIv_abs = abs(retAtmIv),
         IVpercentile = iv30d  %>% runPercentRank(w),  
-        IV_RSI = RSI2(iv30d %>% log, 10, maType="EMA") %>% EMA(5) ,
-        IV_mom = IV_RSI %>% runPercentRank(w), 
-        #steepness_pct = pmax(pmin(log(iv10d / iv90d), 1), -1) %>% na.locf(na.rm=F) %>% runPercentRank(w),
-        IVHV_zscore = log(iv30d / clsHv20d) %>% runPercentRank(w),
-        #skew = slope %>% na.locf(na.rm=F) ,
-        #skew_zscore = skew  %>% runPercentRank(w),
         vol_of_Ivol = ew_sd_roll(c(NA, diff(log(iv30d)))%>% na.locf(na.rm=F)) ,
-        vol_of_Ivol_pct = vol_of_Ivol %>% runPercentRank(w),
-        IVVVOL_ratio = (iv30d / vol_of_Ivol) %>% runPercentRank(w)
+        iv_mom = log(iv10d / iv1yr),
+        rv_mom = log(orHv5d / clsHv252d),
+        iv_richness = log(iv30d / vol_of_Ivol),
+        TR = trend_ratio(retAtmIv),
+        VCR = runMax(retAtmIv^2, 20) / runSum(retAtmIv^2, 20)
     ) %>% ungroup  %>% arrange(ticker, tradeDate)
-    df_mod <- df %>% dplyr::filter(tradeDate > "2025-01-01")
-    df_mod %>% dplyr::select(VRP, IVpercentile, IV_mom, IVHV_zscore, IVVVOL_ratio) %>%pairs
-    df_mod <- df_mod %>% mutate(regime = case_when(
-        
-    ))
-    p_vrp <- df_mod %>% ggplot(aes(tradeDate, VRP)) + geom_line(color="orange")
-    p_iv <- df_mod %>% mutate(mom = factor(case_when(IV_RSI > 0.2 ~ "Up", IV_RSI < -0.2 ~ "Down", TRUE ~ "Flat"))) %>% ggplot(aes(tradeDate, iv30d)) + geom_line(color="lightgray") + geom_point(aes(color=mom)) + theme(axis.title.x = element_blank()) + scale_color_colorblind()
-    p_iv_mom <- df_mod %>% ggplot(aes(tradeDate, IV_RSI)) + geom_line(color="blue")+ theme(axis.title.x = element_blank())
-    p_ivrv <- df_mod %>% ggplot(aes(tradeDate, IVHV_zscore)) + geom_line(color="red")+ theme(axis.title.x = element_blank())
-    p_ivvvol <- df_mod %>% ggplot(aes(tradeDate, IVVVOL_ratio)) + geom_line(color="purple")+ theme(axis.title.x = element_blank())
-    p_vrp / p_iv / p_iv_mom / p_ivrv / p_ivvvol
+    
+    predictors <- c("iv10d","iv30d","stkPxChng1wk","correlSpy1y","avgOptVolu20d","orHv5d","clsHv20d",
+                    "ivHvXernRatio","ivEtfRatio","etfIvHvXernRatio","fexErn60_30","ffexErn60_30",
+                    "slope","contango","deriv","iv_mom", "rv_mom", "iv_richness", "TR","VCR","retAtmIv_abs")
+    selected <- 
+    # Correlation between predictors
+    df %>% filter(ticker %in% c("IWM", "QQQ", "SPY") & dtExM1 == 25) %>% ungroup %>% 
+        dplyr::select(all_of(predictors), VRP_5, VRP_20) %>%
+        mutate(across(where(is.numeric),~replace(., is.infinite(.), NA))) %>% cor(use = "pairwise.complete.obs") %>% corrplot::corrplot()
+    # Single ticker
+    df %>% dplyr::filter(ticker == "SPY") %>% 
+        dplyr::select(all_of(predictors), tradeDate, ticker, VRP_5, VRP_20, retAtmIv_abs) %>% 
+        mutate(target = ntile(VRP_20, 7)) %>% dplyr::select(-VRP_5, -VRP_20, -retAtmIv_abs) %>% 
+        pivot_longer(-c(tradeDate, ticker, target)) %>% group_by(name) %>% 
+        mutate(bin = ntile(value, 7)) %>% group_by(bin, name) %>%
+        reframe(M = mean(target, na.rm=T), S = sd(target, na.rm=T)/sqrt(n()), n()) %>% na.omit %>%
+        ggplot(aes(x=bin, y=M, ymin = M-S*2, ymax=M+S*2)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~name)
+    # Complete pooling ntile
+    df %>% group_by(ticker) %>%  mutate(target = VRPzscore) %>% 
+        dplyr::select(all_of(predictors), tradeDate, ticker, target) %>% group_by(ticker) %>% 
+        pivot_longer(-c(tradeDate, ticker, target)) %>% group_by(ticker, name) %>% 
+        mutate(bin = ntile(value, 7)) %>% group_by(bin, name) %>%
+        reframe(M = mean(target, na.rm=T), S = sd(target, na.rm=T)/sqrt(n()), n()) %>% na.omit %>%
+        ggplot(aes(x=bin, y=M, ymin = M-S*2, ymax=M+S*2)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~name, scales="free")
+    # Partial pooling ntile
+    df %>% group_by(ticker) %>%  mutate(target = VRPzscore) %>% 
+        dplyr::select(all_of(predictors), tradeDate, ticker, target) %>% 
+        pivot_longer(-c(tradeDate, ticker, target)) %>% group_by(ticker, name) %>% 
+        mutate(bin = ntile(value, 7)) %>% group_by(ticker, bin, name) %>%
+        reframe(P = mean(target, na.rm=T)) %>% group_by(bin, name) %>% 
+        reframe(M = mean(P, na.rm=T), S = sd(P, na.rm=T), n()) %>% na.omit %>% 
+        ggplot(aes(x=bin, y=M, ymin = M-S, ymax=M+S)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~name, scales="free")
+    # TR vs VCR (as predictors of VRP)
+    df %>% group_by(ticker) %>% mutate(VRP = ntile(VRP_20, 7), TR_bin = ntile(TR, 7), VCR_bin = ntile(VCR, 7)) %>% 
+        group_by(TR_bin, VCR_bin) %>%  reframe(M=mean(VRP, na.rm=T)) %>% na.omit %>% 
+        ggplot(aes(x=TR_bin, y=VCR_bin, fill=M)) + geom_tile(color = "white") + scale_fill_viridis_c() 
+    # Single predictor VS VRP on single ticker
+    df %>% dplyr::filter(ticker == "SPY") %>% mutate(VRP = ntile(VRP_20, 5)/2, pred = ntile(iv30d, 5)) %>% filter(dtExM1 == 25) %>% 
+        ggplot(aes(x=1, y=pred , size=5, color=VRP)) + geom_jitter(width = 0.1) + scale_color_distiller(palette = "RdBu")
+    # Modelling
+    df_model_ntile <- df %>% group_by(ticker) %>% 
+        mutate(target = VRPntile, 
+               pred1 = ntile(iv30d, 7)-4, 
+               pred2 = ntile(retAtmIv_abs, 7)-4, 
+               pred3 = ntile(TR, 7)-4, 
+               pred4 = ntile(VCR, 7)-4)  
+    df_model_zscore <- df %>% group_by(ticker) %>% 
+        mutate(target = VRPzscore, 
+               pred1 = runZscore(iv30d, 252) %>% cap_forecast(2), 
+               pred2 = runZscore(retAtmIv_abs, 252) %>% cap_forecast(2), 
+               pred3 = runZscore(TR, 252) %>% cap_forecast(2), 
+               pred4 = runZscore(VCR, 252) %>% cap_forecast(2)) 
+    fit_ntile <- brm(target ~ pred1 + pred2 + pred3 + pred4, df_model_ntile %>% filter(dtExM1==25))
+    fit_zscore <- brm(target ~ pred1 + pred2 + pred3 + pred4, df_model_zscore %>% filter(dtExM1==25))
+    # Predictions
+    date <- "2026-01-02"
+    new_data <-  df_model_zscore %>% filter(tradeDate == date) %>% ungroup %>% dplyr::select(ticker, pred1, pred2, pred3, pred4) 
+    preds <- predict(fit_zscore, newdata = new_data)[,1]
+    target_m <- df_model_zscore %>% filter(tradeDate == date) %>% ungroup %>% pull(VRP_20_m) 
+    target_sd <- df_model_zscore %>% filter(tradeDate == date) %>% ungroup %>% pull(VRP_20_sd)
+    future <- data.frame(ticker = new_data$ticker, VRP_mean = (exp(target_m)-1) * 100, VRP_pred = (exp(preds * target_sd + target_m) - 1) * 100)
+    
+    new_data <-  df_model_zscore %>% filter(ticker == "UVIX") %>% ungroup %>% dplyr::select(ticker, tradeDate, pred1, pred2, pred3, pred4) 
+    preds <- predict(fit_zscore, newdata = new_data)[,1]
+    target_m <- df_model_zscore %>% filter(ticker == "UVIX") %>% ungroup %>% pull(VRP_20_m) 
+    target_sd <- df_model_zscore %>% filter(ticker == "UVIX") %>% ungroup %>% pull(VRP_20_sd)
+    future <- data.frame(ticker = new_data$ticker, tradeDate = new_data$tradeDate, VRP_mean = (exp(target_m)-1) * 100, VRP_pred = (exp(preds * target_sd + target_m) - 1) * 100)
+    future %>% ggplot(aes(tradeDate, VRP_mean)) + geom_line() + geom_line(aes(y = VRP_pred), color="black")
+    
+    # on strike backtest
+    res_strangle <- backtest_short_strangle("SPY", 0.2, 20, 20, start_date = "2021-01-01")
+    res_straddle <- backtest_short_strangle("SPY", 0.5, 20, 20, start_date = "2021-01-01")
+    trades_strangle <- summarize_trades(res_strangle)
+    trades_straddle <- summarize_trades(res_straddle)
+    trades <- trades_strangle
+    df_ticker <- df %>% dplyr::filter(ticker == "SPY") %>% mutate(pred = ntile(iv30d, 5))
+    df_gex <- ORATS_GEX$SPX %>%  mutate(pred = ntile(-GEX_vl, 5))
+    joined <- inner_join(trades, df_ticker, by=c("entry_date" = "tradeDate"))
+    joined %>% ggplot(aes(pred %>% jitter, final_pnl_pct_notional)) + geom_point(alpha=0.5)
+    joined %>% group_by(pred) %>% reframe(M = median(final_pnl_pct_notional, na.rm=T), S = mad(final_pnl_pct_notional, na.rm=T)/sqrt(n())) %>% 
+        ggplot(aes(x = pred, y = M, ymin = M - S*2, ymax = M + S*2)) + geom_errorbar(width=0.2) + geom_point(aes(y=M))
+    joined %>% dplyr::select(entry_date, final_pnl, pred) %>% pivot_longer(c(-entry_date, -final_pnl)) %>% 
+        group_by(value = factor(value)) %>% reframe(tradeDate = entry_date,  eq = cumsum(replace_na(final_pnl,0))) %>% 
+        ggplot(aes(tradeDate, eq, color=value, group=factor(value))) + geom_line(size=2) + scale_color_colorblind()
+    joined %>% dplyr::select(entry_date, final_pnl, pred) %>% pivot_longer(c(-entry_date, -final_pnl)) %>% 
+        group_by(value = factor(value)) %>% reframe(M = mean(final_pnl, na.rm=T) / sd(final_pnl, na.rm=T)* 16)
 }
 
 # ORATS *api data* single stock playing with (SPY as example)
@@ -895,45 +918,6 @@ source("/home/marco/trading/Systems/Options//OptionsCommon.R")
         matplot2(cbind(z$straRetM1 %>% cumsum, z$profit_pct_cum %>% cumsum))
     }
     
-}
-
-
-# Clustering
-{
-    # Returns, the hard way
-    library(dbscan)
-    library(Rtsne)
-    PC <- 10 # The number of PCA factor to use, keep it low to avoid overfitting
-    EPS <- 1 # Play with this to get the number of pairs you want  
-    good_symbols -> ... # all non NA containing symbols
-    Returns <- stocks %>% filter(Symbol %in% good_symbols & between(Date, "2023-01-01", "2024-01-01")) %>% select(Date, Symbol, ReturnPrice) %>% pivot_wider(names_from = Symbol, values_from = ReturnPrice) %>% arrange(Date) 
-    pca <- prcomp( Returns[,-1] %>%  t, center = TRUE, scale. = TRUE) # run PCA
-    X <- pca$x[,1:PC]; # Extract PCA factors
-    rtsne <- Rtsne(X, check_duplicates = TRUE)$Y # Run t-SNE, some people say it is bad and you should only use PCA factors, I don't know
-    optic_res <- optics(rtsne, minPts = 2) # Run optics, this is the pre-clustering
-    Clusters <- extractDBSCAN(optic_res, eps_cl = 1) # Run DBscan clustering
-    hullplot(rtsne, Clusters) # visualize clusters
-    clusters <- data.frame(Symbol = good_symbols[-1], Cluster = Clusters$cluster)
-    # Returns,the easy way
-    a <- lapply(Price_data_stocks, function(df) select(df, Date, ReturnPrice))
-    names(a) <- names(Price_data_stocks)
-    b <- Reduce(function(...) full_join(..., by = "Date"), a) %>% arrange(Date)
-    z <- cor(b[,-1], use="pairwise.complete.obs")
-    rownames(z) <- names(Price_data_stocks)
-    colnames(z) <- names(Price_data_stocks)
-    z[is.na(z)] <- 0 # careful
-    d <- as.dist(1 - z)
-    tree <- hclust(d, method="complete")
-    dend <- as.dendrogram(tree)
-    clusters <- cutree(dend, k=50)
-    # IV returns from ORATS
-    df <- ORATS_core %>% select(ticker, tradeDate, iv30d) %>% arrange(ticker, tradeDate)  %>% 
-        filter(year(tradeDate)>=2020) %>% na.omit %>% group_by(ticker) %>% 
-        arrange(tradeDate) %>%  mutate(ivRet = c(0, diff(log(iv30d)))) %>% ungroup %>% select(-iv30d)
-    df_wide <- df %>% pivot_wider(id_cols = tradeDate, names_from = ticker, values_from = ivRet)
-    df_matrix <- df_wide[,-1] %>% as.matrix; df_matrix[is.infinite(df_matrix)] <- 0
-    ORATS_IV_cor_matrix <- cor(df_matrix, use="pairwise.complete.obs")
-    # ...
 }
 
 

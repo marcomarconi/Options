@@ -1,106 +1,1777 @@
-Symbol,Name,Latest,"Wkly Opts","Options Vol","Total OI"
-AGQ,"Ultra Silver 2X ETF",112.22,Yes,7547,112989
-AMDL,"GraniteShares 2X Long AMD Daily ETF",68.2,Yes,10891,84292
-ARKG,"Ark Genomic Revolution ETF",34.75,Yes,2707,194826
-ARKK,"Ark Innovation ETF",81.26,Yes,37219,678520
-ASHR,"Xt Harvest CSI 300 China A-Shares ETF",35.48,Yes,10428,818649
-BITO,"Proshares Bitcoin Strategy ETF",9.74,Yes,12367,262472
-BITX,"Volatility 2X Bitcoin Strategy ETF",15.81,Yes,19711,204672
-BKLN,"Invesco Senior Loan ETF",20.51,Yes,576,469827
-BNO,"US Brent Oil",52.49,Yes,59940,338922
-BOIL,"Ultra Bloomberg Natural Gas 2X ETF",28.1,Yes,6991,131552
-COPX,"GX Copper Miners ETF",90.06,Yes,13947,314873
-DIA,"Dow Industrials SPDR",511.44,Yes,41858,617309
-DPST,"Direxion Daily Regional Banks Bull 3X ETF",108.12,Yes,2766,30307
-DRAM,"Roundhill Memory ETF",68,Yes,264599,1087340
-EEM,"Emrg Mkts Ishares MSCI ETF",70.08,Yes,85821,6016770
-EFA,"EAFE Ishares MSCI ETF",104.44,Yes,26706,1456165
-ETH,"Grayscale Ethereum Staking Mini ETF",19.01,Yes,1447,35137
-ETHA,"Ishares Ethereum Trust ETF",15.11,Yes,102996,1395003
-ETHE,"Grayscale Ethereum Staking ETF",16.21,Yes,445,53425
-ETHU,"Volatility Shares 2X Ether ETF",19.45,Yes,7681,89472
-EWJ,"Japan Ishares MSCI ETF",92.93,Yes,2324,122048
-EWY,"South Korea Ishares MSCI ETF",216.7,Yes,144988,1055562
-EWZ,"Brazil Ishares MSCI ETF",35.67,Yes,98388,4978480
-FAS,"Financial Bull 3X ETF",130.76,Yes,4299,51260
-FBTC,"Fidelity Wise Origin Bitcoin Fund",62.2,Yes,3269,121815
-FEZ,"Euro Stoxx 50 ETF SPDR",67.93,Yes,11284,133899
-FXI,"China Largecap Ishares ETF",35.34,Yes,63050,4394941
-GBTC,"Grayscale Bitcoin Trust ETF",55.48,Yes,4027,53020
-GDX,"Vaneck Gold Miners ETF",86.68,Yes,75273,1942072
-GDXJ,"Vaneck Junior Gold Miners ETF",114.95,Yes,6524,161973
-GLD,"Gold SPDR",411.26,Yes,193663,4668184
-HYG,"High Yield Corp Bond Ishares Iboxx $ ETF",79.84,Yes,295220,8245265
-IAU,"Gold Trust Ishares",84.27,Yes,8643,140293
-IBIT,"Ishares Bitcoin Trust ETF",40.49,Yes,543704,6251103
-ICLN,"Global Clean Energy Ishares ETF",23.04,Yes,2042,52535
-IEF,"7-10 Year Treasury Bond Ishares ETF",94.17,Yes,6066,795857
-IGV,"North American Tech-Software Ishares ETF",107.7,Yes,338499,1789821
-IVV,"S&P 500 Ishares Core ETF",762.02,Yes,374,20670
-IWM,"Russell 2000 Ishares ETF",288.98,Yes,1626400,10228772
-IYR,"US Real Estate Ishares ETF",99.6,Yes,4647,164478
-JETS,"US Global Jets ETF",28.93,Yes,12006,261831
-KOLD,"Ultrashort Bloomberg Natural Gas -2X ETF",22.92,Yes,7286,61987
-KRE,"S&P Regional Banking ETF SPDR",68.31,Yes,28030,1979271
-KWEB,"KS CSI China Internet ETF",27.36,Yes,92954,3477287
-LABD,"Direxion Daily S&P Biotech Bear 3X ETF",13.62,Yes,1590,24964
-LABU,"Direxion Daily S&P Biotech Bull 3X ETF",181.67,Yes,4371,23870
-LQD,"Invst Grade Corp Bond Ishares Iboxx $ ETF",108.93,Yes,33495,1549514
-MAGS,"Roundhill Magnificent Seven ETF",69.86,Yes,4245,68286
-METU,"Direxion Daily META Bull 2X ETF",23.7,Yes,19467,46022
-MSOS,"Advisorshares Pure US Cannabis ETF",5.11,Yes,26025,578846
-MSTU,"T-Rex 2X Long Mstr Daily Target ETF",5.41,Yes,22516,243150
-MSTX,"Defiance Daily Target 1.75X Long Mstr ETF",24.74,Yes,4465,182048
-MSTZ,"T-Rex 2X Inverse Mstr Daily Target ETF",6.76,Yes,821,27751
-NAIL,"Direxion Daily Homebuilders Bull 3X ETF",38.42,Yes,5888,61179
-NUGT,"Direxion Daily Gold Miners Bull 2X ETF",160.59,Yes,3663,28366
-NVDL,"GraniteShares 2X Long NVDA Daily ETF",115.38,Yes,29444,160000
-NVDX,"T-Rex 2X Long Nvidia Daily Target ETF",21.91,Yes,9203,63508
-QQQ,"Invesco QQQ Trust Series 1",742.74,Yes,5824573,10948838
-RSP,"Invesco S&P 500 E.W. ETF",209.21,Yes,8464,289347
-SCHD,"Schwab US Dividend Equity ETF",32.18,Yes,4828,125063
-SCO,"Ultrashort Bloomberg Crude Oil -2X ETF",26.09,Yes,17228,334988
-SILJ,"Amplify Junior Silver Miners ETF",30.5,Yes,9382,560827
-SLV,"Silver Trust Ishares",67.67,Yes,351357,7709906
-SMH,"Vaneck Semiconductor ETF",607.81,Yes,131188,2271969
-SOXL,"Direxion Daily Semiconductor Bull 3X ETF",227.03,Yes,125265,864106
-SOXS,"Direxion Daily Semiconductor Bear 3X ETF",6.26,Yes,178463,876160
-SOXX,"Semiconductor Ishares ETF",571.93,Yes,29538,306742
-SPXL,"Direxion Daily S&P 500 Bull 3X ETF",286.86,Yes,2876,53537
-SPXS,"Direxion Daily S&P 500 Bear 3X ETF",25.72,Yes,15358,218248
-SPXU,"Ultrapro Short S&P500 -3X ETF",36.09,Yes,4621,92126
-SPY,"SPDR S&P 500 ETF Trust",758.54,Yes,9135935,17558792
-SQQQ,"Ultrapro Short QQQ -3X ETF",37.42,Yes,61156,440407
-SSO,"Ultra S&P500 2X ETF",69.78,Yes,2705,31131
-SVIX,"vs TR Short VIX -1X Futures ETF",21.9,Yes,6618,102766
-TLT,"20+ Year Treas Bond Ishares ETF",85.47,Yes,431916,8850938
-TMF,"Direxion Daily 20-Yr Treasury Bull 3X Shrs ETF",35,Yes,15136,252141
-TNA,"Small Cap Bull 3X ETF",67.74,Yes,26736,148833
-TQQQ,"Ultrapro QQQ 3X ETF",86.04,Yes,258612,1224718
-TSLL,"Direxion Daily Tsla Bull 2X ETF",14.47,Yes,141586,889323
-TZA,"Small Cap Bear -3X ETF",4.39,Yes,11572,192777
-UNG,"US Natural Gas Fund",11.54,Yes,30264,304844
-UPRO,"Ultrapro S&P 500 3X ETF",150.29,Yes,8419,83646
-URA,"GX Uranium ETF",50.54,Yes,13529,342162
-USO,"US Oil Fund",135.5,Yes,244501,1706955
-UVIX,"vs TR 2X Long VIX Futures ETF",4.02,Yes,46371,358173
-UVXY,"Ultra VIX Short-Term 2X Futures ETF",29.95,Yes,28961,243143
-VOO,"S&P 500 ETF Vanguard",697.3,Yes,7358,94227
-VXUS,"Total Intl Stock ETF Vanguard",86.31,Yes,710,12222
-VXX,"Ipath.B S&P 500 VIX Short-Term Futures ETN",24.78,Yes,38565,296053
-XBI,"S&P Biotech SPDR",133.62,Yes,11923,573182
-XHB,"S&P Homebuilders SPDR",103.23,Yes,9648,172195
-XLB,"S&P 500 Materials Sector SPDR",50.92,Yes,3042,676356
-XLC,"S&P 500 Communication Sector SPDR",115.61,Yes,423,266478
-XLE,"S&P 500 Energy Sector SPDR",57.3,Yes,358617,5075093
-XLF,"S&P 500 Financials Sector SPDR",51.43,Yes,124657,6375002
-XLI,"S&P 500 Industrial Sector SPDR",172.4,Yes,5403,641866
-XLK,"S&P 500 Technology Sector SPDR",195.76,Yes,107106,844577
-XLP,"S&P 500 Cons Staples Sector SPDR",82.03,Yes,22439,755513
-XLU,"S&P 500 Utilities Sector SPDR",43.1,Yes,61123,1929974
-XLV,"S&P 500 Healthcare Sector SPDR",147.84,Yes,13102,594660
-XLY,"S&P 500 Cons Disc Sector SPDR",118.19,Yes,21544,511850
-XOP,"S&P Oil & Gas Expl & Prod SPDR",167.87,Yes,9392,456232
-XRT,"S&P Retail SPDR",83.32,Yes,10489,211382
-YINN,"Direxion Daily FTSE China Bull 3X ETF",30.24,Yes,7682,68650
-ZSL,"Ultrashort Silver -2X ETF",20.55,Yes,2268,103843
+Symbol,Name,Latest,Wkly Opts,Options Vol,Total OI,Asset Class
+AAAU,GS Physical Gold ETF,41.57,No,68,5560,Commodity
+AAOX,Tradr 2X Long Aaoi Daily ETF,39.99,No,8115,30202,Equity
+AAPB,GraniteShares 2X Long AAPL Daily ETF,36.48,No,15,431,Equity
+AAPD,Direxion Daily AAPL Bear 1X ETF,11.88,No,44,679,Equity
+AAPU,Direxion Daily AAPL Bull 2X ETF,37.56,No,725,19903,Equity
+AAPW,Roundhill AAPL Weeklypay ETF,39.01,No,125,301,Equity
+AAPX,T-Rex 2X Long Apple Daily Target ETF,33.96,No,3,169,Equity
+AAPY,Kurv Yield Premium Apple [Aapl] ETF,25.5595,No,1,11,Equity
+AAXJ,Ishares MSCI All Country Asia Ex Japan ETF,123.3,No,16,1211,Equity
+ABFL,Abacus Fcf Leaders ETF,83.53,No,N/A,N/A,Equity
+ABNG,Leverage Shares 2X Long Abnb Daily ETF,17.94,No,2,18,Equity
+ACES,Alps Clean Energy ETF,36.94,No,N/A,N/A,Equity
+ACIO,Aptus Collared Income Opportunity ETF,46.46,No,N/A,N/A,Portfolio-Multi Asset
+ACWI,Ishares MSCI ACWI ETF,157.74,No,5044,15002,Equity
+ACWV,Ishares MSCI Global Min Vol Factor ETF,119.29,No,1,34,Portfolio-Multi Asset
+ACWX,Ishares MSCI ACWI Ex U.S. ETF,77.1,No,34,2440,Equity
+ADBG,Leverage Shares 2X Long ADBE Daily ETF,2.73,No,567,17064,Equity
+AETH,Bitwise Ethereum Strategy ETF,32.6538,No,N/A,N/A,Currency
+AFK,Vaneck Africa Index ETF,26.5621,No,1,318,Equity
+AFRU,T-Rex 2X Long Afrm Daily Target ETF,11.0135,No,11,307,Equity
+AGG,US Aggregate Bond Ishares Core ETF,98.9,No,208,9457,Fixed Income
+AGGY,Wisdomtree Yield Enhd U.S. Agg Bond Fund,43.6,No,N/A,N/A,Fixed Income
+AGIX,Kraneshares Artificial Intelligence & Technology,47.52,No,203,4965,Equity
+AGNG,GX Aging Population ETF,34.47,No,N/A,N/A,Equity
+AGQ,Ultra Silver 2X ETF,84.95,Yes,11690,117521,Commodity
+AIA,Asia 50 Ishares ETF,149.16,No,31,441,Equity
+AIBU,Direxion Daily AI Data Bull 2X ETF,66.2596,No,1,121,Equity
+AIFD,Tcw Artificial Intelligence ETF,55.2,No,24,195,Equity
+AIPI,Rex AI Equity Premium Income ETF,37.53,No,49,601,Portfolio-Multi Asset
+AIQ,GX Artificial Intelligence & Tech ETF,66.8,No,1219,23915,Equity
+AIRR,FT Rba American Industrial Renaissance ETF,130.9,No,48,1753,Portfolio-Multi Asset
+AIS,Vistashares Artificial Intelligence Supercycle E,85.57,No,366,2800,Equity
+AIVC,Amplify Bloomberg AI Value Chain ETF,118.11,No,2,79,Equity
+AIVI,Wisdomtree International Dividend Top 100 Fund,57.8801,No,N/A,N/A,Equity
+AIVL,Wisdomtree U.S. Dividend Ex-Financials Fund,128.8783,No,N/A,N/A,Equity
+AIYY,Yieldmax AI Option Income Strategy ETF,9.28,No,17,435,Portfolio-Multi Asset
+ALBG,Leverage Shares 2X Long Alb Daily ETF,10.72,No,1,61,Equity
+ALLW,SPDR Bridgewater All Weather ETF,29.61,No,2,1805,Equity
+ALTL,Pacer Lunt Large Cap Alternator ETF,51.0519,No,N/A,N/A,Equity
+AMDD,Direxion Daily AMD Bear 1X ETF,2.91,No,179,9127,Equity
+AMDG,Leverage Shares 2X Long AMD Daily ETF,122.44,No,37,603,Equity
+AMDL,GraniteShares 2X Long AMD Daily ETF,71.82,Yes,6373,86989,Equity
+AMDW,Roundhill AMD Weeklypay ETF,109.17,No,55,1227,Equity
+AMDY,Yieldmax AMD Option Income Strategy ETF,55.55,No,149,1866,Equity
+AMLP,Alps Alerian MLP ETF,50.67,No,1537,16473,Equity
+AMOM,Qraft Ai-Enhanced U.S. Large Cap Momentum ETF,62.9684,No,1,1,Equity
+AMYY,GraniteShares YieldBoost AMD ETF,15.76,No,1,79,Equity
+AMZA,Infracap MLP ETF,45.5,No,33,566,Equity
+AMZD,Direxion Daily AMZN Bear 1X ETF,9.31,No,8,1539,Equity
+AMZO,Tradr 2X Short AMZN Daily ETF,17.48,No,2,54,Equity
+AMZP,Kurv Yield Premium Amazon [Amzn] ETF,26.532,No,2,88,Equity
+AMZU,Direxion Daily AMZN Bull 2X ETF,35.43,No,2973,36452,Equity
+AMZW,Roundhill AMZN Weeklypay ETF,37.42,No,5,188,Equity
+AMZY,Yieldmax AMZN Option Income Strategy ETF,10.98,No,30,1463,Equity
+AMZZ,GraniteShares 2X Long AMZN Daily ETF,32.6,No,86,3196,Equity
+ANGL,Vaneck Fallen Angel High Yield Bond ETF,29.18,No,N/A,N/A,Fixed Income
+AOA,Aggressive Allocation Ishares Core ETF,98.22,No,1,7,Portfolio-Multi Asset
+APHU,T-Rex 2X Long Aph Daily Target ETF,27.1798,No,9,37,Equity
+APLX,Tradr 2X Long Apld Daily ETF,32.43,No,755,12314,Equity
+APLY,Yieldmax AAPL Option Income Strategy ETF,12,No,9,677,Equity
+APLZ,Tradr 2X Short Apld Daily ETF,12.65,No,1,739,Equity
+APPX,Tradr 2X Long App Daily ETF,33.95,No,367,12306,Equity
+AQWA,GX Clean Water ETF,19.15,No,211,54,Equity
+ARCX,Tradr 2X Long Achr Daily ETF,15.1101,No,6,294,Equity
+ARGT,GX MSCI Argentina ETF,97.1,No,41,6128,Equity
+ARKB,Ark 21Shares Bitcoin ETF,20.88,No,895,17702,Currency
+ARKF,Ark Fintech Innovation ETF,40.03,No,81,2429,Equity
+ARKG,Ark Genomic Revolution ETF,36.86,Yes,3237,226208,Portfolio-Multi Asset
+ARKK,Ark Innovation ETF,80.19,Yes,85464,839270,Portfolio-Multi Asset
+ARKQ,Ark Autonomous Tech & Robotics ETF,133.17,No,91,6024,Portfolio-Multi Asset
+ARKW,Ark Next Generation Internet ETF,146.63,No,39,4560,Equity
+ARKX,Ark Space Exploration & Innovation ETF,34.56,No,2385,24994,Equity
+ARMG,Leverage Shares 2X Long Arm Daily ETF,62.49,No,1020,10266,Equity
+ARMH,Arm Holdings Plc Adrhedged,187.0692,No,2,25,Equity
+ARMW,Roundhill Arm Weeklypay ETF,99.07,No,24,102,Equity
+ARTY,Ishares Robotics and Artificial Intelligence ETF,78.9,No,261,2419,Equity
+ASEA,GX FTSE Southeast Asia ETF,20.442,No,3,49,Equity
+ASHR,Xt Harvest CSI 300 China A-Shares ETF,36.34,Yes,19401,843384,Portfolio-Multi Asset
+ASHS,Xt Harvest CSI 500 China A-Shares Small Cap ETF,46.72,No,107,5255,Portfolio-Multi Asset
+ASMG,Leverage Shares 2X Long ASML Daily ETF,62.54,No,184,1988,Equity
+ASMH,ASML Holding NV Adrhedged,131.6147,No,7,61,Equity
+ASTX,Tradr 2X Long Asts Daily ETF,24.265,No,10113,43131,Equity
+AVDE,Avantis International Equity ETF,90.25,No,N/A,N/A,Equity
+AVDV,Avantis International Small Cap Value ETF,106.72,No,1,599,Equity
+AVEM,Avantis Emerging Markets Equity ETF,99.71,No,9,77,Equity
+AVGE,Avantis All Equity Markets ETF,99.29,No,1,1,Equity
+AVGG,Leverage 2X Long AVGO Daily ETF,32.43,No,389,5286,Equity
+AVGV,Avantis All Equity Markets Value ETF,85.41,No,N/A,N/A,Equity
+AVGW,Roundhill AVGO Weeklypay ETF,45.07,No,24,484,Equity
+AVGX,Defiance Daily Target 2X Long AVGO ETF,55.62,No,4676,20494,Equity
+AVL,Direxion Daily AVGO Bull 2X ETF,52.89,No,1689,12104,Equity
+AVLC,Avantis U.S. Large Cap Equity ETF,89.66,No,N/A,N/A,Equity
+AVLV,Avantis U.S. Large Cap Value ETF,90.95,No,1,3,Equity
+AVMC,Avantis U.S. Mid Cap Equity ETF,79.23,No,N/A,N/A,Equity
+AVMV,Avantis U.S. Mid Cap Value ETF,79.81,No,1,0,Equity
+AVRE,Avantis Real Estate ETF,46.74,No,10,18,Alternative
+AVSC,Avantis U.S Small Cap Equity ETF,70.95,No,N/A,N/A,Equity
+AVSU,Avantis Responsible U.S. Equity ETF,87.975,No,N/A,N/A,Equity
+AVUS,Avantis U.S. Equity ETF,127.64,No,N/A,N/A,Equity
+AVUV,Avantis U.S. Small Cap Value ETF,122,No,21,1797,Equity
+AWAY,Amplify Travel Tech ETF,18.013,No,31,83,Equity
+AXTX,Tradr 2X Long Axti Daily ETF,21.41,No,984,4479,Equity
+BABO,Yieldmax BABA Option Income Strategy,8.14,No,3,265,Equity
+BABW,Roundhill BABA Weeklypay ETF,21.8653,No,N/A,N/A,Equity
+BABX,GraniteShares 2X Long BABA Daily ETF,17.32,No,265,5296,Equity
+BAGY,Amplify Bitcoin Max Income Covered Call ETF,23.7414,No,1,7,Currency
+BAI,Ishares A.I. Innovation and Tech Active ETF,53.2,No,125,1333,Equity
+BAIG,Leverage Shares 2X Long Bbai Daily ETF,29.77,No,11,748,Equity
+BALI,Blackrock Advantage Large Cap Income ETF,33.74,No,1,21,Equity
+BATT,Amplify Lithium & Battery Technology ETF,16.57,No,72,2946,Equity
+BBC,Virtus Lifesci Biotech Clinical Trials ETF,45.47,No,14,148,Portfolio-Multi Asset
+BBCA,JPM Betabuilders Canada ETF,100.06,No,6,30,Equity
+BBEU,JPM Betabuilders Europe ETF,78.46,No,N/A,N/A,Equity
+BBH,Vaneck Biotech ETF,187.64,No,2,352,Equity
+BBJP,JPM Betabuilders Japan ETF,77.94,No,1,29,Equity
+BCD,All Commodity Longer Dated Strategy K-1 Free ETF,35.02,No,N/A,N/A,Commodity
+BCI,All Commodity Strategy K-1 Free ETF,22.94,No,56,479,Commodity
+BDRY,Breakwave Dry Bulk Shipping ETF,11.57,No,13,3054,Equity
+BEG,Leverage Shares 2X Long BE Daily ETF,107.47,No,432,2020,Equity
+BETZ,Roundhill Sports Betting & Igaming ETF,19.47,No,15,302,Equity
+BEX,Tradr 2X Long BE Daily ETF,76.58,No,885,5444,Currency
+BEZ,Tradr 2X Short BE Daily ETF,11.41,No,89,671,Equity
+BFOR,Barron's 400 ETF,93.0419,No,50,79,Portfolio-Multi Asset
+BIB,Ultra Nasdaq Biotechnology 2X ETF,85.02,No,3,182,Equity
+BIBL,Inspire 100 ETF,56.27,No,10,10,Equity
+BIDG,Leverage Shares 2X Long Bidu Daily ETF,10.96,No,2,73,Equity
+BIGY,Yieldmax Target 12 Big 50 Option Income ETF,52.3661,No,18,29,Equity
+BIL,BBG 1-3 Month T-Bill SPDR ETF,91.57,No,48,2976,Fixed Income
+BILS,BBG 3-12 Month T-Bill SPDR ETF,99.3,No,1,283,Fixed Income
+BIS,Ultrashort Nasdaq Biotechnology -2X ETF,16.33,No,3,22,Equity
+BITB,Bitwise Bitcoin ETF,34.13,No,700,12989,Currency
+BITI,Proshares Short Bitcoin Strategy -1X ETF,27.17,No,1592,16075,Currency
+BITO,Proshares Bitcoin Strategy ETF,8.56,Yes,16829,310726,Currency
+BITQ,Bitwise Crypto Industry Innovators ETF,27.87,No,89,613,Equity
+BITS,GX Blockchain & Bitcoin Strategy ETF,63.7,No,1,37,Alternative
+BITU,Proshares Ultra Bitcoin ETF,9.38,No,603,16404,Currency
+BITX,Volatility 2X Bitcoin Strategy ETF,11.96,Yes,14118,238079,Currency
+BITY,Amplify Bitcoin 2% Monthly Option Income ETF,26.1993,No,N/A,N/A,Currency
+BIV,Interm Term Bond ETF Vanguard,76.53,No,39,152,Fixed Income
+BIZD,Vaneck Bdc Income ETF,12.36,No,1210,40212,Equity
+BKCH,GX Blockchain ETF,87.4,No,9,608,Equity
+BKF,Ishares MSCI Bic ETF,39.73,No,4,185,Equity
+BKLN,Invesco Senior Loan ETF,20.46,Yes,5491,490080,Fixed Income
+BLCN,Siren Nasdaq Nexgen Economy ETF,26.7,No,2,89,Equity
+BLOK,Amplify Transformational Data Sharing ETF,66.78,No,41,1287,Equity
+BLSG,Leverage Shares 2X Long Blsh Daily ETF,1.84,No,51,135,Alternative
+BLV,Long Term Bond Index ETF Vanguard,69.09,No,7,858,Fixed Income
+BMNG,Leverage Shares 2X Long Bmnr Daily ETF,13.75,No,26,6530,Alternative
+BMNU,T-Rex 2X Long Bmnr Daily Target ETF,1,No,3881,232778,Equity
+BND,Total Bond Market ETF Vanguard,73.34,No,93,2499,Fixed Income
+BNDD,Quadratic Deflation ETF,101.2251,No,1,6,Fixed Income
+BNDW,Total World Bond Vanguard ETF,68.41,No,1,90,Fixed Income
+BNDX,Total Intl Bond ETF Vanguard,48.35,No,188,983,Fixed Income
+BNO,US Brent Oil,43.88,Yes,23991,482728,Commodity
+BOAT,Sonicshares Global Shipping ETF,40.89,No,60,307,Equity
+BOIL,Ultra Bloomberg Natural Gas 2X ETF,28.31,Yes,5952,127020,Commodity
+BOND,Pimco Active Bond ETF,92.05,No,3,172,Fixed Income
+BOTZ,GX Robotics & Artificial Intelligence ETF,38.37,No,509,19121,Equity
+BPRO,Bitwise Proficio Currency Debasement ETF,20.0077,No,2,32,Portfolio-Multi Asset
+BRF,Vaneck Brazil Smallcap ETF,16.1696,No,1,280,Equity
+BRKW,Roundhill BRKB Weeklypay ETF,39.024,No,1,36,Equity
+BRZU,Direxion Daily Brazil Bull 2X ETF,85.6452,No,695,7518,Portfolio-Multi Asset
+BSOL,Bitwise Solana Staking ETF,9.4,No,7170,46748,Currency
+BSV,Short-Term Bond ETF Vanguard,77.77,No,8,53,Fixed Income
+BSVO,Ea Bridgeway Omni Small-Cap Value ETF,28.23,No,1,6,Equity
+BTAL,US Anti-Beta Fund Mkt Neutral Quantshares,10.96,No,12,496,Equity
+BTC,Grayscale Bitcoin Mini Trust ETF,27.84,No,1181,34408,Currency
+BTCI,Neos Bitcoin High Income ETF,28.67,No,609,8353,Currency
+BTCL,T-Rex 2X Long Bitcoin Daily Target ETF,12.28,No,16,993,Currency
+BTCO,Invesco Galaxy Bitcoin ETF,62.64,No,6,288,Currency
+BTCW,Wisdomtree Bitcoin Fund,66.55,No,24,142,Currency
+BTCZ,T-Rex 2X Inverse Bitcoin Daily Target ETF,5.88,No,226,3259,Currency
+BTF,Valkyrie Bitcoin Strategy ETF,16.46,No,1,671,Currency
+BTGD,Stkd Bitcoin & Gold ETF,21.85,No,1,197,Portfolio-Multi Asset
+BUCK,Simplify Stable Income ETF,23.52,No,30,28,Fixed Income
+BUG,GX Cybersecurity ETF,33.89,No,3026,36022,Equity
+BULG,Leverage Shares 2X Long Bull Daily ETF,38.81,No,8,1049,Equity
+BUZZ,Vaneck Social Sentiment ETF,38,No,11,451,Equity
+BWET,Breakwave Tanker Shipping ETF,211.96,No,109,3650,Commodity
+BWX,BBG International Treasury Bond SPDR ETF,21.82,No,N/A,N/A,Fixed Income
+BZQ,Ultrashort MSCI Brazil Capped -2X ETF,24.5198,No,1,403,Equity
+CAIE,Calamos Autocallable Income ETF,27.19,No,6,1186,Equity
+CALF,Pacer US Small Cap Cash Cows 100 ETF,49.2,No,2,167,Fixed Income
+CANE,Teucrium Sugar,9.35,No,2863,99913,Commodity
+CARZ,FT S-Network Future Vehicles & Technology ETF,119.94,No,10,12,Equity
+CATH,GX S&P 500 Catholic Values ETF,89.32,No,N/A,N/A,Equity
+CBRX,Tradr 2X Long Cbrs Daily ETF,21.36,No,11,61,Equity
+CBRZ,Tradr 2X Short Cbrs Daily ETF,20,No,9,2,Equity
+CCUP,T-Rex 2X Long Crcl Daily Target ETF,2.58,No,97,3835,Equity
+CDC,Victory US Eqty Income Ehnd Vol Wtd ETF,73,No,N/A,N/A,Portfolio-Multi Asset
+CEGX,Tradr 2X Long Ceg Daily ETF,14.31,No,541,2431,Equity
+CEMB,JPM EM Corporate Bond ETF,45.74,No,N/A,N/A,Fixed Income
+CEPI,Rex Crypto Equity Premium Income ETF,35.08,No,1,135,Equity
+CERY,BBG Enhanced Roll Yield Commodity Strategy No K-,34.36,No,N/A,N/A,Commodity
+CEW,Wisdomtree Emerging Currency Strategy Fund,19.429,No,2,37,Portfolio-Multi Asset
+CFA,Victory US 500 Vol ETF,97.38,No,N/A,N/A,Portfolio-Multi Asset
+CGDV,Capital Dividend Value ETF,48.99,No,7,181,Equity
+CGGR,Capital Growth ETF,46.96,No,6,31,Equity
+CGUS,Capital Core Equity ETF,44.31,No,N/A,N/A,Equity
+CGW,Invesco S&P Global Water Index ETF,63.51,No,5,146,Equity
+CHAT,Roundhill Generative AI & Technology ETF,102.34,No,850,8093,Equity
+CHAU,Direxion Daily CSI 300 China A Bull 2X ETF,24.75,No,308,8981,Portfolio-Multi Asset
+CHIQ,GX MSCI China Consumer Discretionary ETF,16.87,No,1,340,Equity
+CHPS,Xt Semiconductor Select Equity ETF,104.56,No,42,137,Equity
+CHPX,GX AI Semiconductor & Quantum ETF,109.27,No,65,285,Equity
+CIBR,FT Nasdaq Cybersecurity ETF,84.54,No,824,14611,Portfolio-Multi Asset
+CIFG,Leverage Shares 2X Long Cifr Daily ETF,19.68,No,31,746,Equity
+CIFU,T-Rex 2X Long Cifr Daily Target ETF,47.8,No,125,1147,Equity
+CLOU,GX Cloud Computing ETF,21.75,No,23,1524,Equity
+CLSX,Tradr 2X Long Clsk Daily ETF,29.53,No,60,1104,Equity
+CMDY,Bberg Roll Select cmdty Strategy Ishares ETF,56.86,No,15,90,Commodity
+CMGG,Leverage Shares 2X Long Cmg Daily ETF,13.8,No,7,80,Equity
+CNBS,Amplify Seymour Cannabis ETF,29.0293,No,45,747,Equity
+CNCG,Leverage Shares 2X Long Cnc Daily ETF,30.07,No,6,27,Equity
+CNXT,Vaneck Chinaamc Sme-Chnext ETF,60.54,No,379,4035,Portfolio-Multi Asset
+CNYA,Ishares MSCI China A ETF,37.77,No,8,185,Equity
+COAL,Global Coal Index ETF,24.34,No,39,4415,Equity
+COHX,Tradr 2X Long Cohr Daily ETF,56.5,No,421,3945,Equity
+COIG,Leverage Shares 2X Long COIN Daily ETF,5.3,No,27,297,Equity
+COIW,Roundhill COIN Weeklypay ETF,9.54,No,25,812,Equity
+COLO,GX MSCI Colombia ETF,44.06,No,1556,36346,Equity
+COM,Auspice Broad Commodity Strategy ETF,33.15,No,N/A,N/A,Commodity
+COMB,GraniteShares Commodity Broad No K-1 ETF,24.74,No,5,51,Commodity
+COMT,Commodities Select Strategy Ishares ETF,31.37,No,2,125,Portfolio-Multi Asset
+CONI,GraniteShares -2X Short COIN Daily ETF,52.82,No,50,972,Equity
+CONL,GraniteShares 2X Long COIN Daily ETF,5.4,No,13327,145354,Equity
+CONY,Yieldmax COIN Option Income Strategy ETF,21.01,No,277,8190,Equity
+COPJ,Sprott Junior Copper Miners ETF,42.5,No,182,4140,Equity
+COPP,Sprott Copper Miners ETF,42.06,No,49,2118,Equity
+COPX,GX Copper Miners ETF,85.48,Yes,6815,348987,Equity
+CORD,T-Rex 2X Inverse CRWV Daily Target ETF,4.04,No,243,1878,Equity
+CORN,Teucrium Corn,16.95,No,2178,262262,Commodity
+CORO,Ishares International Country Rotation Active Et,37.19,No,3,21,Equity
+COSW,Roundhill Cost Weeklypay ETF,41.5026,No,2,52,Equity
+COWG,Pacer US Large Cap Cash Cows Growth Leaders ETF,38.87,No,N/A,N/A,Equity
+COWS,Amplify Cash Flow Dividend Leaders ETF,36.08,No,N/A,N/A,Equity
+COWZ,Pacer US Cash Cows 100 ETF,61.8,No,1,276,Fixed Income
+COYY,GraniteShares YieldBoost COIN ETF,19.13,No,3,2091,Equity
+COZX,Tradr 2X Long Corz Daily ETF,29.4,No,3,105,Equity
+CPER,US Copper,38.86,No,5361,113592,Commodity
+CPII,Ionic Inflation Protection ETF,19.11,No,N/A,N/A,Fixed Income
+CPNX,Tradr 2X Long Cpng Daily ETF,17.32,No,3,11,Equity
+CPXR,Uscf Daily Target 2X Copper Index ETF,31.031,No,70,663,Commodity
+CQQQ,Invesco China Technology ETF,55.08,No,259,9561,Equity
+CRAK,Vaneck Oil Refiners ETF,45.28,No,98,5601,Equity
+CRCD,T-Rex 2X Inverse Crcl Daily Target ETF,4.85,No,378,1071,Equity
+CRCG,Leverage Shares 2X Long Crcl Daily ETF,15.05,No,337,32783,Equity
+CRCO,Yieldmax Crcl Option Income Strategy ETF,16.55,No,6,343,Equity
+CRDU,Tradr 2X Long Crdo Daily ETF,99.41,No,512,6041,Equity
+CRMG,Leverage Shares 2X Long Crm Daily ETF,3.87,No,1358,10564,Equity
+CRMX,Tradr 2X Long Crml Daily ETF,13.91,No,46,1579,Equity
+CRPT,FT Skybridge Crypto Industry & Digital Economy E,13.49,No,4,467,Equity
+CRSH,Yieldmax Short Tsla Option Income Strategy ETF,21.1638,No,5,114,Equity
+CRWG,Leverage Shares 2X Long CRWV Daily ETF,45.58,No,582,23525,Equity
+CRWL,GraniteShares 2X Long Crwd Daily ETF,52.23,No,479,4328,Equity
+CRWU,T-Rex 2X Long CRWV Daily Target ETF,8.62,No,617,4107,Equity
+CSB,Victory US Smallcap HI Div Vol Wtd ETF,63.86,No,N/A,N/A,Portfolio-Multi Asset
+CSD,Invesco S&P Spin-Off ETF,146.26,No,1,36,Equity
+CSEX,Tradr 2X Long Cls Daily ETF,19.98,No,167,2573,Currency
+CTA,Simplify Managed Futures Strategy,27.2,No,93,1166,Equity
+CTEC,GX Cleantech ETF,68.73,No,18,4,Equity
+CURE,Direxion Daily Healthcare Bull 3X ETF,93.46,No,312,3886,Equity
+CUSD,Crossingbridge Ultra-Short Duration ETF,19.27,No,N/A,N/A,Equity
+CUT,Invesco MSCI Global Timber ETF,27.9685,No,3,195,Equity
+CVIE,Calvert International Responsible Index ETF,86.8,No,N/A,N/A,Equity
+CVLC,Calvert US Large-Cap Core Responsible Index ETF,94.49,No,N/A,N/A,Equity
+CVNY,Yieldmax Cvna Option Income Strategy ETF,22.034,No,6,151,Equity
+CVY,Invesco Zacks Multi-Asset Income ETF,28.9634,No,N/A,N/A,Equity
+CWB,BBG Convertible Securities SPDR ETF,110.58,No,156,4714,Fixed Income
+CWEB,Direxion Daily China Internet Index Bull 2X ETF,20.32,No,1562,24805,Equity
+CWI,ACWI Ex-US MSCI ETF SPDR,41.21,No,N/A,N/A,Equity
+CWVX,Tradr 2X Long CRWV Daily ETF,37.51,No,3004,17501,Equity
+DAPP,Vaneck Digital Transformation ETF,22.02,No,65,931,Equity
+DAT,Proshares Big Data Refiners ETF,40.4684,No,20,35,Equity
+DAX,GX DAX Germany ETF,45.37,No,42,839,Equity
+DBA,Invesco DB Agriculture Fund,26.63,No,1911,88678,Commodity
+DBB,Invesco DB Base Metals Fund,25.3,No,497,14785,Commodity
+DBC,Invesco DB Commodity Index Tracking Fund,27.63,No,1083,22964,Commodity
+DBE,Invesco DB Energy Fund,27.473,No,65,1067,Commodity
+DBEF,Xt MSCI EAFE Hedged Equity ETF,54.7,No,2,91,Equity
+DBEU,Xt MSCI Europe Hedged Equity ETF,53.53,No,N/A,N/A,Portfolio-Multi Asset
+DBJP,Xt MSCI Japan Hedged Equity ETF,117.2673,No,N/A,N/A,Equity
+DBMF,IM Dbi Managed Futures Strategy ETF,30.92,No,61,168,Equity
+DBO,Invesco DB Oil Fund,18.89,No,705,12213,Commodity
+DBP,Invesco DB Precious Metals Fund,98.3351,No,6,90,Commodity
+DCOR,Dimensional US Core Equity 1 ETF,81.97,No,N/A,N/A,Equity
+DDM,Ultra Dow30 2X ETF,63.9,No,62,2546,Equity
+DECO,SPDR Galaxy Digital Asset Ecosystem ETF,82.64,No,1,8,Equity
+DEEP,Deep Value ETF,41.7913,No,N/A,N/A,Equity
+DEM,Wisdomtree EM High Div Fund,55.69,No,20,292,Equity
+DES,Wisdomtree U.S. Smallcap Dividend Fund,39.47,No,1,33,Equity
+DESK,Vaneck Office and Commercial REIT ETF,40.0951,No,N/A,N/A,Equity
+DFAC,Dimensional U.S. Core Equity 2 ETF,44.2,No,358,765,Equity
+DFAR,Dimensional US Real Estate ETF,25.79,No,1,414,Alternative
+DFAS,Dimensional U.S. Small Cap ETF,80.35,No,8,26,Equity
+DFAT,Dimensional U.S. Targeted Value ETF,68.48,No,2,38,Equity
+DFAU,Dimensional US Core Equity Market ETF,51.75,No,N/A,N/A,Equity
+DFAX,Dimensional World Ex U.S. Core Equity 2 ETF,37.94,No,N/A,N/A,Equity
+DFE,Wisdomtree Europe Smallcap Dividend Fund,74.6278,No,5,30,Equity
+DFEN,Direxion Daily Aerospace & Defense Bull 3X ETF,77.23,No,594,6940,Equity
+DFGR,Dimensional Global Real Estate ETF,28.67,No,1,6,Equity
+DFIC,Dimensional Intl Core Equity 2 ETF,38.055,No,N/A,N/A,Portfolio-Multi Asset
+DFIP,Dimensional Inflation-Protected Securities ETF,41.7,No,N/A,N/A,Fixed Income
+DFIV,Dimensional International Value ETF,55.32,No,N/A,N/A,Equity
+DFJ,Wisdomtree Japan Smallcap Fund,107.41,No,N/A,N/A,Equity
+DFNL,Davis Select Financial ETF,47.94,No,N/A,N/A,Equity
+DFSV,Dimensional US Small Cap Value ETF,38.14,No,N/A,N/A,Equity
+DFUS,Dimensional U.S. Equity ETF,81.98,No,21,107,Equity
+DFUV,Dimensional US Marketwide Value ETF,54.62,No,N/A,N/A,Equity
+DGRO,Dividend Growth Ishares Core ETF,74.82,No,94,25973,Portfolio-Multi Asset
+DGRS,Wisdomtree US Smallcap Quality Dvid Fund,58,No,1,4,Portfolio-Multi Asset
+DGRW,Wisdomtree U.S. Quality Dividend Growth Fund,95.91,No,1,84,Portfolio-Multi Asset
+DGS,Wisdomtree Emerging Market Smallcap Fund,66.4683,No,5,92,Equity
+DGT,Global Dow ETF SPDR,186.9736,No,15,4,Equity
+DIA,Dow Industrials SPDR,515.52,Yes,48892,683666,Equity
+DIG,Ultra Oil & Gas 2X ETF,49.89,No,160,1589,Equity
+DIHP,Dimensional Intl High Profitability ETF,34.49,No,1,34,Equity
+DIPS,Yieldmax Short NVDA Option Income Strategy ETF,38.82,No,5,82,Equity
+DISO,Yieldmax Dis Option Income Strategy ETF,9.455,No,431,6,Equity
+DISV,Dimensional Intl Small Cap Value ETF,41.68,No,5,100,Equity
+DIV,GX Superdividend U.S. ETF,18.68,No,2,300,Equity
+DIVB,US Dividend and Buyback Ishares ETF,60.88,No,1,5,Equity
+DIVO,Amplify Cwp Enhanced Dividend Income ETF,45.87,No,23,526,Equity
+DJD,Invesco Dow Jones Industrial Average Dividend Et,62.71,No,18,43,Portfolio-Multi Asset
+DJIA,GX Dow 30 Covered Call ETF,22,No,5,582,Equity
+DJP,Ipath Commodity Index TR ETN,45.01,No,31,398,Commodity
+DJTU,T-Rex 2X Long Djt Daily Target ETF,1.185,No,22,1921,Equity
+DLLL,GraniteShares 2X Long Dell Daily ETF,181.88,No,478,2020,Equity
+DLN,Wisdomtree U.S. Largecap Dividend Fund,96.2,No,13,12,Equity
+DLS,Wisdomtree International Smallcap Fund,86.24,No,1,2,Equity
+DNL,Wisdomtree Global Ex-US Quality Div Growth Fund,46.58,No,11,11,Equity
+DOG,Short Dow30 -1X ETF,22.09,No,168,3489,Equity
+DOJE,Rex-Osprey Doge ETF,7.68,No,1,2512,Currency
+DON,Wisdomtree U.S. Midcap Dividend Fund,55.87,No,N/A,N/A,Equity
+DPST,Direxion Daily Regional Banks Bull 3X ETF,122.94,Yes,2752,33533,Equity
+DRAM,Roundhill Memory ETF,76.71,Yes,434981,1543393,Equity
+DRGN,Themes China Generative Artificial Intelligence,38,No,20,73,Equity
+DRIP,Direxion Daily S&P Oil & Gas E&P Bear 2X ETF,5.5,No,5574,42120,Portfolio-Multi Asset
+DRIV,GX Autonomous & Electric Vehicles ETF,40.12,No,35,491,Equity
+DRLL,Strive U.S. Energy ETF,33.78,No,1,118,Equity
+DRN,Direxion Daily Real Estate Bull 3X ETF,10.24,No,168,9235,Equity
+DRNZ,Rex Drone ETF,23.74,No,152,5741,Equity
+DRUP,GraniteShares Nasdaq Select Disruptors ETF,60.5312,No,N/A,N/A,Equity
+DRV,Direxion Daily Real Estate Bear 3X ETF,20.08,No,204,1814,Equity
+DSI,KLD 400 Social Ishares MSCI ETF,141.8,No,5,45,Equity
+DTCR,GX Data Center & Digital Infrastructure ETF,31.92,No,143,4103,Equity
+DTEC,Alps Disruptive Technologies ETF,47.0804,No,N/A,N/A,Equity
+DUBS,Aptus Large Cap Enhanced Yield ETF,41.8135,No,N/A,N/A,Equity
+DUG,Ultrashort Oil & Gas -2X ETF,21.28,No,332,1434,Equity
+DUHP,Dimensional US High Profitability ETF,41.35,No,N/A,N/A,Equity
+DUOG,Leverage Shares 2X Long Duol Daily ETF,47.01,No,5,273,Equity
+DUSA,Davis Select USA ETF,55.86,No,N/A,N/A,Equity
+DUSL,Direxion Daily Industrials Bull 3X ETF,97.6,No,9,247,Equity
+DUST,Direxion Daily Gold Miners Index Bear 2X ETF,54.04,No,1124,51794,Equity
+DVIN,Webs Defined Volatility Xli ETF,30.56,No,N/A,N/A,Equity
+DVQQ,Webs Defined Volatility QQQ ETF,32.12,No,13,40,Equity
+DVRE,Webs Defined Volatility Xlre ETF,23.97,No,N/A,N/A,Equity
+DVSP,Webs Defined Volatility Spy ETF,28.95,No,N/A,N/A,Equity
+DVUT,Webs Defined Volatility Xlu ETF,26.61,No,N/A,N/A,Equity
+DVXB,Webs Defined Volatility Xlb ETF,28.21,No,N/A,N/A,Equity
+DVXC,Webs Defined Volatility Xlc ETF,23.87,No,N/A,N/A,Equity
+DVXE,Webs Defined Volatility Xle ETF,34.98,No,N/A,N/A,Equity
+DVXF,Webs Defined Volatility Xlf ETF,24.93,No,N/A,N/A,Equity
+DVXK,Webs Defined Volatility Xlk ETF,38.19,No,1,18,Equity
+DVXP,Webs Defined Volatility Xlp ETF,25,No,N/A,N/A,Equity
+DVXV,Webs Defined Volatility Xlv ETF,29.81,No,N/A,N/A,Equity
+DVXY,Webs Defined Volatility Xly ETF,22.94,No,N/A,N/A,Equity
+DVY,Select Dividend Ishares ETF,153.3,No,178,9085,Equity
+DVYE,Emrg Mkts Dividend Ishares ETF,33.11,No,2,280,Equity
+DWAS,Invesco Dorsey Wright Smallcap Momentum ETF,120.95,No,2,157,Equity
+DWX,S&P Dividend Intl SPDR,46.5424,No,N/A,N/A,Equity
+DXD,Ultrashort Dow30 -2X ETF,17.79,No,103,4693,Equity
+DXJ,Wisdomtree Japan Hedged Equity Fund,178.51,No,131,2205,Equity
+DXUV,Dimensional US Vector Equity ETF,66.29,No,N/A,N/A,Equity
+DYLG,GX Dow 30 Covered Call & Growth ETF,27.6657,No,N/A,N/A,Equity
+DYNF,Blackrock U.S. Equity Factor Rotation ETF,67.72,No,N/A,N/A,Equity
+EART,GX Rare Earth & Critical Materials ETF,31.72,No,4,100,Equity
+EBIZ,GX E-Commerce ETF,27.49,No,N/A,N/A,Equity
+EBND,BBG Emerging Markets Local Bond SPDR ETF,20.97,No,N/A,N/A,Fixed Income
+ECH,Ishares MSCI Chile ETF,40.66,No,17,9651,Equity
+ECNS,Ishares MSCI China Small-Cap ETF,29.548,No,10,339,Equity
+ECON,Emrg Mkts Consumer Egshares,37.74,No,2,25,Equity
+ECOW,Pacer Emerging Markets Cash Cows 100 ETF,27,No,N/A,N/A,Equity
+EDC,Emerging Markets Bull 3X ETF,100.38,No,116,6021,Equity
+EDIV,S&P Emrg Mkts Dividend SPDR,41.63,No,2,32,Equity
+EDV,Extended Dur Trs Idx ETF Vanguard,65.6,No,2195,12001,Fixed Income
+EDZ,Emerging Markets Bear -3X ETF,13.56,No,153,6025,Equity
+EELV,Invesco S&P Emerging Markets Low Volatility ETF,28.72,No,2,7,Equity
+EEM,Ishares MSCI Emerging Index Fund,70.79,Yes,185585,6010865,Equity
+EEMV,Ishares MSCI E.M. Min Vol Factor ETF,76.66,No,1,33,Portfolio-Multi Asset
+EEMX,EM Fossil Fuel Reserves MSCI ETF SPDR,55.9866,No,1,17,Equity
+EES,Wisdomtree U.S. Smallcap Fund,65.62,No,N/A,N/A,Equity
+EET,Ultra MSCI Emerging Markets 2X ETF,126.9927,No,9,98,Equity
+EETH,Proshares Ether Strategy ETF,20.8652,No,231,1917,Currency
+EEV,Ultrashort MSCI Emerging Markets -2X ETF,10.2351,No,1,33,Equity
+EFA,Ishares MSCI EAFE ETF,104.41,Yes,64809,1513521,Equity
+EFAD,Proshares MSCI EAFE Dividend Growers ETF,42.8695,No,N/A,N/A,Portfolio-Multi Asset
+EFAV,Ishares MSCI EAFE Min Vol Factor ETF,87.38,No,N/A,N/A,Equity
+EFG,Ishares MSCI EAFE Growth ETF,125.1,No,5,47,Equity
+EFV,Ishares MSCI EAFE Value ETF,76.64,No,6,13775,Equity
+EFZ,Short MSCI EAFE -1X ETF,23.0354,No,N/A,N/A,Equity
+EIDO,Ishares MSCI Indonesia ETF,12.43,No,92,6049,Equity
+EINC,Vaneck Energy Income ETF,116.6451,No,6,7,Equity
+EIPI,FT Energy Income Partners Enhanced ETF,21.63,No,1,60,Equity
+ELD,Wisdomtree Emerging Markets Local Debt Fund,28.99,No,N/A,N/A,Fixed Income
+ELIL,Direxion Daily LLY Bull 2X ETF,26.45,No,31,931,Equity
+EMB,JPM USD Emerging Markets Bond ETF,96.73,No,149,11947,Fixed Income
+EMBD,GX Emerging Markets Bond ETF,23.99,No,N/A,N/A,Fixed Income
+EMET,Vaneck Green Metals ETF,44.4134,No,16,44,Equity
+EMLC,Vaneck JPM EM Local Currency Bond Et,25.58,No,4,1803,Fixed Income
+EMQQ,Emrg Mkts Internet and E-Commerce ETF,31.63,No,35,702,Equity
+EMXC,Ishares MSCI E.M. Ex China ETF,105.75,No,268,1467,Equity
+ENFR,Alerian Energy Infrastructure ETF,37.52,No,10,91,Portfolio-Multi Asset
+ENZL,Ishares MSCI New Zealand ETF,44.88,No,N/A,N/A,Equity
+EOSU,T-Rex 2X Long Eose Daily Target ETF,39.73,No,35,538,Equity
+EPI,Wisdomtree India Earnings Fund,43.02,No,30,2156,Equity
+EPOL,Ishares MSCI Poland ETF,39.75,No,15,1208,Equity
+EPP,Ishares MSCI Pacific Ex-Japan Index Fund,53.93,No,2,244,Equity
+EPV,Ultrashort FTSE Europe -2X ETF,18.55,No,28,331,Equity
+EQTY,Kovitz Core Equity ETF,27.68,No,N/A,N/A,Equity
+EQWL,Invesco S&P 100 E.W. ETF,128.8,No,4,426,Portfolio-Multi Asset
+ERTH,Invesco MSCI Sustainable Future ETF,48.5509,No,5,14,Equity
+ERX,Energy Bull 2X ETF,77.1,No,475,15513,Equity
+ERY,Direxion Daily Energy Bear 2X ETF,13.05,No,376,13994,Equity
+ESGE,Emrg Mkts ESG Optimized Ishares MSCI ETF,56.57,No,4,73,Equity
+ESGV,ESG U.S. Stock Vanguard ETF,132.38,No,1,27,Equity
+ESPO,Vaneck Video Gaming and Esports ETF,88.28,No,2,172,Equity
+ETH,Grayscale Ethereum Staking Mini ETF,16.21,Yes,1782,35204,Currency
+ETHA,Ishares Ethereum Trust ETF,12.88,Yes,336732,1722749,Currency
+ETHB,Ishares Staked Ethereum Trust ETF,21.92,No,8,353,Currency
+ETHD,Proshares Ultrashort Ether ETF,81.05,No,158,2179,Currency
+ETHE,Grayscale Ethereum Staking ETF,13.79,Yes,713,58336,Currency
+ETHT,Proshares Ultra Ether ETF,8.86,No,81,6479,Currency
+ETHU,Volatility Shares 2X Ether ETF,13.5,Yes,8285,103414,Currency
+ETHV,Vaneck Ethereum ETF,24.93,No,12,158,Currency
+ETHW,Bitwise Ethereum ETF,12.21,No,19,1683,Currency
+ETU,T-Rex 2X Long Ether Daily Target ETF,3.57,No,14,471,Equity
+EUAD,Stoxx Europe Aerospace & Defense ETF,42.26,No,135,6308,Equity
+EUFN,Ishares MSCI Europe Financials ETF,38.73,No,99,6542,Equity
+EUHY,Ishares Euro High Yield Corp Bond USD Hgd ETF,53.65,No,N/A,N/A,Fixed Income
+EUM,Short MSCI Emerging Markets -1X ETF,15.17,No,N/A,N/A,Equity
+EUO,Ultrashort Euro -2X ETF,30.46,No,112,1611,Currency
+EURL,Direxion Daily FTSE Europe Bull 3X ETF,46.4566,No,6,450,Portfolio-Multi Asset
+EUSA,Ishares MSCI USA Equal Weighted ETF,112.38,No,N/A,N/A,Equity
+EVMT,Invesco E.V. Metals Commodity Strategy No K-1 Et,18.32,No,30,2,Commodity
+EVX,Vaneck Environmental Services ETF,39.9559,No,6,9,Equity
+EWA,Ishares MSCI Australia Index Fund,28.56,No,234,37411,Equity
+EWC,Ishares MSCI Canada Index Fund,57.87,No,534,380540,Equity
+EWD,Ishares MSCI Sweden ETF,50.34,No,3,857,Equity
+EWG,Ishares MSCI Germany Index Fund,41.52,No,2336,127980,Equity
+EWH,Ishares MSCI Hong Kong Index Fund,21.28,No,29,5458,Equity
+EWI,Ishares MSCI Italy ETF,60.6,No,11,8820,Equity
+EWJ,Ishares MSCI Japan Index Fund,96.26,Yes,3609,162692,Equity
+EWK,Ishares MSCI Belgium ETF,26.621,No,1,1,Equity
+EWL,Ishares MSCI Switzerland ETF,61.33,No,91,545,Equity
+EWM,Ishares MSCI Malaysia Index Fund,27.52,No,4,3141,Equity
+EWN,Ishares MSCI Netherlands Index Fund,70.84,No,7,280,Equity
+EWP,Ishares MSCI Spain ETF,59.01,No,9,1772,Equity
+EWQ,Ishares MSCI France Index Fund,45.81,No,34,4664,Equity
+EWS,Ishares MSCI Singapore ETF,29.79,No,8,853,Equity
+EWT,Ishares MSCI Taiwan ETF,109.99,No,2120,168753,Equity
+EWU,Ishares MSCI United Kingdom ETF,45.46,No,74,17285,Equity
+EWV,Ultrashort MSCI Japan -2X ETF,16.8995,No,35,422,Equity
+EWW,Ishares MSCI Mexico ETF,77.33,No,147,16384,Equity
+EWX,S&P Emrg Mkts Smallcap SPDR,76.15,No,N/A,N/A,Equity
+EWY,Ishares MSCI South Korea ETF,219.2,Yes,180750,1305506,Equity
+EWZ,Ishares MSCI Brazil ETF,33.73,Yes,551144,5753448,Equity
+EWZS,Ishares MSCI Brazil Small-Cap ETF,12.59,No,2,2472,Equity
+EXI,Global Industrials Ishares ETF,198.93,No,1,16,Equity
+EZA,Ishares MSCI South Africa Index Fund,66.74,No,113,9557,Equity
+EZBC,Franklin Bitcoin ETF,36.38,No,11,306,Currency
+EZET,Franklin Ethereum ETF,12.92,No,N/A,N/A,Currency
+EZJ,Ultra MSCI Japan 2X ETF,69.93,No,1,130,Equity
+EZU,Ishares MSCI Eurozone ETF,69.31,No,132,6128,Equity
+FALN,US Fallen Angels Ishares ETF,27.19,No,2,91,Equity
+FAN,FT Global Wind Energy ETF,24.82,No,65,127,Equity
+FAS,Financial Bull 3X ETF,146.37,Yes,5734,59930,Equity
+FAZ,Financial Bear -3X ETF,40.01,No,971,39497,Equity
+FBL,GraniteShares 2X Long META Daily ETF,22.13,No,412,12020,Equity
+FBND,Fidelity Total Bond ETF,45.61,No,2,51,Fixed Income
+FBOT,Fidelity Disruptive Automation ETF,39.28,No,10,18,Equity
+FBT,FT AMEX Biotech Fund,228.85,No,10,363,Equity
+FBTC,Fidelity Wise Origin Bitcoin Fund,54.77,Yes,32689,125781,Currency
+FBY,Yieldmax META Option Income Strategy ETF,9.25,No,14,396,Equity
+FCA,FT China Alphadex Fund,29.04,No,N/A,N/A,Equity
+FCG,FT Natural Gas ETF,26.88,No,64,7786,Equity
+FCLD,Fidelity Cloud Computing ETF,38.4419,No,1,56,Equity
+FCOM,Fidelity Telecommunication MSCI ETF,70.39,No,2,70,Equity
+FDEM,Fidelity Targeted Emerging Markets Factor ETF,37.62,No,1,10,Equity
+FDEV,Fidelity Targeted International Factor ETF,35.52,No,2,1,Equity
+FDIG,Fidelity Crypto Industry Digital Payments ETF,46.27,No,1,103,Equity
+FDIQ,Invesco Bloomberg Financial Data Providers ETF,65.33,No,1,19,Fixed Income
+FDIS,Fidelity Consumer Disc MSCI ETF,102.11,No,2,248,Equity
+FDL,FT Morningstar ETF,49.05,No,4,83,Equity
+FDLO,Fidelity Low Volatility Factor ETF,68.24,No,4,2,Equity
+FDMO,Fidelity Momentum Factor ETF,97.82,No,N/A,N/A,Equity
+FDN,FT DJ Internet Fund,265.68,No,13,1903,Equity
+FDNI,FT Dow Jones International Internet ETF,26.25,No,1,14,Equity
+FDT,FT Developed Markets Ex-US Alphadex Fund,99.4,No,2,23,Equity
+FDTX,Fidelity Disruptive Technology ETF,57.94,No,140,18,Equity
+FDVV,Fidelity High Dividend ETF,60.59,No,6,525,Equity
+FELC,Fidelity Enhanced Large Cap Core ETF,41.95,No,N/A,N/A,Equity
+FELG,Fidelity Enhanced Large Cap Growth ETF,43.72,No,6,10,Equity
+FELV,Fidelity Enhanced Large Cap Value ETF,40.04,No,17,19,Equity
+FEM,FT Emerging Markets Alphadex Fund,32.62,No,N/A,N/A,Equity
+FENI,Fidelity Enhanced International ETF,40.32,No,2,28,Equity
+FENY,Fidelity Energy MSCI ETF,29.66,No,64,2144,Equity
+FEP,FT Europe Alphadex Fund,58.06,No,N/A,N/A,Equity
+FEPI,Rex Fang & Innovation Equity Premium Income ETF,44.19,No,23,1314,Equity
+FEUZ,FT Eurozone Alphadex ETF,68.08,No,N/A,N/A,Portfolio-Multi Asset
+FEX,FT Large Cap Core Alphadex Fund,137.92,No,N/A,N/A,Equity
+FEZ,Euro Stoxx 50 ETF SPDR,70.06,Yes,7656,278410,Equity
+FFDI,Fidelity Fundamental Developed International ETF,32.9301,No,1,1,Equity
+FFEM,Fidelity Fundamental Emerging Markets ETF,45.08,No,1,36,Equity
+FFGX,Fidelity Fundamental Global Ex-U.S. ETF,35.3563,No,1,26,Equity
+FFLV,Fidelity Fundamental Large Cap Value ETF,27.4852,No,N/A,N/A,Equity
+FFTY,Innovator Ibd 50 ETF,42.96,No,75,1318,Equity
+FGM,FT Germany Alphadex Fund,64.65,No,N/A,N/A,Equity
+FGRU,T-Rex 2X Long Figr Daily Target ETF,9.4692,No,8,94,Equity
+FHEQ,Fidelity Hedged Equity ETF,33.2,No,N/A,N/A,Equity
+FHLC,Fidelity Health Care MSCI ETF,72.22,No,1,214,Equity
+FIAT,Yieldmax Short COIN Option Income Strategy ETF,22.08,No,14,624,Equity
+FIDI,Fidelity International High Dividend ETF,27.295,No,5,143,Equity
+FIDU,Fidelity Industrials MSCI ETF,97.56,No,6,69,Equity
+FIGG,Leverage Shares 2X Long Fig Daily ETF,15.84,No,9,2358,Equity
+FINX,GX Fintech ETF,24.97,No,3,253,Equity
+FITE,SPDR Kensho Future Security ETF,106.847,No,9,151,Equity
+FIVA,Fidelity International Value Factor ETF,38.65,No,N/A,N/A,Equity
+FIW,FT Water ETF,106.06,No,1,292,Equity
+FIXD,FT Smith Opportunistic Fixed Income ETF,43.73,No,N/A,N/A,Fixed Income
+FJP,FT Japan Alphadex Fund,78.75,No,N/A,N/A,Equity
+FLAX,Franklin Asia Ex Japan ETF,38.7438,No,2,1,Equity
+FLBR,Brazil Franklin FTSE ETF,21.29,No,4,189,Equity
+FLEE,Europe Franklin FTSE ETF,39.23,No,N/A,N/A,Equity
+FLEU,Europe Hedged Franklin FTSE ETF,36.4424,No,N/A,N/A,Equity
+FLGR,Germany Franklin FTSE ETF,33.4959,No,N/A,N/A,Equity
+FLIN,Franklin India ETF,35.47,No,2,296,Equity
+FLJH,Japan Hedged Franklin FTSE ETF,46.86,No,N/A,N/A,Equity
+FLJP,Japan Franklin FTSE ETF,41.04,No,9,44,Equity
+FLKR,South Korea Franklin FTSE ETF,71.69,No,176,601,Equity
+FLMX,Mexico Franklin FTSE ETF,38.47,No,N/A,N/A,Equity
+FLOW,GX U.S. Cash Flow Kings 100 ETF,37.5119,No,N/A,N/A,Equity
+FLQL,Franklin Liberty U.S. Equity ETF,78.1,No,N/A,N/A,Equity
+FLRG,Fidelity U.S. Multifactor ETF,40.62,No,N/A,N/A,Equity
+FLRN,BBG Investment Grade Floating Rate SPDR ETF,30.82,No,N/A,N/A,Fixed Income
+FLTR,Vaneck Investment Grade Floating Rate ETF,25.56,No,N/A,N/A,Fixed Income
+FLYT,Tradr 2X Long Fly Daily ETF,12.14,No,90,813,Equity
+FMAG,Fidelity Magellan ETF,36.9185,No,N/A,N/A,Equity
+FMAT,Fidelity Materials MSCI ETF,59.72,No,5,150,Equity
+FMDE,Fidelity Enhanced Mid Cap ETF,40.11,No,5,19,Equity
+FMET,Fidelity Metaverse ETF,37.61,No,N/A,N/A,Equity
+FNCL,Fidelity Financials MSCI ETF,76.03,No,13,141,Equity
+FNDA,Schwab Fundamental U.S. Small Co. ETF,36.98,No,4,8,Portfolio-Multi Asset
+FNDC,Schwab Fundamental Intl Small Co. ETF,49.77,No,4,1,Portfolio-Multi Asset
+FNDE,Schwab Fundamental Emrg Mkts Large Co. ETF,40.94,No,3,164,Portfolio-Multi Asset
+FNDF,Schwab Fundamental Intl Large Co. ETF,54.12,No,8,147,Portfolio-Multi Asset
+FNDX,Schwab Fundamental U.S. Large Co. ETF,31.05,No,2,85,Portfolio-Multi Asset
+FNGG,Direxion Daily NYSE Fang+ Bull 2X ETF,241.5758,No,5,295,Equity
+FNGS,Microsectors Fang+ ETN,75.96,No,78,2059,Equity
+FNY,FT Mid Cap Growth Alphadex Fund,107.94,No,2,6,Equity
+FPE,FT Preferred Securities & Income ETF,17.99,No,N/A,N/A,Portfolio-Multi Asset
+FPRO,Fidelity Real Estate Investment ETF,24.4741,No,N/A,N/A,Equity
+FPX,FT US Equity Opportunities ETF,200.41,No,1,100,Equity
+FQAL,Fidelity Quality Factor ETF,80.87,No,N/A,N/A,Equity
+FRDM,Freedom 100 Emerging Markets ETF,76.09,No,40,527,Equity
+FREL,Fidelity Real Estate MSCI ETF,28.765,No,N/A,N/A,Equity
+FRI,FT S&P REIT Fund,30.97,No,N/A,N/A,Equity
+FRNW,Fidelity Clean Energy ETF,24.87,No,1,65,Equity
+FSMD,Fidelity Small-Mid Factor ETF,51.57,No,N/A,N/A,Equity
+FSTA,Fidelity Consumer Staples MSCI ETF,52.41,No,7,357,Equity
+FSZ,FT Switzerland Alphadex Fund,82.04,No,N/A,N/A,Equity
+FTAG,FT Indxx Global Agriculture ETF,28.32,No,2,84,Equity
+FTC,FT Large Cap Growth Alphadex Fund,192.22,No,1,137,Equity
+FTCS,FT Capital Strength ETF,92.96,No,5,3,Portfolio-Multi Asset
+FTEC,Fidelity Info Tech MSCI ETF,286.54,No,44,1415,Equity
+FTGC,FT Global Tactical Commodity Strategy Fund,27.59,No,N/A,N/A,Portfolio-Multi Asset
+FTLS,FT Long/Short Equity,74.5,No,2,7,Equity
+FTQI,FT Nasdaq Buywrite Income ETF,22.08,No,N/A,N/A,Equity
+FTXL,FT Nasdaq Semiconductor ETF,289.2,No,83,984,Equity
+FTXO,FT Nasdaq Bank ETF,40.44,No,N/A,N/A,Equity
+FUTG,Leverage Shares 2X Long Futu Daily ETF,3.47,No,191,6213,Equity
+FUTY,Fidelity Utilities MSCI ETF,57.5,No,8,106,Equity
+FV,FT Dorsey Wright Focus 5 ETF,72.81,No,1,59,Portfolio-Multi Asset
+FVD,FT Vl Dividend,47.42,No,N/A,N/A,Equity
+FXA,Invesco Australian Dollar Trust,69.45,No,37,1225,Currency
+FXB,Invesco British Pound Sterling Trust,126.93,No,297,5949,Currency
+FXC,Invesco Canadian Dollar Trust,69.1451,No,1037,3261,Currency
+FXD,FT Cons. Discret. Alphadex,69.03,No,1,16,Equity
+FXE,Invesco Euro Currency Trust,105.77,No,1333,26733,Currency
+FXF,Invesco Swiss Franc Trust,109.56,No,168,2817,Currency
+FXG,FT Cons. Staples Alphadex,61.447,No,N/A,N/A,Equity
+FXH,FT Health Care Alphadex,115.45,No,22,155,Equity
+FXI,China Largecap Ishares ETF,33.3,Yes,171510,4684045,Equity
+FXL,FT Technology Alphadex,213.89,No,9,185,Equity
+FXN,FT Energy Alphadex Fund,20.17,No,4,86,Equity
+FXP,Ultrashort FTSE China 50 -2X ETF,23.1946,No,5,203,Equity
+FXR,FT Industrials Alphadex,88.67,No,N/A,N/A,Equity
+FXU,FT Utilities Alphadex Fund,48.21,No,N/A,N/A,Equity
+FXY,Invesco Japanese Yen Trust,56.85,No,4498,115273,Currency
+FXZ,FT Materials Alphadex Fund,82.72,No,1,21,Equity
+FYC,FT Small Cap Growth Alphadex Fund,120.42,No,1,7,Equity
+FYEE,Fidelity Yield Enhanced Equity ETF,28.92,No,1,64,Equity
+GAL,SSGA Global Allocation ETF SPDR,53.5121,No,N/A,N/A,Portfolio-Multi Asset
+GBIL,GS Treasuryaccess 0-1 Year ETF,100.07,No,N/A,N/A,Fixed Income
+GBTC,Grayscale Bitcoin Trust ETF,48.8,Yes,3967,65844,Currency
+GBUG,Sprott Active Gold & Silver Miners ETF,41.65,No,83,669,Equity
+GCC,Wisdomtree Enhancedcontinuous Commodity Fund,23.25,No,N/A,N/A,Commodity
+GCOR,GS Access U.S. Aggregate Bond ETF,41.12,No,N/A,N/A,Fixed Income
+GDOG,Grayscale Dogecoin Trust ETF,9.7113,No,1,1679,Currency
+GDX,Vaneck Gold Miners ETF,82.51,Yes,169035,2310317,Equity
+GDXJ,Vaneck Junior Gold Miners ETF,107.22,Yes,7905,179361,Equity
+GDXW,Roundhill Gold Miners Weeklypay ETF,41.68,No,12,404,Equity
+GDXY,Yieldmax Gold Miners Option Income Strategy ETF,11.05,No,259,4851,Equity
+GEM,GS Activebeta Emerging Markets Equity ETF,53.81,No,N/A,N/A,Equity
+GEMG,Leverage Shares 2X Long Gemi Daily ETF,10.61,No,53,219,Equity
+GENZ,Vaneck Digital Native Economy ETF,36.52,No,2,1023,Equity
+GEVG,Leverage Shares 2X Long Gev Daily ETF,33.4,No,44,469,Equity
+GEVX,Tradr 2X Long Gev Daily ETF,26.04,No,816,3549,Equity
+GGLL,Direxion Daily GOOGL Bull 2X ETF,122.37,No,1811,42078,Equity
+GGLS,Direxion Daily GOOGL Bear 1X ETF,5.61,No,311,1535,Equity
+GGME,Invesco Next Gen Media and Gaming ETF,60.455,No,1,2,Equity
+GII,FTSE Global Infra 100 SPDR,75.52,No,N/A,N/A,Equity
+GINN,Goldman Sachs Innovate Equity ETF,77.9335,No,1,49,Equity
+GK,Advisorshares Gerber Kawasaki ETF,29.8491,No,3,6,Equity
+GLD,Gold SPDR,387.12,Yes,278301,4847209,Commodity
+GLDW,Roundhill Gold Weeklypay ETF,43.8181,No,5,66,Equity
+GLGG,Leverage Shares 2X Long Glxy Daily ETF,12.31,No,9,213,Equity
+GLL,Ultrashort Gold -2X ETF,24.54,No,580,30118,Commodity
+GLNK,Grayscale Chainlink Trust ETF,7.03,No,101,13897,Currency
+GLWG,Leverage Shares 2X Long Glw Daily ETF,27.67,No,292,2299,Equity
+GLXU,T-Rex 2X Long Glxy Daily Target ETF,14.35,No,17,537,Equity
+GMEU,T-Rex 2X Long Gme Daily Target ETF,7.93,No,88,4352,Equity
+GMF,S&P Emerging Asia Pacific SPDR,160.2916,No,N/A,N/A,Equity
+GNOM,GX Genomics & Biotechnology ETF,52.07,No,79,142,Equity
+GNR,S&P Global Natural Resources SPDR,69.51,No,4,358,Equity
+GOAU,US Global Go Gold and Precious Metal Miners ETF,40.37,No,3,70,Equity
+GOEX,GX Gold Explorers ETF,75.51,No,3,156,Equity
+GOLY,Strategy Shares Gold-Hedged Bond ETF,26.3517,No,7,67,Portfolio-Multi Asset
+GOOP,Kurv Yield Premium Google [Googl] ETF,41.9,No,3,48,Equity
+GOOW,Roundhill GOOGL Weeklypay ETF,71.5161,No,17,308,Equity
+GOOX,T-Rex 2X Long Alphabet Daily Target ETF,87.38,No,20,481,Equity
+GOOY,Yieldmax GOOGL Option Income Strategy ETF,13.78,No,314,1503,Equity
+GOP,Unusual Whales Republican Trades ETF,44.3761,No,2,36,Equity
+GOVT,US Treasury Bond Ishares ETF,22.745,No,5,1289,Fixed Income
+GOVZ,Ishares 25 Year Treasury Strips Bond ETF,37.02,No,1,1179,Fixed Income
+GPIQ,GS Nasdaq-100 Core Premium Income ETF,59.39,No,390,4641,Equity
+GPIX,GS S&P 500 Core Premium Income ETF,55.5,No,141,1205,Equity
+GPTY,Yieldmax AI & Tech Portfolio Option Income ETF,47.384,No,4,141,Equity
+GPZ,Vaneck Alternative Asset Manager ETF,22.78,No,7,80,Equity
+GRAG,Leverage Shares 2X Long Grab Daily ETF,6.26,No,1,45,Equity
+GREK,GX MSCI Greece ETF,77.19,No,7,12570,Equity
+GRID,FT Nasdaq Clean Edge Smart Grid Infra Fund,194.68,No,100,2103,Equity
+GRN,Ipath Series B Carbon ETN,31.6195,No,1,15,Commodity
+GRNY,Fundstrat Granny Shots US Large Cap ETF,27.49,No,844,24184,Equity
+GRPM,Invesco S&P Midcap 400 Garp ETF,127.24,No,14,15,Portfolio-Multi Asset
+GSEW,Equal Weight U.S. Large Cap Equity ETF,93.17,No,8,26,Equity
+GSG,S&P GSCI Commodity-Indexed Ishares ETF,29.53,No,67,8648,Commodity
+GSIE,GS Activebeta International Equity ETF,46.32,No,1,12,Equity
+GSLC,GS Activebeta U.S. Large Cap Equity ETF,141.89,No,N/A,N/A,Equity
+GSOL,Grayscale Solana Staking ETF,5.21,No,23,2762,Currency
+GSPY,Gotham Enhanced 500 ETF,40.6411,No,2,20,Equity
+GSWO,GS Activebeta World Equity ETF,63.86,No,N/A,N/A,Equity
+GSY,Invesco Ultra Short Duration ETF,50.25,No,N/A,N/A,Fixed Income
+GTEK,GS Future Tech Leaders Equity ETF,62.01,No,2,42,Equity
+GTPE,GS MSCI World Private Equity Return Tracker ETF,60.64,No,3,99,Equity
+GUNR,Mstar Global Upstream Natural Resources ETF,50.68,No,1,352,Equity
+GURU,GX Guru Index ETF,68.1063,No,N/A,N/A,Equity
+GUSH,Direxion Daily Oil & Gas Bull 2X ETF,30.23,No,3023,37142,Equity
+GVI,Interm Govt/Credit Bond Ishares ETF,105.885,No,N/A,N/A,Fixed Income
+GVIP,GS Hedge Industry Vip ETF,185.52,No,6,6,Equity
+GVLU,Tidal Gotham 1000 Value ETF,26.0581,No,N/A,N/A,Equity
+GWX,S&P Smallcap Intl SPDR,45.51,No,N/A,N/A,Equity
+GXC,S&P China SPDR,89.85,No,2,143,Equity
+GXDW,GX Dorsey Wright Thematic ETF,28.42,No,N/A,N/A,Equity
+GXPC,GX Purecap MSCI Communication Services ETF,30.795,No,1,7,Equity
+GXRP,Grayscale XRP Trust ETF,22.14,No,5,733,Currency
+GYLD,Arrow DJ Global Yield ETF,14.005,No,N/A,N/A,Portfolio-Multi Asset
+HACK,Amplify Cybersecurity ETF,96,No,92,4113,Equity
+HAP,Vaneck Natural Resources ETF,69.55,No,1,21,Equity
+HARD,Simplify Commodities Strategy No K-1 ETF,31.0147,No,3,130,Commodity
+HAUS,Tidal Home Appreciation U.S. REIT ETF,18.4735,No,N/A,N/A,Equity
+HBR,Canary Hbar ETF,10.91,No,96,967,Currency
+HDGE,Active Bear ETF,16.94,No,51,947,Equity
+HDV,High Dividend Ishares Core ETF,26.99,No,21,6452,Portfolio-Multi Asset
+HEAL,GX Healthtech ETF,26.15,No,N/A,N/A,Equity
+HEDJ,Wisdomtree Europe Hedged Equity Fund,58.13,No,2,163,Equity
+HEFA,EAFE Curr Hedged Ishares MSCI ETF,46.96,No,N/A,N/A,Portfolio-Multi Asset
+HEGD,Swan Hedged Equity US Large Cap ETF,26.72,No,N/A,N/A,Equity
+HELX,Franklin Genomic Advancements ETF,36.4884,No,N/A,N/A,Equity
+HERO,GX Video Games & Esports ETF,24.69,No,6,81,Equity
+HEWJ,Japan Curr Hedged Ishares MSCI ETF,66.02,No,4,9,Portfolio-Multi Asset
+HEZU,Eurozone Curr Hedged Ishares MSCI ETF,50.02,No,N/A,N/A,Portfolio-Multi Asset
+HFND,Tidal Unlimited Hfnd Multi-Strategy ETF,24.6832,No,N/A,N/A,Alternative
+HGER,Harbor All-Weather Inflation Focus ETF,29.91,No,1,456,Commodity
+HIBL,Direxion Daily S&P 500 High Beta Bull 3X ETF,131.09,No,11,393,Equity
+HIBS,Direxion Daily S&P 500 High Beta Bear 3X ETF,18.065,No,13,433,Equity
+HIMZ,Defiance Daily Target 2X Long Hims ETF,52.28,No,1423,45039,Equity
+HIPS,GraniteShares Hips US High Income ETF,11.364,No,3,1999,Equity
+HIYY,Yieldmax Hims Option Income Strategy ETF,17.1858,No,7,231,Equity
+HNDL,Strategy Shares Nasdaq 7Handl ETF,22.74,No,N/A,N/A,Portfolio-Multi Asset
+HODL,Vaneck Bitcoin ETF,17.8,No,19,970,Currency
+HOOG,Leverage Shares 2X Long HOOD Daily ETF,35.43,No,511,4755,Equity
+HOOW,Roundhill HOOD Weeklypay ETF,32.35,No,395,2183,Equity
+HOOX,Defiance Daily Target 2X Long HOOD ETF,40.15,No,181,1249,Equity
+HOOY,Yieldmax HOOD Option Income Strategy ETF,33.09,No,23,630,Equity
+HTEC,Robo Global Healthcare Technology Innovation ETF,35.076,No,17,20,Equity
+HUMN,Roundhill Humanoid Robotics ETF,36.22,No,67,1839,Equity
+HUTG,Leverage Shares 2X Long Hut Daily ETF,36.08,No,392,807,Equity
+HYD,Vaneck High Yield Muni ETF,51.49,No,6,3754,Fixed Income
+HYDR,GX Hydrogen ETF,56.8,No,7,188,Equity
+HYG,High Yield Corp Bond Ishares Iboxx $ ETF,80.01,Yes,347581,9749391,Fixed Income
+HYGH,Int Rate Hedged High Yield Bond Ishares ETF,86.76,No,N/A,N/A,Portfolio-Multi Asset
+HYLB,Xt USD High Yield Corp Bond ETF,36.5,No,N/A,N/A,Fixed Income
+HYMB,S&P High Yield Muni Bond SPDR,25.31,No,13,560,Fixed Income
+HYS,Pimco 0-5 Year High Yield Corp Bond ETF,93.53,No,N/A,N/A,Fixed Income
+HYSA,Bondbloxx USD High Yield Bond Sector Rotation Et,14.945,No,N/A,N/A,Fixed Income
+IAGG,Intl Aggregate Bond Ishares Core ETF,50.53,No,N/A,N/A,Portfolio-Multi Asset
+IAI,US Broker-Dealers & Sec Exch Ishares ETF,186.1,No,7,939,Equity
+IAK,US Insurance Ishares ETF,134.39,No,1,150,Equity
+IAT,US Regional Banks Ishares ETF,59.46,No,16,1087,Equity
+IAU,Gold Trust Ishares,79.33,Yes,5808,164264,Commodity
+IAUI,Neos Gold High Income ETF,50.9,No,59,1783,Commodity
+IBB,Nasdaq Biotechnology Ishares ETF,173.64,No,791,33515,Equity
+IBIT,Ishares Bitcoin Trust ETF,35.62,Yes,940684,7123161,Currency
+IBND,BBG International Corporate Bond SPDR ETF,31.16,No,N/A,N/A,Fixed Income
+IBOT,Vaneck Robotics ETF,68.42,No,12,52,Equity
+IBUY,Amplify Online Retail ETF,68.7318,No,N/A,N/A,Equity
+IBX,Tradr 2X Long IBM Daily ETF,23.31,No,249,981,Equity
+ICF,Cohen & Steers REIT Ishares ETF,66.88,No,N/A,N/A,Equity
+ICLN,Global Clean Energy Ishares ETF,21.1,Yes,1660,64630,Equity
+ICOP,Ishares Copper and Metals Mining ETF,53.86,No,31,1683,Equity
+ICSH,Ultrashort Term Ishares ETF,50.51,No,4,9,Portfolio-Multi Asset
+ICVT,Convertible Bond Ishares ETF,124.25,No,1,206,Fixed Income
+IDEV,Intl Devd Markets Ishares Core MSCI ETF,89.56,No,7,62,Equity
+IDGT,U.S. Digital Infrastructure and Real Estate ETF,123.92,No,1,338,Equity
+IDNA,Genomics Immunology and Healthcare ETF,30.56,No,1,103,Equity
+IDRV,Ishares Self-Driving Ev and Tech ETF,40.38,No,N/A,N/A,Equity
+IDU,US Utilities Ishares ETF,112.49,No,3,28,Equity
+IDV,Intl Select Dividend Ishares ETF,42.14,No,10,1018,Equity
+IDVO,Amplify Intl Enhanced Dividend Income ETF,42.38,No,33,283,Equity
+IEDI,US Discretionary Spending Ishares Evolved ETF,55.2272,No,N/A,N/A,Equity
+IEF,7-10 Year Treasury Bond Ishares ETF,94.36,Yes,5754,822790,Fixed Income
+IEFA,EAFE Ishares Core MSCI ETF,97.29,No,61,4315,Portfolio-Multi Asset
+IEI,3-7 Year Treas Bond Ishares ETF,117.19,No,78,25217,Fixed Income
+IEMG,Emrg Mkts Ishares Core MSCI ETF,85.63,No,325,4685,Portfolio-Multi Asset
+IEO,US Oil & Gas Explor & Prod Ishares ETF,107.47,No,47,507,Equity
+IEUR,Europe Ishares Core MSCI ETF,74.7,No,1,252,Portfolio-Multi Asset
+IEV,Europe 350 Ishares ETF,72.4,No,2,195,Equity
+IEZ,US Oil Equipment & Services Ishares ETF,27.59,No,78,2906,Equity
+IFLN,Invesco Bloomberg Enhanced Fallen Angels ETF,18.24,No,N/A,N/A,Fixed Income
+IFRA,US Infrastructure Ishares ETF,61.99,No,3,148,Equity
+IGE,Natural Resources North American Ishares ETF,57.45,No,1,60,Equity
+IGF,Global Infrastructure Ishares ETF,66.36,No,1,111,Equity
+IGIB,Interm Term Corp Bond Ishares ETF,53.05,No,2,221,Fixed Income
+IGLB,Long-Term Corp Bond Ishares ETF,50.14,No,4,734,Fixed Income
+IGLD,FT Vest Gold Strategy Target Income ETF,22.09,No,12,1687,Commodity
+IGM,Ishares Expanded Tech Sector ETF,164.6,No,109,2790,Equity
+IGOV,Intl Treasury Bond Ishares ETF,41.2,No,1,89,Fixed Income
+IGPT,Invesco AI and Next Gen Software ETF,106.4,No,119,631,Equity
+IGSB,Short-Term Corp Bond Ishares ETF,52.3,No,6,344,Fixed Income
+IGV,Ishares Expanded Tech-Software Sector ETF,89.09,Yes,179037,2124687,Equity
+IHAK,Ishares Cybersecurity and Tech ETF,54.51,No,1,176,Equity
+IHDG,Wisdomtree Intl Hedged Quality Div Growth ETF,53.2334,No,N/A,N/A,Portfolio-Multi Asset
+IHE,US Pharmaceuticals Ishares ETF,91.88,No,7,165,Equity
+IHF,US Healthcare Providers Ishares ETF,52.29,No,27,1662,Equity
+IHI,US Medical Devices Ishares ETF,49.07,No,448,91808,Equity
+IJH,S&P Midcap 400 Ishares Core ETF,75.78,No,139,13589,Equity
+IJJ,S&P Midcap 400 Value Ishares ETF,144.81,No,1,49,Equity
+IJK,S&P Midcap 400 Growth Ishares ETF,115.66,No,1,387,Equity
+IJR,S&P Smallcap Ishares Core ETF,143.21,No,159,7995,Equity
+IJS,S&P Smallcap 600 Value Ishares ETF,133.32,No,61,195,Equity
+IJT,S&P Smallcap 600 Growth Ishares ETF,170.72,No,2,83,Equity
+ILCG,Mstar Largecap Growth Ishares ETF,117.14,No,1,25,Equity
+ILF,Latin America 40 Ishares ETF,33.9,No,163,12865,Equity
+ILIT,Ishares Lithium Miners and Producers ETF,18.93,No,20,127,Equity
+IMCG,Mstar Midcap Growth Ishares ETF,97.01,No,1,158,Equity
+IMVP,Invesco India ETF,21.02,No,N/A,N/A,Equity
+INCO,India Consumer Egshares ETF,59.8339,No,2,30,Equity
+INDA,Ishares MSCI India ETF,49.58,No,2104,254467,Equity
+INDL,Direxion Daily MSCI India Bull 2X ETF,45.76,No,105,1004,Equity
+INDS,Pacer Benchmark Industrial Real Estate ETF,39.81,No,N/A,N/A,Alternative
+INDY,India 50 Ishares ETF,43.5,No,1,314,Equity
+INFL,Horizon Kinetics Inflation Beneficiaries ETF,49.86,No,6,224,Equity
+INQQ,India Internet & Ecommerce ETF,12.69,No,1,70,Equity
+INTF,Intl Multifactor Ishares Edge MSCI ETF,41.22,No,1,1,Equity
+INTW,GraniteShares 2X Long INTC Daily ETF,379.08,No,1029,5101,Equity
+ION,Proshares S&P Global Core Battery Metals ETF,56.2888,No,1,80,Equity
+IONL,GraniteShares 2X Long Ionq Daily ETF,31.19,No,379,2959,Equity
+IONX,Defiance Daily Target 2X Long Ionq ETF,58.66,No,154,6009,Equity
+IONZ,Defiance Daily Target 2X Short Ionq ETF,2.45,No,175,1841,Equity
+IOO,Global 100 Ishares ETF,139.13,No,1,21,Equity
+IPAC,Pacific Ishares Core MSCI ETF,83.87,No,N/A,N/A,Portfolio-Multi Asset
+IPAY,Amplify Digital Payments ETF,44.4,No,1,147,Equity
+IPO,Renaissance IPO ETF,59.54,No,174,11835,Portfolio-Multi Asset
+IPOS,Renaissance International IPO ETF,25.6848,No,2,34,Portfolio-Multi Asset
+IQDF,Flexshares Intl Quality Div Fund,34.97,No,N/A,N/A,Equity
+IQDG,Wisdomtree Intl Quality Div Growth Fund,44.02,No,24,3,Portfolio-Multi Asset
+IQLT,Ishares MSCI Intl Quality Factor ETF,49.33,No,N/A,N/A,Portfolio-Multi Asset
+IRE,Defiance Daily Target 2X Long Iren ETF,29.85,No,4207,30669,Equity
+IREG,Leverage Shares 2X Long Iren Daily ETF,23.03,No,442,1505,Equity
+IREX,Tradr 2X Long Iren Daily ETF,41.14,No,1035,9336,Equity
+IREZ,Tradr 2X Short Iren Daily ETF,4.9,No,53,1936,Equity
+ISPY,Proshares S&P 500 High Income ETF,48.14,No,5,31,Alternative
+ISRA,Vaneck Israel ETF,64.2009,No,31,738,Portfolio-Multi Asset
+ISTB,1-5 Year USD Bond Ishares Core ETF,48.17,No,N/A,N/A,Portfolio-Multi Asset
+ITA,US Aerospace & Defense Ishares ETF,238.99,No,556,22000,Equity
+ITB,US Home Construction Ishares ETF,99.25,No,7129,105648,Equity
+ITEQ,Amplify Bluestar Israel Technology ETF,65.68,No,N/A,N/A,Equity
+ITM,Vaneck Intermediate Muni ETF,46.96,No,2,85,Fixed Income
+ITOT,S&P Total US Stock Market Ishares Core ETF,163.85,No,49,4253,Equity
+IUSB,USD Bond Market Total Ishares Core ETF,46.12,No,2,56,Portfolio-Multi Asset
+IUSG,S&P US Growth Ishares Core ETF,188.68,No,9,260,Equity
+IUSV,S&P US Value Ishares Core ETF,109.71,No,1,62,Equity
+IVE,S&P 500 Value Ishares ETF,226.38,No,1,1217,Equity
+IVES,Dan Ives Wedbush AI Revolution ETF,38.03,No,197,4164,Equity
+IVLU,Ishares MSCI Intl Value Factor ETF,42.2,No,31,188,Equity
+IVOL,Quadratic Interest Rate Vol and Infl ETF,17.307,No,1,1592,Fixed Income
+IVOO,S&P Midcap 400 ETF Vanguard,128.53,No,1,25,Equity
+IVRS,Ishares Future Metaverse Tech and Communications,32.3003,No,N/A,N/A,Equity
+IVV,S&P 500 Ishares Core ETF,750.11,Yes,762,19179,Equity
+IVW,S&P 500 Growth Ishares ETF,137.96,No,24,3228,Equity
+IWB,Russell 1000 Ishares ETF,408.41,No,42,1035,Equity
+IWC,Micro-Cap Ishares ETF,192.13,No,35,636,Equity
+IWD,Russell 1000 Value Ishares ETF,242.18,No,25,4123,Equity
+IWF,Russell 1000 Growth Ishares ETF,123.19,No,9564,18115,Equity
+IWL,Russell Top 200 Ishares ETF,185.01,No,5,3,Equity
+IWM,Russell 2000 Ishares ETF,295.59,Yes,1697096,11929998,Equity
+IWMI,Neos Russell 2000 High Income ETF,52.74,No,152,1825,Equity
+IWMW,Ishares Russell 2000 Buywrite ETF,39.455,No,1,28,Equity
+IWMY,Defiance R2000 Enhanced Options Income ETF,19.71,No,3,233,Equity
+IWN,Russell 2000 Value Ishares ETF,216.87,No,32,2906,Equity
+IWO,Russell 2000 Growth Ishares ETF,389.04,No,44,1839,Equity
+IWP,Russell Midcap Growth Ishares ETF,141.95,No,50,1954,Equity
+IWR,Russell Midcap Ishares ETF,108.54,No,99,1759,Equity
+IWS,Russell Midcap Value Ishares ETF,162.95,No,8,266,Equity
+IWV,Russell 3000 Ishares ETF,424.9,No,1,8509,Equity
+IWX,Russell Top 200 Value Ishares ETF,105.52,No,N/A,N/A,Equity
+IWY,Russell Top 200 Growth Ishares ETF,288.74,No,10,212,Equity
+IXC,Global Energy Ishares ETF,49.83,No,11,593,Equity
+IXG,Global Financials Ishares ETF,124.88,No,100,296,Equity
+IXJ,Global Healthcare Ishares ETF,92.97,No,8,60,Equity
+IXN,Global Tech Ishares ETF,146.33,No,29,369,Equity
+IXP,Global Telecom Ishares ETF,117.39,No,1,8,Equity
+IXUS,Total Intl Stock Ishares Core MSCI ETF,96.97,No,14,566,Portfolio-Multi Asset
+IYC,US Consumer Services Ishares ETF,101.34,No,N/A,N/A,Equity
+IYE,US Energy Ishares ETF,56.77,No,3,331,Equity
+IYF,US Financials Ishares ETF,127.61,No,12,341,Equity
+IYG,US Financial Services Ishares ETF,90.66,No,1,76,Equity
+IYH,US Healthcare Ishares ETF,62.68,No,30,116,Equity
+IYJ,US Industrials Ishares ETF,162.25,No,8,972,Equity
+IYK,US Consumer Goods Ishares ETF,71.57,No,4,93,Equity
+IYM,US Basic Materials Ishares ETF,185.34,No,23,551,Equity
+IYR,US Real Estate Ishares ETF,100.45,Yes,6701,167330,Equity
+IYRI,Neos Real Estate High Income ETF,48.2,No,55,445,Equity
+IYT,Transportation Average Ishares ETF,83.94,No,106,5167,Equity
+IYW,US Technology Ishares ETF,253.57,No,1412,17658,Equity
+IYY,DJ US Ishares ETF,182.2215,No,12,92,Equity
+IYZ,US Telecommunications Ishares ETF,41.6,No,477,4643,Equity
+IZRL,Ark Israel Innovative Technology ETF,29.8,No,N/A,N/A,Equity
+JAAA,Janus AAA Clo ETF,50.64,No,1,2729,Fixed Income
+JAVA,JPM Active Value ETF,79.4,No,8,42,Equity
+JBBB,Janus B-BBB Clo ETF,47.4,No,25,1191,Fixed Income
+JDST,Direxion Daily Junior Gold Miners Bear 2X ETF,35.85,No,150,7509,Portfolio-Multi Asset
+JEPI,JPM Equity Premium Income ETF,56.1,No,2411,31960,Equity
+JEPQ,JPM Nasdaq Equity Premium Income ETF,61.34,No,4426,66533,Fixed Income
+JETS,US Global Jets ETF,31,Yes,56466,287428,Equity
+JHML,JH Largecap Multifactor ETF,89.1066,No,N/A,N/A,Equity
+JIRE,JPM International Research Enhanced Equity ETF,82.7,No,N/A,N/A,Equity
+JMBS,Janus Mortgage-Backed Securities ETF,45.08,No,N/A,N/A,Fixed Income
+JMST,JPM Ultra-Short Municipal Income ETF,50.96,No,N/A,N/A,Fixed Income
+JNK,BBG High Yield Bond SPDR ETF,96.39,No,36,3119,Fixed Income
+JNUG,Direxion Daily Junior Gold Miners Bull 2X ETF,146.39,No,2162,24322,Portfolio-Multi Asset
+JOBX,Tradr 2X Long Joby Daily ETF,22.8,No,11,211,Equity
+JOET,Virtus Terranova U.S. Quality Momentum ETF,45.54,No,1,33,Equity
+JPEM,JPM Diversified Return Emerging Markets Equity E,65.0242,No,2,0,Equity
+JPIN,JPM Diversified Return International Equity ETF,74.33,No,N/A,N/A,Portfolio-Multi Asset
+JPO,Yieldmax JP Option Income Strategy ETF,14.0053,No,1,13,Equity
+JPST,JPM Ultra-Short Income ETF,50.5,No,11,9,Fixed Income
+JPUS,JPM Diversified Return U.S. Equity ETF,138.654,No,N/A,N/A,Portfolio-Multi Asset
+JQUA,JPM U.S. Quality Factor ETF,71.42,No,2,48,Equity
+JUST,GS Just U.S. Large Cap Equity ETF,107.1479,No,N/A,N/A,Equity
+JVAL,JPM U.S. Value Factor ETF,58.3194,No,N/A,N/A,Equity
+JXI,Global Utilities Ishares ETF,83.24,No,1,124,Equity
+JXX,Janus Henderson Transformational Growth ETF,32.886,No,N/A,N/A,Equity
+KARS,KS Electric Vehicles and Future Mobility ETF,33.64,No,N/A,N/A,Equity
+KBA,KS Bosera MSCI China A ETF,34.61,No,34,164,Portfolio-Multi Asset
+KBE,S&P Bank ETF SPDR,65.71,No,233,219366,Equity
+KBWB,Invesco KBW Bank ETF,92.64,No,20109,35164,Portfolio-Multi Asset
+KBWD,Invesco KBW High Dividend Yield Financial ETF,12.29,No,3,1409,Equity
+KBWP,Invesco KBW Property & Casualty Insurance ETF,120.47,No,3,114,Equity
+KBWY,Invesco KBW Premium Yield Equity REIT ETF,17.97,No,1,1242,Equity
+KCCA,KS California Carbon Allowance ETF,16.8418,No,N/A,N/A,Commodity
+KCE,S&P Capital Markets ETF SPDR,154.8674,No,8,105,Equity
+KCOP,Kurv Copper & Mining Enhanced Income ETF,24.13,No,2,225,Equity
+KDEF,Plus Korea Defense Industry Index ETF,48.28,No,13,1428,Equity
+KGRN,KS MSCI China Environment Index ETF,24.47,No,N/A,N/A,Equity
+KHYB,KS Ccbs China Corp High Yield Bond USD ETF,24.24,No,N/A,N/A,Fixed Income
+KIE,S&P Insurance ETF SPDR,58.22,No,94,46340,Equity
+KJD,Kraneshares 2X Long Jd Daily ETF,16.46,No,N/A,N/A,Equity
+KLAG,Leverage Shares 2X Long Klac Daily ETF,57.68,No,49,230,Equity
+KLIP,KS China Internet and Covered Call Strategy ETF,23.88,No,1,359,Equity
+KMLM,Kfa Mount Lucas Index Strategy ETF,27.82,No,3,41,Fixed Income
+KNCT,Invesco Next Gen Connectivity ETF,215.28,No,1,18,Equity
+KNGZ,FT S&P 500 Diversified Dividend Aristocrats ETF,40.56,No,1,214,Equity
+KOLD,Ultrashort Bloomberg Natural Gas -2X ETF,22.2,Yes,6226,59656,Commodity
+KOMP,SPDR Kensho & New Economies Composite ETF,71.45,No,N/A,N/A,Equity
+KORU,Direxion Daily South Korea Bull 3X ETF,1090.74,Yes,8826,35456,Portfolio-Multi Asset
+KPDD,Kraneshares 2X Long Pdd Daily ETF,5.03,No,26,5577,Equity
+KRBN,Kfa Global Carbon ETF,33.38,No,1,56,Equity
+KRE,S&P Regional Banking ETF SPDR,71.72,Yes,150061,2371036,Equity
+KRMA,GX Conscious Companies ETF,47.32,No,N/A,N/A,Equity
+KROP,GX Agtech & Food Innovation ETF,34.3,No,3,29,Equity
+KSA,Ishares MSCI Saudi Arabia ETF,38.6,No,165,5287,Equity
+KSPY,Kraneshares Hedgeye Hedged Equity Index ETF,29.26,No,N/A,N/A,Equity
+KSTR,KS Sse Star Market 50 Index ETF,27.83,No,782,13306,Equity
+KTEC,KS Hang Seng Tech Index ETF,12.78,No,6,317,Equity
+KTUP,T-Rex 2X Long Ktos Daily Target ETF,7.8,No,86,1301,Equity
+KURE,KS MSCI All China Health Care Index ETF,14.7,No,2,360,Equity
+KWEB,KS CSI China Internet ETF,25.24,Yes,83043,3743332,Portfolio-Multi Asset
+LABD,Direxion Daily S&P Biotech Bear 3X ETF,11.29,Yes,1301,30540,Portfolio-Multi Asset
+LABU,Direxion Daily S&P Biotech Bull 3X ETF,206.86,Yes,3058,28161,Portfolio-Multi Asset
+LABX,Tradr 2X Long Alab Daily ETF,170.43,No,314,2633,Equity
+LACG,Leverage Shares 2X Long Lac Daily ETF,7.43,No,4,81,Equity
+LCDL,GraniteShares 2X Long Lcid Daily ETF,0.595,No,3,244,Equity
+LCTD,Blackrock World Ex U.S. Carbon Transition ETF,57.855,No,N/A,N/A,Equity
+LEMB,JPM EM Local Currency Bond,42.42,No,N/A,N/A,Fixed Income
+LEUX,Tradr 2X Long Leu Daily ETF,16.44,No,46,320,Equity
+LFGY,Yieldmax Crypto Industry & Tech Portfolio Option,23.13,No,10,756,Equity
+LIMI,Themes Lithium & Battery Metal Miners ETF,53.8314,No,2,8,Equity
+LIT,GX Lithium & Battery Tech ETF,82.15,No,294,8220,Equity
+LITX,Tradr 2X Long Lite Daily ETF,34.62,No,3698,20096,Equity
+LITZ,Tradr 2X Short Lite Daily ETF,16.73,No,57,343,Equity
+LLYX,Defiance Daily Target 2X Long LLY ETF,23.47,No,527,4301,Equity
+LMBS,FT Low Duration Opportunities ETF,49.85,No,N/A,N/A,Fixed Income
+LOUP,Innovator Deepwater Frontier Tech ETF,95.49,No,23,239,Equity
+LQD,Invst Grade Corp Bond Ishares Iboxx $ ETF,109.07,Yes,19681,1792906,Fixed Income
+LQDH,Int Rate Hedged Corp Bond Ishares ETF,93.26,No,N/A,N/A,Portfolio-Multi Asset
+LRCU,Tradr 2X Long Lrcx Daily ETF,92.87,No,126,993,Equity
+LRGF,USA Multifactor Ishares Edge MSCI ETF,75.62,No,N/A,N/A,Equity
+LRNZ,Trueshares Technology AI & Deep Learning ETF,61.1025,No,1,12,Equity
+LTCC,Canary Litecoin ETF,10.62,No,5,632,Currency
+LTL,Ultra Telecommunications 2X ETF,23.7698,No,6,12,Equity
+LTPZ,Pimco 15  Year U.S. TIPS Index ETF,51.13,No,8,3961,Fixed Income
+LULG,Leverage Shares 2X Long Lulu Daily ETF,5.91,No,14,692,Equity
+LVHI,Franklin Intl Low Vol High Div ETF,40.55,No,1,15,Equity
+MAGA,Point Bridge Gop Stock Tracker ETF,54.8939,No,N/A,N/A,Equity
+MAGC,Roundhill China Magnificent Seven ETF,17.7707,No,5,289,Equity
+MAGS,Roundhill Magnificent Seven ETF,65.44,Yes,23295,106448,Equity
+MAGX,Roundhill Daily 2X Long Magnificent Seven ETF,53.16,No,17,756,Equity
+MAGY,Roundhill Magnificent Seven Covered Call ETF,44.03,No,9,294,Equity
+MAKX,Proshares S&P Kensho Smart Factories ETF,73.1172,No,2,34,Equity
+MARO,Yieldmax Mara Option Income Strategy ETF,6.23,No,94,951,Equity
+MARS,Roundhill Space & Technology ETF,32.83,No,80,2815,Equity
+MAXI,Simplify Bitcoin Strategy Plus Income ETF,8.94,No,11,225,Equity
+MBB,MBS Ishares ETF,94.48,No,2,957,Fixed Income
+MCHI,Ishares MSCI China ETF,52.77,No,1103,18092,Equity
+MCHU,Tradr 2X Long Mchp Daily ETF,25.7717,No,N/A,N/A,Equity
+MDIV,Multiasset Diversified Income Index Fund FT,16.42,No,1,0,Portfolio-Multi Asset
+MDST,Westwood Enhanced Midstream Income ETF,28.57,No,5,73,Fixed Income
+MDY,SPDR S&P Midcap 400 ETF Trust,691,No,142,29033,Equity
+MDYG,S&P Midcap Growth ETF SPDR,110.53,No,4,19,Equity
+MDYV,S&P Midcap Value ETF SPDR,93.46,No,N/A,N/A,Equity
+MEME,Roundhill Meme Stock ETF,10.34,No,139,4798,Equity
+METU,Direxion Daily META Bull 2X ETF,21.52,Yes,5833,64688,Equity
+METV,Roundhill Ball Metaverse ETF,18.66,No,5,124,Equity
+METW,Roundhill META Weeklypay ETF,25.4035,No,1,282,Equity
+MEXX,Direxion Daily MSCI Mexico Bull 3X ETF,31.23,No,2,634,Equity
+MGC,Vanguard Mega Cap ETF,274.85,No,N/A,N/A,Equity
+MGK,Vanguard Mega Cap Growth ETF,88.57,No,46,16556,Equity
+MGV,Vanguard Mega Cap Value ETF,162.27,No,N/A,N/A,Equity
+MIDU,Mid Cap Bull 3X ETF,71.24,No,5,1356,Equity
+MILN,GX Millennial Consumer ETF,43.26,No,N/A,N/A,Equity
+MINT,Pimco Enhanced Short Maturity Active ETF,100.72,No,3,18,Fixed Income
+MISL,FT Indxx Aerospace & Defense ETF,46.4,No,2,92,Equity
+MJ,Amplify Alternative Harvest ETF,25.19,No,225,2918,Equity
+MKOR,Matthews Korea Active ETF,70.93,No,2,28,Equity
+MLPA,GX MLP ETF,52.01,No,1,235,Equity
+MLPX,GX MLP & Energy Infrastructure ETF,72.25,No,4,1000,Equity
+MMTM,S&P 1500 Momentum Tilt ETF SPDR,314.0794,No,N/A,N/A,Equity
+MNA,Nyli Merger Arbitrage ETF,36.3389,No,N/A,N/A,Portfolio-Multi Asset
+MNRS,Grayscale Bitcoin Miners ETF,48.6056,No,2,722,Equity
+MOAT,Vaneck Morningstar Wide Moat ETF,102.12,No,97,281,Equity
+MOO,Vaneck Agribusiness ETF,76.96,No,89,3815,Equity
+MORT,Vaneck Mortgage REIT Income ETF,10.08,No,15,4223,Portfolio-Multi Asset
+MPG,Leverage Shares 2X Long MP Daily ETF,7.02,No,35,443,Alternative
+MPWX,Tradr 2X Long Mpwr Daily ETF,22.117,No,2,65,Equity
+MQQQ,Tradr 2X Long Innovation 100 Monthly ETF,248.5,No,8,16,Equity
+MRAL,GraniteShares 2X Long Mara Daily ETF,75.1,No,42,686,Equity
+MRNY,Yieldmax Mrna Option Income Strategy ETF,18.4,No,31,611,Equity
+MSFD,Direxion Daily MSFT Bear 1X ETF,14.22,No,19,213,Equity
+MSFL,GraniteShares 2X Long MSFT Daily ETF,15.33,No,398,8478,Equity
+MSFO,Yieldmax MSFT Option Income Strategy ETF,10.6999,No,21,732,Equity
+MSFU,Direxion Daily MSFT Bull 2X ETF,23.21,No,9400,69474,Equity
+MSFW,Roundhill MSFT Weeklypay ETF,25.3682,No,4,257,Equity
+MSFX,T-Rex 2X Long Microsoft Daily Target ETF,15.3,No,46,1427,Equity
+MSFY,Kurv Yield Premium Microsoft [Msft] ETF,16.7111,No,1,45,Equity
+MSOS,Advisorshares Pure US Cannabis ETF,4.99,Yes,20146,613159,Equity
+MSOX,Advisorshares Msos 2X Daily ETF,3.29,No,1844,37654,Equity
+MST,Defiance Leveraged Long Income Mstr ETF,12.51,No,20,354,Equity
+MSTU,T-Rex 2X Long Mstr Daily Target ETF,2.86,Yes,33797,276890,Equity
+MSTW,Roundhill Mstr Weeklypay ETF,4.58,No,48,1467,Equity
+MSTX,Defiance Daily Target 1.75X Long Mstr ETF,13.08,Yes,11423,196943,Equity
+MSTY,Yieldmax Mstr Option Income Strategy ETF,15.7,No,1979,43198,Portfolio-Multi Asset
+MSTZ,T-Rex 2X Inverse Mstr Daily Target ETF,10.59,Yes,4465,30012,Equity
+MTBA,Simplify MBS ETF,49.22,No,1,35,Fixed Income
+MTUM,Ishares MSCI USA Momentum Factor ETF,338.52,No,6103,140225,Portfolio-Multi Asset
+MTYY,GraniteShares YieldBoost Mstr ETF,21.05,No,2,81,Equity
+MUB,Natl Muni Bond Ishares ETF,107.33,No,172,32508,Fixed Income
+MULL,GraniteShares 2X Long MU Daily ETF,940.77,No,1838,12626,Equity
+MUNI,Pimco Intermediate Municipal Bond Active ETF,52.49,No,1,316,Fixed Income
+MUU,Direxion Daily MU Bull 2X ETF,1080.08,No,4309,14035,Equity
+MVLL,GraniteShares 2X Long MRVL Daily ETF,193.56,No,3735,11288,Equity
+MVV,Ultra Midcap400 2X ETF,89.2,No,16,5,Equity
+MXI,Global Materials Ishares ETF,110.24,No,1,114,Equity
+MYY,Short Midcap400 -1X ETF,15.3166,No,N/A,N/A,Equity
+MZZ,Ultrashort Midcap400 -2X ETF,5.94,No,N/A,N/A,Equity
+NAIL,Direxion Daily Homebuilders Bull 3X ETF,45.75,Yes,6651,65922,Equity
+NANC,Unusual Whales Democratic Trades ETF,49.94,No,15,189,Equity
+NANR,S&P North American Natural SPDR,78.04,No,N/A,N/A,Portfolio-Multi Asset
+NASA,Tema Space Innovators ETF,31.25,Yes,18553,191464,Equity
+NBIG,Leverage Shares 2X Long Nbis Daily ETF,43.67,No,1366,17932,Alternative
+NBIZ,Tradr 2X Short Nbis Daily ETF,6.58,No,388,3375,Equity
+NCIQ,Hashdex Nasdaq CME Crypto Index ETF,15.64,No,1,143,Currency
+NEAR,Short Maturity Bond Ishares ETF,50.58,No,N/A,N/A,Portfolio-Multi Asset
+NEBX,Tradr 2X Long Nbis Daily ETF,64.71,No,2212,28640,Equity
+NEMG,Leverage Shares 2X Long Nem Daily ETF,17,No,2,73,Equity
+NERD,Roundhill Video Games ETF,19.8301,No,29,4,Equity
+NETG,Leverage Shares 2X Long Net Daily ETF,11.31,No,40,368,Equity
+NFLP,Kurv Yield Premium Netflix [Nflx] ETF,19.65,No,4,58,Equity
+NFLU,T-Rex 2X Long NFLX Daily Target ETF,19.62,No,177,8601,Equity
+NFLW,Roundhill NFLX Weeklypay ETF,18.1935,No,1,250,Equity
+NFLY,Yieldmax NFLX Option Income Strategy ETF,8.52,No,34,812,Equity
+NFTY,FT India Nifty 50 Equal Weight ETF,53.96,No,4,31,Equity
+NIOG,Leverage Shares 2X Long Nio Daily ETF,12.78,No,1,81,Equity
+NLR,Vaneck Uranium & Nuclear Energy ETF,126.94,No,229,9097,Equity
+NOBL,S&P 500 Dividend Aristocrats ETF,54.95,No,216,8672,Portfolio-Multi Asset
+NUG,Leverage Shares 2X Long Nu Daily ETF,8.16,No,3,6,Equity
+NUGT,Direxion Daily Gold Miners Bull 2X ETF,141.46,Yes,4208,33780,Equity
+NUKZ,Nuclear Renaissance Index ETF,71.45,No,373,3995,Equity
+NVD,GraniteShares -2X Short NVDA Daily ETF,4.75,No,470,17547,Equity
+NVDD,Direxion Daily NVDA Bear 1X ETF,32.6,No,13,2085,Equity
+NVDG,Leverage Shares 2X Long NVDA Daily ETF,18.96,No,332,4119,Equity
+NVDL,GraniteShares 2X Long NVDA Daily ETF,99.73,Yes,30738,169342,Equity
+NVDQ,T-Rex 2X Inverse Nvidia Daily Target ETF,10.9,No,94,1834,Equity
+NVDS,Tradr 1.5X Short NVDA Daily ETF,21.21,No,66,2084,Equity
+NVDU,Direxion Daily NVDA Bull 2X ETF,133.24,No,743,11740,Equity
+NVDW,Roundhill NVDA Weeklypay ETF,38.56,No,31,795,Equity
+NVDX,T-Rex 2X Long Nvidia Daily Target ETF,18.93,Yes,5525,65525,Equity
+NVDY,Yieldmax NVDA Option Income Strategy ETF,13.08,No,836,29449,Equity
+NVOX,Defiance Daily Target 2X Long Nvo ETF,13.16,No,27,1828,Equity
+NVTX,Tradr 2X Long Nvts Daily ETF,91.51,No,87,1727,Equity
+NVYY,GraniteShares YieldBoost NVDA ETF,13.09,No,11,220,Equity
+NXPX,Tradr 2X Long Nxpi Daily ETF,22.0832,No,N/A,N/A,Equity
+OACP,Oneascent Core Plus Bond ETF,22.765,No,N/A,N/A,Fixed Income
+OARK,Yieldmax Innovation Option Income Strategy ETF,31.5474,No,14,48,Equity
+ODDS,Pacer Bluestar Digital Entertainment ETF,24.2,No,N/A,N/A,Equity
+ODTE,Vegashares SPX Ndx Rty Premium Income ETF,27.22,No,4,115,Equity
+OEF,S&P 100 Ishares ETF,368.66,No,36,3615,Equity
+OGIG,Alps O'Shares Global Internet Giants ETF,44.42,No,3,14,Equity
+OIH,Vaneck Oil Services ETF,385.49,No,2155,43680,Equity
+OILK,Crude Oil Strategy K-1 Free ETF,49.96,No,555,8289,Commodity
+OKLL,Defiance Daily Target 2X Long Oklo ETF,6.85,No,2969,37500,Equity
+OKTG,Leverage Shares 2X Long Okta Daily ETF,21.59,No,16,155,Equity
+OMAH,Vistashares Target 15 Berkshire Select Income Et,18.58,No,15,3829,Equity
+OMFL,Invesco Russell 1000 Dynamic Multifactor ETF,68.56,No,10,38,Equity
+OND,Proshares On-Demand ETF,34.6253,No,N/A,N/A,Equity
+ONDG,Leverage Shares 2X Long Onds Daily ETF,4.27,No,148,4443,Equity
+ONDU,Tradr 2X Long Onds Daily ETF,6.93,No,178,1228,Equity
+ONEQ,Nasdaq Composite ETF,104.25,No,36,820,Equity
+ONEY,Russell 1000 Yield Focus ETF SPDR,127.9765,No,2,5,Portfolio-Multi Asset
+ONLN,Online Retail ETF,55.38,No,N/A,N/A,Equity
+ONX,Tradr 2X Long On Daily ETF,22.5231,No,N/A,N/A,Equity
+OPEG,Leverage Shares 2X Long Open Daily ETF,4.16,No,3,63,Equity
+OPEX,Tradr 2X Long Open Daily ETF,16.65,No,7,374,Equity
+OPPE,Wisdomtree Europe Hedged Smallcap Equity Fund,57.21,No,N/A,N/A,Equity
+OPPJ,Wisdomtree Japan Opportunities Fund,60.11,No,6,111,Equity
+ORBX,Global X Space Tech ETF,54,No,38,1795,Equity
+ORCX,Defiance Daily Target 2X Long Orcl ETF,37.17,No,863,24308,Equity
+ORLG,Leverage Shares 2X Long Orly Daily ETF,11.54,No,9,23,Equity
+ORR,Militia Long/Short Equity ETF,37.07,No,330,8578,Equity
+OSCG,Leverage Shares 2X Long Oscr Daily ETF,26.43,No,5,63,Equity
+OUNZ,Vaneck Merk Gold ETF,40.55,No,49,2199,Commodity
+OUSA,Alps O'Shares U.S. Quality Dividend ETF,57.75,No,N/A,N/A,Equity
+OZEM,Roundhill Glp-1 & Weight Loss ETF,30.39,No,25,2210,Equity
+PAAU,T-Rex 2X Long Paas Daily Target ETF,14.1629,No,4,26,Equity
+PALC,Pacer Large Cap Multi-Factor Alternator ETF,58.7811,No,N/A,N/A,Equity
+PALL,Physical Palladium ETF,23.23,No,3167,106826,Commodity
+PAMC,Pacer Lunt Midcap Multi-Factor Alternator ETF,55.0661,No,N/A,N/A,Equity
+PANG,Leverage Shares 2X Long Panw Daily ETF,23.06,No,74,1064,Equity
+PATX,Tradr 2X Long Path Daily ETF,7.06,No,4,245,Equity
+PAVE,GX U.S. Infrastructure Development ETF,58.56,No,149,5715,Equity
+PAWZ,Pet Care ETF,47.3168,No,1,23,Equity
+PBD,Invesco Global Clean Energy ETF,20.2999,No,N/A,N/A,Equity
+PBE,Invesco Biotechnology & Genome ETF,84.6404,No,2,15,Equity
+PBW,Invesco Wilderhill Clean Energy ETF,41.54,No,87,2735,Equity
+PCEF,Invesco CEF Income Composite ETF,20.29,No,1,27,Portfolio-Multi Asset
+PCY,Invesco Emerging Markets Sovereign Debt ETF,21.85,No,1,48,Fixed Income
+PDBA,Invesco Agriculture Commodity Strategy No K-1 Et,35.52,No,3,728,Commodity
+PDBC,Invesco Optimum Yield Diversified Commodity Stra,16.5,No,18,23210,Commodity
+PDP,Invesco Dorsey Wright Momentum ETF,150.88,No,1,99,Equity
+PEJ,Invesco Leisure and Entertainment ETF,65.47,No,5,413,Equity
+PEX,Global Listed Private Equity ETF,21.7038,No,1,47,Portfolio-Multi Asset
+PEY,Invesco High Yield Equity Dividend Achievers ETF,22.83,No,891,1734,Equity
+PEZ,Invesco Dorsey Wright Consumer Cyclicals Momentu,103.05,No,1,13,Equity
+PFF,US Preferred Stock Ishares ETF,31.23,No,553,21933,Fixed Income
+PFFA,Virtus Infracap U.S. Preferred Stock ETF,21.34,No,7,2430,Alternative
+PFFD,GX U.S. Preferred ETF,18.89,No,N/A,N/A,Equity
+PFFV,GX Variable Rate Preferred ETF,22.2437,No,N/A,N/A,Alternative
+PFIX,Simplify Interest Rate Hedge ETF,43.52,No,10,197,Fixed Income
+PFXF,Vaneck Prfd Securities Ex Financials ETF,18.5,No,2,138,Equity
+PGF,Invesco Financial Preferred ETF,13.865,No,3,204,Equity
+PGJ,Invesco Golden Dragon China ETF,23.48,No,6,293,Equity
+PGX,Invesco Preferred ETF,10.99,No,26,437,Fixed Income
+PHO,Invesco Water Resources ETF,67.36,No,6,1207,Equity
+PICK,Ishares MSCI Metals & Mining Producers Fund,62.91,No,182,4638,Equity
+PID,Invesco Intl Dividend Achievers ETF,22.43,No,N/A,N/A,Equity
+PIE,Invesco Dorsey Wright Emerging Markets Momentum,34.08,No,N/A,N/A,Equity
+PILL,Direxion Daily Pharma & Medical Bull 3X ETF,14.1,No,7,357,Equity
+PINK,Simplify Health Care ETF,36.95,No,26,82,Equity
+PIO,Invesco Global Water ETF,45.03,No,4,8,Equity
+PIT,Vaneck Commodity Strategy ETF,67.74,No,13,24,Fixed Income
+PIZ,Invesco Dorsey Wright Developed Markets Momentum,57.5,No,N/A,N/A,Equity
+PJP,Invesco Pharmaceuticals ETF,111.63,No,N/A,N/A,Equity
+PKB,Invesco Building & Construction ETF,110.4,No,2,37,Equity
+PKW,Invesco Buyback Achievers ETF,138.09,No,2,21,Equity
+PLTD,Direxion Daily Pltr Bear 1X ETF,8.16,No,103,893,Equity
+PLTG,Leverage Shares 2X Long Pltr Daily ETF,11.12,No,255,4226,Equity
+PLTU,Direxion Daily Pltr Bull 2X ETF,31.36,No,1119,14824,Equity
+PLTW,Roundhill Pltr Weeklypay ETF,19,No,380,1725,Equity
+PLTY,Yieldmax Pltr Option Income Strategy ETF,31.32,No,126,4302,Equity
+PLUL,Leverage Shares 2X Long Plug Daily ETF,15.09,No,4,132,Equity
+PLYY,GraniteShares YieldBoost Pltr ETF,9.22,No,1,71,Equity
+PNQI,Invesco Nasdaq Internet ETF,45.94,No,N/A,N/A,Equity
+PONX,Tradr 2X Long Pony Daily ETF,4.7309,No,7,163,Equity
+POW,Vistashares Electrification Supercycle ETF,31.27,No,13,129,Equity
+POWR,Ishares Global Energy Producers Fund,27.66,No,16,568,Equity
+PPA,Invesco Aerospace & Defense ETF,175.31,No,60,889,Equity
+PPH,Vaneck Pharmaceutical ETF,102.53,No,30,1101,Equity
+PPI,Axs Astoria Inflation Sensitive ETF,21.44,No,4,15,Portfolio-Multi Asset
+PPLT,Physical Platinum ETF,15.37,No,7957,379163,Commodity
+PRF,Invesco RAFI US 1000 ETF,53.86,No,N/A,N/A,Equity
+PRFZ,Invesco RAFI US 1500 Small-Mid ETF,53.31,No,N/A,N/A,Equity
+PRN,Invesco Dorsey Wright Industrials Momentum ETF,255.33,No,16,68,Equity
+PRNT,3D Printing ETF,25.51,No,53,157,Equity
+PSCE,Invesco S&P Smallcap Energy ETF,55.87,No,2,717,Equity
+PSCF,Invesco S&P Smallcap Financials ETF,63.44,No,6,55,Equity
+PSCH,Invesco S&P Smallcap Health Care ETF,48.54,No,2,51,Equity
+PSCT,Invesco S&P Smallcap Information Technology ETF,86.99,No,1,135,Equity
+PSI,Invesco Semiconductors ETF,178.23,No,49,909,Equity
+PSIL,Advisorshares Psychedelics ETF,20.0904,No,16,1024,Equity
+PSK,SPDR ICE Preferred Securities ETF,30.87,No,N/A,N/A,Fixed Income
+PSL,Invesco Dorsey Wright Consumer Staples Momentum,109.84,No,2,1,Equity
+PSP,Invesco Global Listed Private Equity ETF,58.23,No,150,473,Equity
+PSQ,Short QQQ -1X ETF,25.18,No,205,19462,Equity
+PST,Ultrashort Lehman 7-10 Year Treasury -2X ETF,22.9612,No,4,1170,Fixed Income
+PTBD,Pacer Trendpilot US Bond ETF,19.2572,No,N/A,N/A,Fixed Income
+PTF,Invesco Dorsey Wright Technology Momentum ETF,137.17,No,23,739,Equity
+PTIN,Pacer Trendpilot International ETF,37.3064,No,N/A,N/A,Portfolio-Multi Asset
+PTIR,GraniteShares 2X Long Pltr Daily ETF,11.59,No,3431,46339,Equity
+PTLC,Pacer Trendpilot 750 ETF,58.28,No,N/A,N/A,Equity
+PTNQ,Pacer Trendpilot 100 ETF,89.09,No,N/A,N/A,Equity
+PWB,Invesco Large Cap Growth ETF,166.63,No,4,151,Equity
+PWRD,Tcw Transform Systems ETF,120.25,No,2,13,Equity
+PWZ,Invesco California Amt-Free Municipal Bond Portf,24.42,No,N/A,N/A,Fixed Income
+PXE,Invesco Energy Exploration & Production ETF,33.57,No,2,55,Equity
+PXH,Invesco RAFI Emerging Markets ETF,29.06,No,2,2,Equity
+PXI,Invesco Dorsey Wright Energy Momentum ETF,54.76,No,2,27,Equity
+PXJ,Invesco Oil & Gas Services ETF,40.733,No,11,126,Equity
+PYPG,Leverage Shares 2X Long Pypl Daily ETF,5,No,57,2164,Equity
+PYPY,Yieldmax Pypl Option Income Strategy ETF,24.7325,No,7,47,Equity
+PZA,Invesco National Amt-Free Municipal Bond Etfo,23.49,No,113,1052,Fixed Income
+QABA,FT Nasdaq Aba Community Bank Fund,64.24,No,1,43,Equity
+QAI,Nyli Hedge Multi-Strategy Tracker ETF,36.73,No,1,55,Portfolio-Multi Asset
+QBTX,Tradr 2X Long Qbts Daily ETF,16.16,No,646,13357,Equity
+QBTZ,Defiance Daily Target 2X Short Qbts ETF,3.82,No,60,1407,Equity
+QCLN,FT Nasdaq Clean Edge Green Energy Fund,64.24,No,3,281,Equity
+QCML,GraniteShares 2X Long Qcom Daily ETF,30.31,No,862,8350,Equity
+QDEF,Flexshares Quality Div Def Fund,86.6374,No,N/A,N/A,Equity
+QDIV,GX S&P 500 Quality Dividend ETF,36.7805,No,N/A,N/A,Equity
+QDPL,Pacer Metaurus US Large Cap Divd Multiplier 400,45.73,No,1,10,Equity
+QDTE,Roundhill Innovation-100 0Dte Covered Call ETF,31.51,No,119,3019,Equity
+QDVO,Amplify Cwp Growth & Income ETF,29.93,No,14,206,Equity
+QETH,Invesco Galaxy Ethereum ETF,16.97,No,1,15,Fixed Income
+QGRO,American Century Stoxx U.S. Quality Growth ETF,117.48,No,13,48,Equity
+QGRW,Wisdomtree U.S. Quality Growth Fund,66.26,No,7,41,Equity
+QID,Ultrashort QQQ -2X ETF,13.63,No,2348,28566,Equity
+QLD,Ultra QQQ 2X ETF,97.91,No,2160,55701,Equity
+QMOM,Quantitative Momentum ETF,78.82,No,2,18,Portfolio-Multi Asset
+QNXT,Ishares Nasdaq-100 Ex Top 30 ETF,31.66,No,N/A,N/A,Equity
+QPUX,Defiance 2X Daily Long Pure Quantum ETF,32.88,No,441,2809,Equity
+QPX,Advisorshares Q Dynamic Growth ETF,48.9123,No,N/A,N/A,Portfolio-Multi Asset
+QQEW,FT Nasdaq-100 Select Equal Weight ETF,156.82,No,9,202,Equity
+QQQ,Invesco QQQ Trust Series 1,740.62,Yes,8185228,12878745,Equity
+QQQA,Nasdaq 100 Dorsey Wright Momentum ETF,86.95,No,6,218,Equity
+QQQD,Direxion Daily Magnificent 7 Bear 1X ETF,13.07,No,1,1408,Equity
+QQQE,Nasdaq-100 Equal Weighted Index ETF,121.68,No,29,2773,Equity
+QQQH,Neos Nasdaq-100 Hedged Equity Income ETF,56.35,No,2,90,Fixed Income
+QQQI,Neos Nasdaq 100 High Income ETF,56.75,No,5558,41076,Equity
+QQQJ,Invesco Nasdaq Next Gen 100 ETF,44.6,No,81,1361,Equity
+QQQM,Invesco Nasdaq 100 ETF,304.52,No,2347,38798,Equity
+QQQP,Tradr 2X Long Innovation 100 Quarterly ETF,235.51,No,1,19,Fixed Income
+QQQT,Defiance Nasdaq 100 Income Target ETF,19.08,No,8,241,Equity
+QQQY,Defiance Nasdaq 100 Enhanced Options Income ETF,24.31,No,26,896,Alternative
+QQXT,FT Nasdaq-100 Ex-Technology Sector Fund,96.82,No,30,12,Equity
+QRFT,Qraft Ai-Enhanced U.S. Large Cap ETF,69.7884,No,N/A,N/A,Equity
+QRMI,GX Nasdaq 100 Risk Managed Income ETF,15.73,No,N/A,N/A,Equity
+QTEC,FT Nasdaq-100-Technology Sector Fund,335.18,No,7,83,Equity
+QTOP,Ishares Nasdaq Top 30 Stocks ETF,38.84,No,94,587,Equity
+QTUM,Defiance Quantum ETF,167.96,No,1040,14550,Equity
+QUAL,Ishares MSCI USA Quality Factor ETF,215.89,No,4,239,Portfolio-Multi Asset
+QUBX,Tradr 2X Long Qubt Daily ETF,13.7,No,222,3235,Equity
+QUS,USA Qlty Mix MSCI ETF SPDR,183.85,No,N/A,N/A,Portfolio-Multi Asset
+QVMT,Invesco S&P 500 Concentrated Qvm ETF,68.5881,No,N/A,N/A,Portfolio-Multi Asset
+QYLD,GX Nasdaq-100 Covered Call ETF,18.52,No,1132,14023,Equity
+QYLG,GX Nasdaq 100 Covered Call & Growth ETF,30.61,No,3,22,Equity
+RAAX,Vaneck Inflation Allocation ETF,40.03,No,N/A,N/A,Portfolio-Multi Asset
+RBLU,T-Rex 2X Long Rblx Daily Target ETF,8.23,No,95,650,Equity
+RBLY,Yieldmax Rblx Option Income Strategy ETF,13.57,No,14,190,Equity
+RDTE,Roundhill Russell 2000 0Dte Covered Call ETF,29.17,No,10,138,Equity
+RDTL,GraniteShares 2X Long Rddt Daily ETF,21.46,No,358,4714,Equity
+RDVI,FT Vest Rising Dividend Achievers Target Income,28.87,No,1,57,Equity
+RDVY,FT Rising Dividend Achievers ETF,79.15,No,4,5,Equity
+RDWU,T-Rex 2X Long Rdw Daily Target ETF,14.19,No,418,2438,Equity
+REET,Global REIT Ishares ETF,27.06,No,1,32,Portfolio-Multi Asset
+REGL,S&P Midcap 400 Dividend Aristocrats ETF,90.01,No,2,30,Equity
+REK,Short Real Estate -1X ETF,15.94,No,1,291,Portfolio-Multi Asset
+REM,Mortgage Real Estate Ishares ETF,21.45,No,43,5776,Equity
+REMX,Vaneck Rare Earth Strategic Metals ETF,95.55,No,701,21792,Equity
+RETL,Direxion Daily Retail Bull 3X Shares ETF,8.68,No,200,4673,Equity
+REW,Ultrashort Technology -2X ETF,11.49,No,5,492,Equity
+REZ,Residential and Multisector Real Estate ETF,89.09,No,N/A,N/A,Equity
+RFV,Invesco S&P Midcap 400 Pure Value ETF,142.7236,No,N/A,N/A,Equity
+RGTU,Tradr 2X Long Rgti Daily ETF,23.96,No,17,1183,Equity
+RGTX,Defiance Daily Target 2X Long Rgti ETF,23.13,No,305,5735,Equity
+RGTZ,Defiance Daily Target 2X Short Rgti ETF,3.23,No,340,4760,Equity
+RIET,Hoya Capital High Dividend Yield ETF,9.4728,No,4,113,Alternative
+RING,Ishares MSCI Global Gold Miners ETF,71.35,No,18,622,Equity
+RIOX,Defiance Daily Target 2X Long Riot ETF,63.34,No,21,397,Equity
+RKLX,Defiance Daily Target 2X Long Rklb ETF,52.45,No,2780,13291,Equity
+RLY,SSGA Multi-Asset Real Return ETF SPDR,35.37,No,N/A,N/A,Equity
+ROBN,T-Rex 2X Long HOOD Daily Target ETF,35.7,No,2805,23392,Equity
+ROBO,Global Robotics and Automation ETF,86,No,76,3080,Equity
+ROBT,FT Nasdaq Artificial Intel & Robotics ETF,55.62,No,N/A,N/A,Equity
+RODM,Hartford Multifactor Dev Markets [Ex-Us] ETF,41.04,No,N/A,N/A,Equity
+ROE,Astoria US Quality Kings ETF,42.55,No,1,2,Equity
+ROKT,SPDR Kensho Final Frontiers ETF,117.58,No,18,806,Equity
+ROM,Ultra Technology 2X ETF,157.01,No,26,868,Equity
+RPAR,Rpar Risk Parity ETF,22.8351,No,100,707,Portfolio-Multi Asset
+RPG,Invesco S&P 500 Pure Growth ETF,62.75,No,8,272,Equity
+RPHS,Regents Park Hedged Market Strategy ETF,10.715,No,N/A,N/A,Equity
+RPV,Invesco S&P 500 Pure Value ETF,112.87,No,20,130,Equity
+RSP,Invesco S&P 500 E.W. ETF,209.96,Yes,12675,360045,Equity
+RSPD,Invesco S&P 500 E.W. Consumer Discretionary ETF,56.08,No,6,31,Equity
+RSPF,Invesco S&P 500 E.W. Financial ETF,77.26,No,N/A,N/A,Equity
+RSPG,Invesco S&P 500 E.W. Energy ETF,97.27,No,N/A,N/A,Equity
+RSPH,Invesco S&P 500 E.W. Health Care ETF,31.51,No,1,123,Equity
+RSPM,Invesco S&P 500 E.W. Materials ETF,39.4787,No,N/A,N/A,Equity
+RSPN,Invesco S&P 500 E.W. Industrials Portfolio,62.55,No,N/A,N/A,Equity
+RSPR,Invesco S&P 500 E.W. Real Estate ETF,36.114,No,10,27,Portfolio-Multi Asset
+RSPT,Invesco S&P 500 E.W. Technology ETF,63.93,No,36,505,Equity
+RSPU,Invesco S&P 500 E.W. Utilities ETF,79.53,No,8,183,Portfolio-Multi Asset
+RTH,Vaneck Retail ETF,256.77,No,24,166,Equity
+RWJ,Invesco S&P Smallcap 600 Revenue ETF,58.3,No,2,30,Equity
+RWK,Invesco S&P Midcap 400 Revenue ETF,144.146,No,N/A,N/A,Equity
+RWL,Invesco S&P 500 Revenue ETF,127.31,No,N/A,N/A,Equity
+RWM,Short Russell 2000 -1X ETF,13.64,No,28,3140,Equity
+RWR,DJ REIT ETF SPDR,110.52,No,20,1805,Equity
+RWX,DJ Intl Real Estate ETF SPDR,26.8949,No,N/A,N/A,Equity
+RXD,Ultrashort Health Care -2X ETF,19.55,No,N/A,N/A,Equity
+RXL,Ultra Health Care 2X ETF,46.827,No,1,98,Equity
+RYLD,GX Russell 2000 Covered Call ETF,16.01,No,17,4394,Portfolio-Multi Asset
+RYLG,GX Russell 2000 Covered Call & Growth ETF,24.5283,No,1,9,Equity
+RZG,Invesco S&P Smallcap 600 Pure Growth ETF,69.2575,No,N/A,N/A,Equity
+RZV,Invesco S&P Smallcap 600 Pure Value ETF,144.3127,No,N/A,N/A,Equity
+SAA,Ultra Smallcap600 2X ETF,35.3628,No,1,7,Equity
+SARK,Tradr 1X Short Innovation Daily ETF,27.24,No,40,601,Equity
+SATG,Leverage Shares 2X Long Sats Daily ETF,12.76,No,435,4065,Equity
+SATO,Invesco Alerian Galaxy Crypto Economy ETF,18.2892,No,N/A,N/A,Equity
+SBB,Short Smallcap600 -1X ETF,22.9949,No,N/A,N/A,Equity
+SBIO,Alps Medical Breakthroughs ETF,55.11,No,12,78,Portfolio-Multi Asset
+SBIT,Proshares Ultrashort Bitcoin ETF,61.3,No,435,4314,Currency
+SBTU,T-Rex 2X Long Sbet Daily Target ETF,1.89,No,8,333,Equity
+SBU,Leverage Shares 2X Long Sbux Daily ETF,19.32,No,1,96,Equity
+SCC,Ultrashort Consumer Services -2X ETF,14.6776,No,26,370,Equity
+SCHA,Schwab U.S. Smallcap ETF,35.19,No,1050,2049,Equity
+SCHB,Schwab U.S. Broad Market ETF,28.97,No,126,5079,Equity
+SCHC,Schwab Intl Smallcap Equity ETF,49.36,No,1,90,Equity
+SCHD,Schwab US Dividend Equity ETF,31.86,Yes,19342,140298,Equity
+SCHE,Schwab Emrg Mkts Equity ETF,36.88,No,2,230,Equity
+SCHF,Schwab Intl Equity ETF,28.23,No,100,2736,Equity
+SCHG,Schwab U.S. Largecap Growth ETF,33.9,No,812,14001,Equity
+SCHH,Schwab U.S. REIT ETF,23.38,No,1,182,Equity
+SCHI,Schwab 5-10 Year Corp Bond ETF,22.59,No,5,202,Fixed Income
+SCHK,Schwab 1000 Index ETF,36.13,No,4,94,Equity
+SCHM,Schwab U.S. Mid Cap ETF,36.09,No,7,83,Equity
+SCHO,Schwab Short-Term U.S. Treasury ETF,24.1,No,19,133,Fixed Income
+SCHP,Schwab U.S. TIPS ETF,26.49,No,5,801,Fixed Income
+SCHR,Schwab Int-Term U.S. Treasury ETF,24.61,No,2,141,Fixed Income
+SCHV,Schwab U.S. Largecap Value ETF,34.56,No,16,251,Equity
+SCHX,Schwab U.S. Largecap ETF,29.49,No,46,2312,Equity
+SCHY,Schwab International Dividend Equity ETF,31.97,No,6,429,Equity
+SCHZ,Schwab US Aggregate Bond ETF,23.12,No,6,21,Fixed Income
+SCJ,Ishares MSCI Japan Sm Cap,105.57,No,24,161,Equity
+SCO,Ultrashort Bloomberg Crude Oil -2X ETF,31.84,Yes,18166,329394,Commodity
+SCZ,Ishares MSCI EAFE Small-Cap ETF,83.6,No,10,1410,Equity
+SDCI,Uscf Summerhaven Dynamic Commodity Strategy No K,26.52,No,1,262,Commodity
+SDD,Ultrashort Smallcap600 -2X ETF,8.7064,No,1,20,Equity
+SDEM,GX MSCI Superdividend EM ETF,32.5902,No,N/A,N/A,Equity
+SDIV,GX Superdividend ETF,24.18,No,55,1905,Equity
+SDOG,Alps Sector Dividend Dogs ETF,67.63,No,5,7,Equity
+SDOW,Ultrapro Short Dow 30 -3X ETF,25.38,No,1277,34441,Portfolio-Multi Asset
+SDP,Ultrashort Utilities -2X ETF,22.4915,No,8,22,Equity
+SDS,Ultrashort S&P500 -2X ETF,57.35,No,759,32032,Equity
+SDVY,FT Smid Cap Rising Dividend Achievers ETF,42.22,No,N/A,N/A,Equity
+SDY,S&P Dividend SPDR,150.5,No,90,1941,Equity
+SEA,U.S. Global Sea To Sky Cargo ETF,16.745,No,3,168,Equity
+SECT,Northern IV Main Sector Rotation ETF,71.94,No,N/A,N/A,Equity
+SEF,Short Financials -1X ETF,31.71,No,1,263,Equity
+SETH,Proshares Short Ether Strategy ETF,54.39,No,3,88,Currency
+SFY,Sofi Select 500 ETF,149.88,No,1,131,Equity
+SFYF,Sofi 50 ETF,62.841,No,3,3,Equity
+SGDJ,Alps Sprott Junior Gold,83.09,No,11,490,Portfolio-Multi Asset
+SGDM,Sprott Gold Miners ETF,68.07,No,13,860,Portfolio-Multi Asset
+SGOL,Physical Gold ETF,40.16,No,956,14521,Commodity
+SGOV,Ishares 0-3 Month Treasury Bond ETF,100.59,No,611,12495,Fixed Income
+SH,Short S&P500 -1X ETF,33.28,No,609,40776,Equity
+SHE,SSGA Gender Diversity ETF SPDR,155.1077,No,2,119,Portfolio-Multi Asset
+SHLD,GX Defense Tech ETF,62.3,No,815,22135,Equity
+SHM,Short-Term Muni Bond ETF SPDR,47.935,No,N/A,N/A,Fixed Income
+SHV,Short Treasury Bond Ishares ETF,110.26,No,14,383,Fixed Income
+SHY,1-3 Year Treasury Bond Ishares ETF,81.99,No,53,42443,Fixed Income
+SHYG,0-5 Year High Yield Corp Bond Ishares ETF,42.43,No,N/A,N/A,Portfolio-Multi Asset
+SIJ,Ultrashort Industrials -2X ETF,16.3998,No,N/A,N/A,Equity
+SIL,GX Silver Miners ETF,83.73,No,4715,151952,Equity
+SILJ,Amplify Junior Silver Miners ETF,27.92,Yes,88479,636652,Equity
+SIVR,Physical Silver ETF,62.55,No,756,59096,Commodity
+SIZE,Ishares MSCI USA Size Factor ETF,175.4,No,N/A,N/A,Portfolio-Multi Asset
+SJB,Short High Yield -1X ETF,15.31,No,15,4697,Fixed Income
+SJNK,BBG Short Term High Yield Bond SPDR ETF,25.04,No,N/A,N/A,Fixed Income
+SKF,Ultrashort Financials -2X ETF,26.46,No,8,546,Equity
+SKRE,Tuttle Capital Daily 2X Inverse Regional Banks E,6.95,No,13,237,Equity
+SKYU,Ultra Nasdaq Cloud Computing 2X ETF,34.83,No,2,67,Equity
+SKYY,FT Cloud Computing ETF,131.88,No,18,1519,Equity
+SLON,Proshares Ultra Solana ETF,16.16,No,4,1793,Currency
+SLV,Silver Trust Ishares,59.51,Yes,508444,8308558,Commodity
+SLVP,Ishares MSCI Global Silver and Metals Miners ETF,33.05,No,145,7961,Equity
+SLVR,Sprott Silver Miners & Physical Silver ETF,54.22,No,282,18546,Portfolio-Multi Asset
+SLX,Vaneck Steel ETF,105.35,No,105,1105,Equity
+SLYG,S&P Smallcap Growth ETF SPDR,114.17,No,8,25,Equity
+SLYV,S&P Smallcap Value ETF SPDR,106.8,No,55,54,Equity
+SMB,Vaneck Short Muni ETF,17.345,No,N/A,N/A,Fixed Income
+SMCL,GraniteShares 2X Long SMCI Daily ETF,41.82,No,230,5268,Equity
+SMCX,Defiance Daily Target 2X Long SMCI ETF,10.18,No,3643,41674,Equity
+SMCY,Yieldmax SMCI Option Income Strategy ETF,5.23,No,498,4584,Equity
+SMDD,Ultrapro Short Midcap 400 -3X ETF,7.88,No,5,28,Portfolio-Multi Asset
+SMDV,Russell 2000 Dividend Growers ETF,74.652,No,2,31,Portfolio-Multi Asset
+SMH,Vaneck Semiconductor ETF,659.88,Yes,529818,2946633,Equity
+SMHX,Vaneck Fabless Semiconductor ETF,66.28,No,26,520,Equity
+SMIN,Ishares MSCI India Small Cap ETF,69.43,No,44,385,Equity
+SMLF,USA Multifactor Smallcap Ishares Edge MSCI ETF,87.04,No,2,120,Equity
+SMLL,Harbor Active Small Cap ETF,20.6613,No,N/A,N/A,Equity
+SMMD,Russell 2500 Ishares ETF,90.12,No,4,2,Equity
+SMN,Ultrashort Basic Materials -2X ETF,19.7317,No,2,11,Equity
+SMOG,Vaneck Low Carbon Energy ETF,147.8014,No,1,43,Equity
+SMOT,Vaneck Morningstar Smid Moat ETF,38.4166,No,N/A,N/A,Equity
+SMST,Defiance Daily Target 1.5X Short Mstr ETF,53.95,No,121,1567,Equity
+SMU,Tradr 2X Long Smr Daily ETF,11.69,No,109,2963,Equity
+SMUP,T-Rex 2X Long Smr Daily Target ETF,9.11,No,32,765,Equity
+SMZ,Tradr 2X Short Smr Daily ETF,16.9,No,2,46,Equity
+SNAG,Leverage Shares 2X Long Snap Daily ETF,4.51,No,18,41,Equity
+SNDQ,Tradr 2X Short Sndk Daily ETF,2.86,No,7212,34584,Equity
+SNDU,T-Rex 2X Long Sndk Daily Target ETF,68.27,No,3176,22740,Equity
+SNK,GraniteShares 2X Short SpaceX Daily ETF,15.97,No,N/A,N/A,Equity
+SNOU,T-Rex 2X Long Snow Daily Target ETF,34.62,No,113,1531,Equity
+SNOY,Yieldmax Snow Option Income Strategy ETF,10.01,No,6,183,Equity
+SNPE,Xt S&P 500 ESG ETF,68.68,No,1,5,Equity
+SNSR,GX Internet of Things ETF,51.28,No,2,10,Equity
+SNXX,Tradr 2X Long Sndk Daily ETF,42.78,No,36274,400385,Equity
+SOCL,GX Social Media ETF,45.09,No,1,46,Equity
+SOEZ,Franklin Solana ETF,12.0318,No,2,71,Currency
+SOFX,Defiance Daily Target 2X Long Sofi ETF,10.36,No,1138,14311,Equity
+SOLC,Canary Marinade Solana ETF,13.84,No,N/A,N/A,Currency
+SOLT,Volatility Shares 2X Solana ETF,29.16,No,1620,40395,Equity
+SOLZ,Volatility Shares Solana ETF,6.94,No,1449,22541,Equity
+SOXL,Direxion Daily Semiconductor Bull 3X ETF,279.29,Yes,270699,1054305,Equity
+SOXQ,Invesco PHLX Semiconductor ETF,112.78,No,396,3358,Equity
+SOXS,Direxion Daily Semiconductor Bear 3X ETF,3.59,Yes,383770,1280909,Equity
+SOXX,Semiconductor Ishares ETF,639.45,Yes,68422,401145,Equity
+SOXY,Yieldmax Target 12 Semiconductor Option Income E,112.4003,No,5,106,Equity
+SOYB,Teucrium Soybean,24.27,No,92,18435,Commodity
+SPAB,SPDR Aggregate Bond Portfolio ETF,25.5,No,16,34,Fixed Income
+SPAL,GraniteShares 2X Long SpaceX Daily ETF,31.6855,No,N/A,N/A,Equity
+SPBO,Issuer Scd Corp Bond SPDR,29.03,No,N/A,N/A,Fixed Income
+SPCG,Tradr 2X Short SpaceX Daily ETF,16.16,No,N/A,N/A,Equity
+SPCH,Leverage Shares 2X Long Spcx Daily ETF,18.97,No,N/A,N/A,Equity
+SPCI,Tuttle Capital Space Industry Income Blast ETF,31.79,No,1,55,Equity
+SPCK,The Spac and New Issue ETF,22.24,No,3,276,Equity
+SPCL,Defiance Pure Space Daily 2X Strategy ETF,57.45,No,N/A,N/A,Equity
+SPCM,Tradr 2X Long SpaceX Daily ETF,31.87,No,N/A,N/A,Equity
+SPCU,Defiance Daily Target 2X Long SpaceX ETF,25.39,No,N/A,N/A,Equity
+SPDN,Direxion Daily S&P 500 Bear 1X ETF,8.73,No,55,3579,Equity
+SPDW,SPDR World Ex-US Portfolio ETF,51.83,No,12,293,Equity
+SPEM,SPDR Emerging Markets Portfolio ETF,53.08,No,5,234,Equity
+SPEU,Stoxx Europe 50 SPDR,55.5355,No,2,138,Equity
+SPGM,SPDR Portfolio MSCI Global Stock Market ETF,86.08,No,1,44,Equity
+SPGP,Invesco S&P 500 Garp ETF,120.41,No,2,105,Portfolio-Multi Asset
+SPHB,Invesco S&P 500 High Beta ETF,155.04,No,44,867,Equity
+SPHD,Invesco S&P 500 High Dividend Low Volatility ETF,49.95,No,107,2008,Equity
+SPHQ,Invesco S&P 500 Quality ETF,89.36,No,2,255,Equity
+SPHY,SPDR Portfolio High Yield Bond ETF,23.44,No,11,409,Fixed Income
+SPIB,SPDR Intermediate Term Corporate Bond Portfolio,33.39,No,3,94,Fixed Income
+SPIP,TIPS Barclays ETF SPDR,25.67,No,1,296,Fixed Income
+SPLB,SPDR Long Term Corporate Bond Portfolio ETF,22.45,No,4,197,Fixed Income
+SPLV,Invesco S&P 500 Low Volatility ETF,73.09,No,78,2523,Portfolio-Multi Asset
+SPMB,Mortgage Backed Bond ETF SPDR,22.29,No,2,16,Fixed Income
+SPMD,SPDR Mid Cap Portfolio ETF,66.57,No,2,116,Equity
+SPMO,Invesco S&P 500 Momentum ETF,159.9,No,2526,17783,Portfolio-Multi Asset
+SPOG,Leverage Shares 2X Long Spot Daily ETF,6.55,No,52,265,Equity
+SPRX,Spear Alpha ETF,57.93,No,42,408,Equity
+SPSB,SPDR Short-Term Corporate Bond Portfolio ETF,29.96,No,2,426,Fixed Income
+SPSM,SPDR Small Cap Portfolio ETF,55.86,No,49,3360,Portfolio-Multi Asset
+SPTI,Interm Term Treasury ETF SPDR,28.31,No,N/A,N/A,Fixed Income
+SPTL,SPDR Long Term Treasury Portfolio ETF,26.3,No,7,1991,Fixed Income
+SPTM,SPDR Total Stock Market Portfolio ETF,90.91,No,12,867,Equity
+SPTS,SPDR Short-Term Treasury Portfolio ETF,28.97,No,N/A,N/A,Fixed Income
+SPUU,Direxion Daily S&P 500 Bull 2X ETF,215.95,No,35,139,Portfolio-Multi Asset
+SPVM,Invesco S&P 500 Value With Momentum ETF,73.0008,No,1,1,Equity
+SPXE,S&P 500 Ex-Energy ETF,80.9574,No,4,7,Equity
+SPXL,Direxion Daily S&P 500 Bull 3X ETF,272.62,Yes,5686,56721,Equity
+SPXN,S&P 500 Ex-Financials ETF,82.6042,No,N/A,N/A,Portfolio-Multi Asset
+SPXS,Direxion Daily S&P 500 Bear 3X ETF,26.67,Yes,25135,246792,Equity
+SPXT,S&P 500 Ex-Technology ETF,107.7479,No,N/A,N/A,Portfolio-Multi Asset
+SPXU,Ultrapro Short S&P500 -3X ETF,37.42,Yes,2553,96409,Equity
+SPY,SPDR S&P 500 ETF Trust,746.74,Yes,12860919,20577990,Equity
+SPYD,SPDR S&P 500 High Dividend Portfolio ETF,47.5,No,85,3512,Portfolio-Multi Asset
+SPYG,SPDR S&P 500 Growth Portfolio ETF,119.54,No,644,11036,Equity
+SPYH,Neos S&P 500 Hedged Equity Income ETF,56.12,No,2,1,Equity
+SPYI,Neos S&P 500 High Income ETF,53.05,No,1463,20689,Fixed Income
+SPYM,SPDR Portfolio S&P 500 ETF,87.89,No,2324,35250,Equity
+SPYQ,Tradr 2X Long Spy Quarterly ETF,187.28,No,1,194,Fixed Income
+SPYT,Defiance S&P 500 Target Income ETF,17.52,No,10,199,Equity
+SPYV,SPDR S&P 500 Value Portfolio ETF,60.87,No,259,1634,Equity
+SPYX,S&P 500 Ex-Fossil Fuel ETF SPDR,61.32,No,1,46,Portfolio-Multi Asset
+SQQQ,Ultrapro Short QQQ -3X ETF,36.75,Yes,121375,572667,Equity
+SRLN,Blackstone Gso Senior Loan SPDR,40.38,No,10,1997,Portfolio-Multi Asset
+SRS,Ultrashort Real Estate -2X ETF,41.5462,No,7,166,Equity
+SRTY,Ultrapro Short Russell 2000 -3X ETF,22.72,No,472,7777,Portfolio-Multi Asset
+SRVR,Pacer Benchmark & Infrastructure Real Estate ETF,33.54,No,7,156,Alternative
+SSG,Ultrashort Semiconductors -2X ETF,11.24,No,141,968,Equity
+SSK,Rex-Osprey Sol + Staking ETF,9.42,No,28,3066,Currency
+SSO,Ultra S&P500 2X ETF,67.61,Yes,2191,33724,Equity
+SSPC,Leverage Shares 2X Short Spcx Daily ETF,9.66,No,N/A,N/A,Equity
+STCE,Schwab Crypto Thematic ETF,78.95,No,1,242,Equity
+STIP,0-5 Year TIPS Bond Ishares ETF,102.06,No,2,29,Fixed Income
+STPZ,Pimco 1-5 Year U.S. TIPS Index ETF,53.28,No,N/A,N/A,Fixed Income
+STXE,Strive Emerging Markets Ex-China ETF,54.86,No,N/A,N/A,Equity
+STXF,Strive 500 ETF,48.38,No,N/A,N/A,Equity
+STXL,Defiance Daily Target 2X Long Stx ETF,61.88,No,89,153,Equity
+STXX,Tradr 2X Long Stx Daily ETF,76.31,No,111,521,Equity
+SUPL,Proshares Supply Chain Logistics ETF,45.487,No,N/A,N/A,Equity
+SUSA,USA ESG Select Ishares MSCI ETF,153.25,No,N/A,N/A,Equity
+SUSB,1-5 Year USD Corp Bond Ishares ESG ETF,24.93,No,N/A,N/A,Fixed Income
+SVAL,Ishares US Small Cap Value Factor ETF,40.62,No,N/A,N/A,Equity
+SVIX,vs TR Short VIX -1X Futures ETF,23.2,Yes,6321,134261,Equity
+SVOL,Simplify Volatility Premium ETF,16.19,No,380,9315,Equity
+SVXY,Short VIX Short-Term Futures ETF,56.44,No,2325,54599,Portfolio-Multi Asset
+SWAN,Blackswan Growth & Treasury Core Amplify ETF,33.6932,No,N/A,N/A,Portfolio-Multi Asset
+SYLD,Cambria Shareholder Yield ETF,78.15,No,N/A,N/A,Portfolio-Multi Asset
+SZK,Ultrashort Consumer Goods -2X ETF,22.3299,No,N/A,N/A,Equity
+TAGS,Teucrium Agricultural,23.84,No,10,3297,Commodity
+TAIL,Cambria Tail Risk ETF,10.66,No,157,2655,Portfolio-Multi Asset
+TAN,Invesco Solar ETF,60.58,No,3602,62210,Equity
+TARK,Tradr 2X Long Innovation ETF,47.55,No,17,368,Equity
+TBF,Short 20+ Year Treasury -1X ETF,24.24,No,79,1612,Fixed Income
+TBIL,US Treasury 3 Month Bill ETF,49.96,No,4,25,Fixed Income
+TBLU,Tortoise Global Water ESG Fund,50.96,No,5,11,Equity
+TBT,Ultrashort Lehman 20 Year Treasury -2X ETF,34.81,No,3206,30861,Fixed Income
+TCAF,T. Rowe Capital Appreciation Equity ETF,40.38,No,2,17,Equity
+TCHI,Ishares MSCI China Multisector Tech ETF,25.84,No,1,38,Equity
+TDIV,FT Nasdaq Technology Dividend Fund,117.88,No,2,136,Equity
+TDTT,Iboxx 3Yr Target Dur TIPS ETF Flexshares,23.89,No,N/A,N/A,Fixed Income
+TDV,S&P Technology Dividend Aristocrats ETF,104.103,No,N/A,N/A,Equity
+TECL,Technology Bull 3X ETF,236.49,No,2667,62314,Equity
+TECS,Technology Bear -3X ETF,6.25,No,1667,25751,Equity
+TEMT,Tradr 2X Long Tem Daily ETF,19.25,No,166,1562,Equity
+TERG,Leverage Shares 2X Long Ter Daily ETF,66.82,No,35,291,Equity
+TESL,Simplify Volt Tsla Revolution ETF,16.2145,No,14,165,Equity
+TETH,21Shares Ethereum ETF,8.52,No,4,17,Currency
+TFI,Muni Bond ETF SPDR,45.67,No,2,4,Fixed Income
+TFLO,Treasury Floating Rate Bond Ishares ETF,50.59,No,1,3,Portfolio-Multi Asset
+THD,Ishares MSCI Thailand ETF,72.31,No,1,530,Equity
+THNQ,Robo Global Artificial Intelligence ETF,89.48,No,12,63,Equity
+THRO,Ishares U.S. Thematic Rotation Active ETF,43.23,No,N/A,N/A,Equity
+TILL,Teucrium Agricultural Strategy No K-1 ETF,17.3537,No,26,736,Commodity
+TIME,Clockwise Core Equity & Innovation ETF,26.87,No,6,23,Equity
+TINY,Proshares Nanotechnology ETF,93.9261,No,16,47,Equity
+TIP,TIPS Bond Ishares ETF,109.39,No,77,6892,Fixed Income
+TIPX,BBG 1-10 Year TIPS SPDR ETF,18.9,No,3,111,Portfolio-Multi Asset
+TLH,10-20 Year Treas Bond Ishares ETF,100.47,No,616,4487,Fixed Income
+TLT,20+ Year Treas Bond Ishares ETF,86.75,Yes,852889,9925047,Fixed Income
+TLTI,Neos Enhanced Income 20+ Year T-Bond ETF,45.7735,No,20,26,Fixed Income
+TMAT,Main Thematic Innovation ETF,30.3766,No,N/A,N/A,Equity
+TMF,Direxion Daily 20-Yr Treasury Bull 3X Shrs ETF,36.36,Yes,19424,288125,Fixed Income
+TMFC,Motley Fool 100 Index ETF,76.45,No,1,88,Equity
+TMV,Direxion Daily 20-Year Treasury Bear 3X ETF,36.91,No,1569,21237,Fixed Income
+TNA,Small Cap Bull 3X ETF,71.77,Yes,33509,170121,Equity
+TOPT,Ishares Top 20 U.S. Stocks ETF,33.27,No,71,766,Equity
+TOPW,Roundhill Top Weeklypay ETF,35.27,No,9,1369,Equity
+TOTL,SPDR Doubleline Total Return Tactical ETF,39.36,No,N/A,N/A,Portfolio-Multi Asset
+TPOR,Direxion Daily Transportation Bull 3X ETF,38.47,No,10,269,Equity
+TPYP,Tortoise North Amer Pipeline Fund,41.52,No,1,93,Equity
+TQQQ,Ultrapro QQQ 3X ETF,82.87,Yes,399939,1460001,Equity
+TQQY,GraniteShares YieldBoost QQQ ETF,13.09,No,13,128,Equity
+TRFK,Pacer Data and Digital Revolution ETF,109.277,No,6,92,Equity
+TSDD,GraniteShares -2X Short Tsla Daily ETF,7.99,No,229,1933,Equity
+TSL,GraniteShares 1.25X Long Tsla Daily ETF,15.78,No,14,258,Equity
+TSLG,Leverage Shares 2X Long Tsla Daily ETF,6.48,No,25,1757,Equity
+TSLL,Direxion Daily Tsla Bull 2X ETF,13.16,Yes,139100,996105,Equity
+TSLP,Kurv Yield Premium Tesla [Tsla] ETF,18.0898,No,1,15,Equity
+TSLQ,Tradr 2X Short Tsla Daily ETF,18.91,No,1445,22029,Equity
+TSLR,GraniteShares 2X Long Tsla Daily ETF,22.43,No,136,2929,Equity
+TSLS,Direxion Daily Tsla Bear 1X ETF,54.51,No,27,3083,Equity
+TSLT,T-Rex 2X Long Tesla Daily Target ETF,18.24,No,334,8119,Equity
+TSLW,Roundhill Tsla Weeklypay ETF,22.94,No,30,475,Equity
+TSLY,Yieldmax Tsla Option Income Strategy ETF,27.85,No,578,10763,Equity
+TSLZ,T-Rex 2X Inverse Tesla Daily Target ETF,12.1,No,328,5112,Equity
+TSMG,Leverage Shares 2X Long TSM Daily ETF,48.45,No,157,2221,Equity
+TSMU,GraniteShares 2X Long TSM Daily ETF,87.72,No,449,2169,Equity
+TSMY,Yieldmax TSM Option Income Strategy ETF,17.64,No,49,657,Equity
+TSPY,Tappalpha Spy Growth & Daily Income ETF,25.63,No,7,373,Equity
+TSYW,Roundhill Treasury Bond Weeklypay ETF,44.6711,No,2,2,Fixed Income
+TSYY,GraniteShares YieldBoost Tsla ETF,23.3,No,9,3924,Equity
+TTDU,T-Rex 2X Long Ttd Daily Target ETF,2.84,No,31,1192,Equity
+TTT,Ultrapro Short 20 Year Treasury -3X ETF,66.0456,No,25,898,Fixed Income
+TUA,Simplify Short-Term Treasury Futures ETF,20.37,No,80,3095,Fixed Income
+TUR,Ishares MSCI Turkey ETF,40.96,No,494,19218,Equity
+TWM,Ultrashort Russell 2000 -2X ETF,21.6,No,164,2731,Equity
+TXS,Texas Capital Texas Equity ETF,39.49,No,N/A,N/A,Equity
+TYD,Direxion Daily 10-Yr Treasury Bull 3X Shrs ETF,23.9,No,310,2201,Fixed Income
+TYLG,GX Information Technology Covered Call & Growth,42.908,No,N/A,N/A,Equity
+TYO,Direxion Daily 10-Yr Treasury Bear 3X Shrs ETF,14.095,No,2,651,Fixed Income
+TZA,Small Cap Bear -3X ETF,4.02,Yes,29783,175184,Equity
+UAE,Ishares MSCI UAE ETF,20.35,No,41,1314,Portfolio-Multi Asset
+UBEW,Roundhill UBER Weeklypay ETF,27.8782,No,1,113,Equity
+UBOT,Direxion Daily Robotics & AI Bull 2X ETF,26.76,No,7,239,Equity
+UBRL,GraniteShares 2X Long UBER Daily ETF,14.91,No,49,1559,Equity
+UBT,Ultra 20+ Year Treasury 2X ETF,16.52,No,128,1773,Fixed Income
+UCO,Ultra Bloomberg Crude Oil 2X ETF,36.64,No,12792,119819,Commodity
+UCYB,Ultra Nasdaq Cybersecurity 2X ETF,68.08,No,4,36,Equity
+UDN,Invesco DB USD Index Bearish ETF,17.92,No,3041,30130,Currency
+UDOW,Ultrapro Dow30 3X ETF,67.53,No,1830,33858,Portfolio-Multi Asset
+UFO,Procure Space ETF,50.27,No,3530,53517,Equity
+UFOX,Defiance Connective Technologies ETF,95.26,No,6,433,Equity
+UGA,US Gasoline,102.29,No,313,8634,Commodity
+UGE,Ultra Consumer Goods 2X ETF,18.704,No,4,268,Equity
+UGL,Ultra Gold 2X ETF,48.52,No,971,46172,Commodity
+ULTY,Yieldmax Ultra Option Income Strategy ETF,30.44,No,190,33309,Equity
+UMDD,Ultrapro Midcap 400 Proshares 3X ETF,35.87,No,1,126,Portfolio-Multi Asset
+UNG,US Natural Gas Fund,11.74,Yes,23261,322486,Commodity
+UNHG,Leverage Shares 2X Long UNH Daily ETF,21.47,No,825,14889,Equity
+UNHW,Roundhill UNH Weeklypay ETF,52.1787,No,2,15,Equity
+UNL,US 12 Month Natural Gas,6.54,No,7,13415,Commodity
+UNX,Tradr 2X Long U Daily ETF,42.69,No,1055,39,Equity
+UPAR,Tidal Upar Ultra Risk Parity ETF,16.7814,No,N/A,N/A,Portfolio-Multi Asset
+UPRO,Ultrapro S&P 500 3X ETF,142.81,Yes,7055,94186,Equity
+UPSX,Tradr 2X Long Upst Daily ETF,19.44,No,40,1589,Equity
+UPW,Ultra Utilities 2X ETF,23.0655,No,8,12,Equity
+URA,GX Uranium ETF,47.78,Yes,8320,381462,Equity
+URE,Ultra Real Estate 2X ETF,67.38,No,4,114,Equity
+URNJ,Sprott Junior Uranium Miners ETF,26.28,No,131,12330,Equity
+URNM,Sprott Uranium Miners ETF,57.47,No,4415,164216,Equity
+URTH,Ishares MSCI World ETF,202.73,No,9,1153,Portfolio-Multi Asset
+URTY,Ultrapro Russell 2000 3X ETF,83.58,No,588,5929,Portfolio-Multi Asset
+USAX,Tradr 2X Long Usar Daily ETF,25.57,No,23,680,Equity
+USCI,US Commodity Index,92.88,No,3,415,Commodity
+USD,Ultra Semiconductors 2X ETF,108.71,No,1338,17543,Equity
+USDU,Wisdomtree Bloomberg U.S. Dollar Bullish Fund,26.61,No,117,826,Portfolio-Multi Asset
+USFR,Wisdomtree Floating Rate Treasury Fund,50.45,No,1,33,Portfolio-Multi Asset
+USG,Uscf Gold Strategy Plus Income Fund,33.3925,No,N/A,N/A,Commodity
+USGG,Leverage Shares 2X Long Usar Daily ETF,15.4,No,41,781,Equity
+USHY,Broad USD High Yield Corp Bond Ishares ETF,37.01,No,2,567,Fixed Income
+USIG,Broad USD Investment Gr. Corp Bond Ishares ETF,51.23,No,7,1050,Fixed Income
+USL,US 12 Month Oil,47.52,No,41,1009,Commodity
+USMC,Principal U.S. Mega-Cap ETF,73.97,No,N/A,N/A,Equity
+USMV,Ishares MSCI USA Min Vol Factor ETF,94.24,No,20,1485,Equity
+USO,US Oil Fund,114.87,Yes,293745,1937125,Commodity
+USOY,Defiance Oil Enhanced Options Income ETF,7.06,No,219,1873,Equity
+USPX,Franklin U.S. Equity Index ETF,65.51,No,2,0,Equity
+USRT,US REIT Ishares Core ETF,64.66,No,10,16,Equity
+UST,Ultra 7-10 Year Treasury 2X ETF,42.42,No,17,90,Fixed Income
+UTES,Virtus Reaves Utilities ETF,82.21,No,9,1479,Portfolio-Multi Asset
+UTHY,US Treasury 30 Year Bond ETF,40.99,No,N/A,N/A,Fixed Income
+UTSL,Direxion Daily Utilities Bull 3X ETF,43.45,No,79,1402,Equity
+UTWY,US Treasury 20 Year Bond ETF,42.92,No,N/A,N/A,Fixed Income
+UUP,Invesco DB USD Index Bullish Fund ETF,28.3,No,6642,163322,Currency
+UUUG,Leverage Shares 2X Long UUUU Daily ETF,6.89,No,61,1729,Equity
+UVIX,vs TR 2X Long VIX Futures ETF,3.3,Yes,34360,393419,Equity
+UVXY,Ultra VIX Short-Term 2X Futures ETF,26,Yes,48447,297124,Portfolio-Multi Asset
+UWM,Ultra Russell 2000 2X ETF,65.2,No,87,2818,Equity
+UX,Roundhill Uranium ETF,28.2397,No,10,301,Commodity
+UXI,Ultra Industrials 2X ETF,60.72,No,3,37,Equity
+UXRP,Proshares Ultra XRP ETF,12.05,No,24,5530,Currency
+UYG,Ultra Financials 2X ETF,85.12,No,12,955,Equity
+UYM,Ultra Basic Materials 2X ETF,30.82,No,1,125,Equity
+VAW,Materials ETF Vanguard,234.24,No,8,139,Equity
+VB,Smallcap ETF Vanguard,296.51,No,1922,2393,Equity
+VBK,Smallcap Growth ETF Vanguard,356.54,No,113,1017,Equity
+VBR,Smallcap Value ETF Vanguard,238.4,No,254,1174,Equity
+VCEB,Vanguard ESG U.S. Corporate Bond ETF,62.82,No,N/A,N/A,Fixed Income
+VCIT,Interm Corp Bond Vanguard,82.48,No,65,1084,Fixed Income
+VCLT,Long-Term Corp Bond Vanguard,75.4,No,217,4550,Fixed Income
+VCR,Consumer Disc ETF Vanguard,394.33,No,12,390,Equity
+VCSH,Short-Term Corp Bond Vanguard,78.85,No,3,348,Fixed Income
+VDC,Consumer Staples ETF Vanguard,226.11,No,10,225,Equity
+VDE,Energy ETF Vanguard,151.82,No,193,3826,Equity
+VEA,FTSE Developed Markets Vanguard,72.31,No,545,34345,Equity
+VEGI,Ishares MSCI Agriculture Producers ETF,43.1,No,30,533,Equity
+VERS,Proshares Metaverse ETF,78.2517,No,N/A,N/A,Equity
+VEU,FTSE All-World Ex-US ETF Vanguard,84.92,No,482,2476,Equity
+VFH,Financial ETF Vanguard,131.44,No,20,756,Equity
+VFMF,U.S. Multifactor Vanguard ETF,174.535,No,N/A,N/A,Equity
+VFMO,U.S. Momentum Factor Vanguard ETF,242.14,No,1,170,Equity
+VFQY,U.S. Quality Factor Vanguard ETF,167.4915,No,1,1,Equity
+VGIT,Interm Govt Bond Vanguard,58.84,No,7,620,Fixed Income
+VGK,Europe ETF FTSE Vanguard,88.27,No,172,11210,Equity
+VGLT,Long-Term Govt Bond Vanguard,55.31,No,2176,7059,Fixed Income
+VGSH,Short-Term Govt Bond Vanguard,58.12,No,2,467,Fixed Income
+VGT,Information Technology ETF Vanguard,120.04,No,3335,93583,Equity
+VHT,Healthcare ETF Vanguard,280.41,No,119,2098,Equity
+VIG,Dividend Appreciation ETF Vanguard,235.19,No,4435,6853,Equity
+VIGI,Intl Div Appreciation ETF Vanguard,93.21,No,4,108,Equity
+VIS,Industrials ETF Vanguard,353.56,No,7,280,Equity
+VIXM,Proshares VIX Mid-Term Futures ETF,14.97,No,82,69788,Alternative
+VIXY,Proshares VIX Short-Term Futures ETF,21.9,No,1086,89216,Alternative
+VLUE,Ishares MSCI USA Value Factor ETF,199.92,No,118,1041,Portfolio-Multi Asset
+VMBS,Mortgage Backed Securities Vanguard,46.74,No,6,160,Fixed Income
+VNM,Vaneck Vietnam ETF,18.35,No,23,2749,Equity
+VNQ,Real Estate Vanguard ETF,95.56,No,1383,49775,Equity
+VNQI,Global Ex-US Real Estate Vanguard,44.84,No,26,375,Portfolio-Multi Asset
+VO,Midcap ETF Vanguard,80.1,No,187,4686,Equity
+VOE,Midcap Value ETF Vanguard,195.87,No,10,770,Equity
+VOLT,Tema Electrification ETF,41.14,No,68,771,Equity
+VONE,Russell 1000 Vanguard,337.38,No,N/A,N/A,Equity
+VONV,Russell 1000 Value Vanguard,106.14,No,2,22,Equity
+VOO,S&P 500 ETF Vanguard,688.11,Yes,4955,107983,Equity
+VOOG,S&P 500 Growth ETF Vanguard,83,No,557,11068,Equity
+VOOV,S&P 500 Value ETF Vanguard,219.46,No,15,916,Equity
+VOT,Midcap Growth ETF Vanguard,306.18,No,1258,1509,Equity
+VOX,Telecom Services ETF Vanguard,186.87,No,51,658,Equity
+VPL,Pacific ETF FTSE Vanguard,120.35,No,40,696,Equity
+VPLS,Vanguard Core Plus Bond ETF,77.47,No,N/A,N/A,Fixed Income
+VPU,Utilities ETF Vanguard,193.95,No,80,1244,Equity
+VRP,Invesco Variable Rate Preferred ETF,24.42,No,100,310,Portfolio-Multi Asset
+VRTL,GraniteShares 2X Long Vrt Daily ETF,160.84,No,183,1011,Equity
+VSDA,Victory Dividend Accelerator ETF,56.8,No,N/A,N/A,Equity
+VSGX,ESG Intl Stock Vanguard ETF,83.48,No,N/A,N/A,Equity
+VSOL,Vaneck Solana ETF,9.25,No,26,479,Currency
+VSS,FTSE All-World Ex-US Smcp Idx ETF Vanguard,157.54,No,6,50,Equity
+VT,Total World Stock Index ETF Vanguard,157.66,No,537,13126,Equity
+VTC,Total Corporate Bond Vanguard ETF,76.8,No,8,20,Fixed Income
+VTEB,Tax-Exempt Bond Vanguard,50.45,No,11,4296,Fixed Income
+VTEC,Vanguard California Tax-Exempt Bond ETF,100.24,No,8,449,Equity
+VTEI,Vanguard Intermediate-Term Tax-Exempt Bond ETF,100.89,No,N/A,N/A,Equity
+VTES,Vanguard Short-Term Tax Exempt Bond ETF,101.21,No,N/A,N/A,Fixed Income
+VTI,Total Stock Market ETF Vanguard,369.99,No,3159,60729,Equity
+VTIP,Short-Term Infl Protected Vanguard,50.19,No,42,4649,Fixed Income
+VTV,Value ETF Vanguard,216.5,No,208,4211,Equity
+VTWG,Russell 2000 Growth Vanguard,284.4,No,N/A,N/A,Equity
+VTWO,Russell 2000 Vanguard,119.36,No,73,2363,Equity
+VUG,Growth ETF Vanguard,86.98,No,4483,72849,Equity
+VUSB,Vanguard Ultra-Short Bond ETF,49.7,No,N/A,N/A,Fixed Income
+VV,Largecap ETF Vanguard,345,No,6,565,Equity
+VWO,FTSE EM ETF Vanguard,60.77,No,6654,40400,Equity
+VWOB,EM Govt Bond Vanguard,67.44,No,1,4299,Fixed Income
+VXF,Extended Market Index ETF Vanguard,241.07,No,17,262,Equity
+VXUS,Total Intl Stock ETF Vanguard,86.77,Yes,903,15364,Equity
+VXX,Ipath.B S&P 500 VIX Short-Term Futures ETN,22.8,Yes,45670,445941,Alternative
+VXZ,Ipath S&P 500 VIX Mid-Term Futures ETN,52.69,No,7,1774,Alternative
+VYM,High Dividend Yield Vanguard ETF,158.21,No,278,20433,Equity
+VYMI,Intl High Divd Yield ETF Vanguard,99.26,No,26,568,Equity
+WANT,Direxion Daily Consumer Discretionary Bull 3X Et,43.04,No,4,169,Equity
+WCBR,Wisdomtree Cybersecurity Fund,32.19,No,2,81,Equity
+WCLD,Wisdomtree Cloud Computing Fund,29.55,No,25,2171,Equity
+WDCX,Tradr 2X Long Wdc Daily ETF,60.77,No,3461,9552,Equity
+WDTE,Defiance S&P 500 Enhanced Options Income ETF,30.1374,No,31,56,Equity
+WEAT,Teucrium Wheat,22.94,No,5158,260987,Commodity
+WEBL,Direxion Daily Dow Jones Internet Bull 3X ETF,23.46,No,34,919,Equity
+WEBS,Direxion Daily Dow Jones Internet Bear 3X ETF,19.4,No,1,202,Equity
+WEED,Roundhill Cannabis ETF,21.375,No,1,50,Equity
+WGMI,Valkyrie Bitcoin Miners ETF,72.1,No,230,42821,Equity
+WIP,DB Intl Govt Infl-Protected Bond SPDR,39.6,No,7,30,Fixed Income
+WMTI,Rex Wmt Growth & Income ETF,23.2232,No,1,148,Equity
+WNTR,Yieldmax Mstr Short Option Income Strategy ETF,26.72,No,101,687,Equity
+WOOD,Global Timber & Forestry Ishares ETF,67.28,No,43,360,Equity
+WTAI,Wisdomtree Artificial Intel Innovation Fund,47.55,No,221,774,Equity
+WTPI,Wisdomtree Equity Premium Income Fund,33.25,No,4,206,Portfolio-Multi Asset
+WTV,Wisdomtree U.S. Quality Shareholder Yield Fund,101.57,No,1,6,Equity
+WULX,Tradr 2X Long Wulf Daily ETF,64.105,No,36,295,Equity
+XAIX,Xtrackers Artificial Intelligence and Big Data E,58.62,No,17,118,Equity
+XAR,S&P Aerospace & Defense SPDR,284.29,No,797,1756,Equity
+XBI,S&P Biotech SPDR,140.72,Yes,49171,747538,Equity
+XBIL,US Treasury 6 Month Bill ETF,50.11,No,1,17,Fixed Income
+XBTY,GraniteShares YieldBoost Bitcoin ETF,5.8,No,2,352,Equity
+XCEM,Columbia EM Core Ex-China ETF,54.82,No,1,82,Equity
+XDIV,Roundhill S&P 500 No Dividend Target ETF,30.52,No,N/A,N/A,Equity
+XDTE,Roundhill S&P 500 0Dte Covered Call Strategy ETF,39.4,No,12,206,Equity
+XES,S&P Oil & Gas Eqpt & Services SPDR,113.52,No,76,1600,Equity
+XHB,S&P Homebuilders SPDR,111.04,Yes,7061,188541,Equity
+XHE,S&P Healthcare Equipment SPDR,82.34,No,15,36,Equity
+XHS,S&P Healthcare Services SPDR,122.05,No,1,30,Equity
+XITK,SPDR Factset Innovative Technology ETF,193.1211,No,2,43,Portfolio-Multi Asset
+XLB,S&P 500 Materials Sector SPDR,51.81,Yes,8834,710370,Equity
+XLC,S&P 500 Communication Sector SPDR,109.45,Yes,15708,253062,Equity
+XLE,S&P 500 Energy Sector SPDR,53.77,Yes,238716,5368682,Equity
+XLF,S&P 500 Financials Sector SPDR,53.57,Yes,212386,7299352,Equity
+XLG,Invesco S&P 500 Top 50 ETF,61.76,No,73,2057,Equity
+XLI,S&P 500 Industrial Sector SPDR,180.91,Yes,6593,745041,Equity
+XLK,S&P 500 Technology Sector SPDR,191.44,Yes,26524,939237,Equity
+XLP,S&P 500 Cons Staples Sector SPDR,83.3,Yes,19429,863476,Equity
+XLRE,S&P 500 Real Estate Sector SPDR,43.86,No,1348,32959,Equity
+XLSR,SSGA U.S. Sector Rotation ETF,65.54,No,N/A,N/A,Fixed Income
+XLU,S&P 500 Utilities Sector SPDR,44.76,Yes,82288,2001376,Equity
+XLV,S&P 500 Healthcare Sector SPDR,149.4,Yes,26861,666317,Equity
+XLY,S&P 500 Cons Disc Sector SPDR,117.16,Yes,7844,564804,Equity
+XMAG,Defiance Large Cap Ex-Mag 7 ETF,25.65,No,2,495,Equity
+XME,S&P Metals & Mining SPDR,117.02,No,2331,165305,Equity
+XMHQ,Invesco S&P Midcap Quality ETF,110.74,No,2,199,Portfolio-Multi Asset
+XMLV,Invesco S&P Midcap Low Volatility ETF,64.7538,No,N/A,N/A,Portfolio-Multi Asset
+XMMO,Invesco S&P Midcap Momentum ETF,171.83,No,8,589,Equity
+XMVM,Invesco S&P Midcap Value With Momentum ETF,69.75,No,N/A,N/A,Equity
+XNDX,Tradr 2X Long Xndu Daily ETF,16.15,No,10,561,Equity
+XNTK,SPDR NYSE Technology ETF,385.71,No,2,65,Equity
+XOMO,Yieldmax XOM Option Income Strategy ETF,10.6,No,11,139,Equity
+XOP,S&P Oil & Gas Expl & Prod SPDR,153.36,Yes,10999,418419,Equity
+XOVR,Ershares Private-Public Crossover ETF,20.71,No,12159,167966,Equity
+XPEG,Leverage Shares 2X Long Xpev Daily ETF,5.22,No,8,150,Equity
+XPH,S&P Pharmaceuticals SPDR,61.04,No,10,705,Equity
+XPP,Ultra FTSE China 50 2X ETF,18.9593,No,2,11,Equity
+XRMI,GX S&P 500 Risk Managed Income ETF,17.33,No,N/A,N/A,Equity
+XRP,Bitwise XRP ETF,12.78,No,171,5666,Currency
+XRPC,Canary XRP ETF,12.14,No,201,12056,Currency
+XRPI,Volatility Shares XRP ETF,6.32,No,40,6101,Equity
+XRPR,Rex-Osprey XRP ETF,9.39,No,4,417,Currency
+XRPT,Volatility Shares XRP 2X ETF,26.52,No,578,9528,Equity
+XRPZ,Franklin XRP ETF,12.4,No,132,4986,Currency
+XRT,S&P Retail SPDR,86.39,Yes,4660,202124,Equity
+XSD,S&P Semiconductor SPDR,636.3,No,385,3508,Equity
+XSHD,Invesco S&P Smallcap High Dividend Low Volatilit,13.72,No,57,255,Equity
+XSOE,Wisdomtree Emerging Markets Ex-State Owned Fund,50.71,No,N/A,N/A,Portfolio-Multi Asset
+XSVM,Invesco S&P Smallcap Value With Momentum ETF,68.29,No,N/A,N/A,Equity
+XSW,S&P Software & Services ETF SPDR,162.54,No,8,924,Equity
+XT,Exponential Technologies Ishares ETF,82.26,No,5,23,Equity
+XTL,S&P 500 Telecom Sector SPDR,220.57,No,13,919,Equity
+XTN,S&P Transportation SPDR,113.53,No,16,889,Equity
+XXRP,Teucrium 2X Long Daily XRP ETF,2.5,No,907,38496,Equity
+XYLD,GX S&P 500 Covered Call ETF,40.95,No,54,1750,Portfolio-Multi Asset
+XYLG,GX S&P 500 Covered Call & Growth ETF,28.9209,No,2,28,Equity
+XYZG,Leverage Shares 2X Long Xyz Daily ETF,15.95,No,5,240,Equity
+XYZY,Yieldmax Sq Option Income Strategy ETF,25.4534,No,7,79,Equity
+YANG,Direxion Daily FTSE China Bear 3X ETF,34.99,No,2028,24185,Equity
+YBIT,Yieldmax Bitcoin Option Income Strategy ETF,19.21,No,3,169,Currency
+YBTC,Roundhill Bitcoin Covered Call Strategy ETF,17.6623,No,28,478,Currency
+YCL,Ultra Yen 2X ETF,17.6669,No,615,16827,Currency
+YCS,Ultrashort Yen New -2X ETF,55.66,No,45,983,Currency
+YETH,Roundhill Ether Covered Call Strategy ETF,8.54,No,9,515,Currency
+YINN,Direxion Daily FTSE China Bull 3X ETF,25.56,Yes,11550,85313,Equity
+YLD,Principal Edge Active Income ETF,19.06,No,N/A,N/A,Fixed Income
+YMAG,Yieldmax Magnificent 7 Option Income ETF,11.76,No,78,2103,Equity
+YMAX,Yieldmax Universe Fund of Option Income ETF,8.16,No,34,4413,Portfolio-Multi Asset
+YOLO,Advisorshares Pure Cannabis ETF,2.83,No,4,2340,Equity
+YQQQ,Yieldmax Short N100 Option Income Strategy ETF,9.74,No,2,272,Equity
+YXI,Short FTSE China 50 -1X ETF,23.4707,No,N/A,N/A,Portfolio-Multi Asset
+YYY,Amplify CEF High Income ETF,11.47,No,17,382,Portfolio-Multi Asset
+ZAP,Global X U.S. Electrification ETF,34.27,No,2,25,Equity
+ZROZ,Pimco 25-Year Zero Coupon U.S. Treasury ETF,64.82,No,926,15748,Fixed Income
+ZSL,Ultrashort Silver -2X ETF,25.43,Yes,3611,99323,Commodity

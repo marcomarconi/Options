@@ -55,16 +55,16 @@ GEX_calculations <- function(df, ticker) {
     df$residualRate <- 0
     
     GEX_strike <- df %>% mutate( 
-        gex_call = gamma * callOpenInterest * spotPrice^2, 
-        gex_put = -gamma * putOpenInterest * spotPrice^2
-    ) %>% group_by(tradeDate, strike) %>% 
-        reframe(gex = sum(gex_call, na.rm=T) + sum(gex_put, na.rm=T), 
-                volume_strike = callVolume+putVolume,
-                spotPrice = first(spotPrice),
-                smvVol = first(smvVol)
-                )
+            gex_call = gamma * callOpenInterest * spotPrice^2, 
+            gex_put = -gamma * putOpenInterest * spotPrice^2
+        ) %>% group_by(tradeDate, strike) %>% 
+            reframe(gex = sum(gex_call, na.rm=T) + sum(gex_put, na.rm=T), 
+                    volume_strike = callVolume+putVolume,
+                    spotPrice = first(spotPrice),
+                    smvVol = first(smvVol)
+                    )
     
-    total_gex <- GEX_strike %>% 
+    GEX <- GEX_strike %>% 
         group_by(tradeDate) %>%
         reframe(spotPrice = first(spotPrice), 
                 volume = sum(volume_strike),
@@ -77,6 +77,7 @@ GEX_calculations <- function(df, ticker) {
             GEX_vl = GEX / avg_volume,
         )
     
+
     # gamma_flip <- GEX_strike %>%
     #     arrange(tradeDate, strike) %>%
     #     group_by(tradeDate) %>%
@@ -194,16 +195,14 @@ GEX_calculations <- function(df, ticker) {
             CEX=sum(cex_call+cex_put,na.rm=TRUE)
         )
     
-    GEXplus <- total_gex %>%
+    GEXplus <- GEX %>%
         #left_join(front_gex, by = "tradeDate") %>%
         #left_join(weighted_gex_exp, by = "tradeDate") %>%
         #left_join(gamma_flip, by = "tradeDate") %>%
         #left_join(nearest_flip_interp, by = "tradeDate") %>% 
         left_join(DEX, by = "tradeDate") %>% 
         left_join(VEX, by = "tradeDate") %>% 
-        left_join(VEX2, by = "tradeDate") %>% 
         left_join(CEX, by = "tradeDate") %>% 
-        #left_join(VIX_all) %>% 
         arrange(tradeDate) %>% 
         mutate(
             ret_1 = replace_na(c(0, diff(log(spotPrice))), 0),
@@ -216,8 +215,8 @@ GEX_calculations <- function(df, ticker) {
             ret_20f = lead(ret_20, 20),
             ret_20f_abs = abs(ret_20f),
             ret_20f_abs_diff = log(ret_20f_abs / ret_20_abs),
-            VRP_1 = smvVol - (ret_1f_abs*sqrt(252))
-        )
+            volatility = calculate_volatility(ret_1)
+            )
     
     
     GEXplus <- GEXplus %>% mutate(
@@ -228,17 +227,6 @@ GEX_calculations <- function(df, ticker) {
 }
 
 
-tickers <- c("SPX", "TLT", "AAPL", "IBM", "KO", "IEF", "SLV", "UNG", "USO", "XLE", "XLI", "XLK", "GLD")
-
-ORATS_GEX <- list()
-for(ticker in tickers) {
-    print(ticker)
-    ticker_dir <- paste0(dir, ticker, "/")
-    files <- list.files(ticker_dir, "orats_.*_20[2][0-9].*gz")
-    df <- files %>% purrr::map_df(.f = load_orats_day, ticker_dir, cols_to_extract) %>% mutate(ticker = ticker)
-    ORATS_GEX[[ticker]] <- GEX_calculations(df,ticker)
-}
-
 VIX1D <- getSymbols("^VIX1D",env=NULL ) %>% as.data.frame() %>% rownames_to_column("tradeDate") %>% dplyr::select(tradeDate, VIX1D.Adjusted) %>% mutate(tradeDate = as.Date(tradeDate))
 VIX <- getSymbols("^VIX",env=NULL ) %>% as.data.frame() %>% rownames_to_column("tradeDate") %>% dplyr::select(tradeDate, VIX.Adjusted)%>% mutate(tradeDate = as.Date(tradeDate))
 VIX9D <- getSymbols("^VIX9d",env=NULL ) %>% as.data.frame() %>% rownames_to_column("tradeDate") %>% dplyr::select(tradeDate, VIX9D.Adjusted)%>% mutate(tradeDate = as.Date(tradeDate))
@@ -246,18 +234,35 @@ VIX3M <- getSymbols("^VIX3M",env=NULL ) %>% as.data.frame() %>% rownames_to_colu
 VIX6M <- getSymbols("^VIX6M",env=NULL ) %>% as.data.frame() %>% rownames_to_column("tradeDate") %>% dplyr::select(tradeDate, VIX6M.Adjusted)%>% mutate(tradeDate = as.Date(tradeDate))
 VIX_all <-  Reduce(function(...) full_join(..., by = "tradeDate"), list(VIX1D, VIX9D, VIX, VIX3M, VIX6M)) %>%   rename_with(~ gsub("\\.Adjusted", "", .x))
 
+
+tickers <- c("SPY")#, "QQQ", "IWM", "GLD", "SLV")
+
+ORATS_GEX <- list()
+for(ticker in tickers) {
+    print(ticker)
+    ticker_dir <- paste0(dir, ticker, "/")
+    files <- list.files(ticker_dir, "orats_.*_20[0-2][0-9].*gz")
+    df <- files %>% purrr::map_df(.f = load_orats_day, ticker_dir, cols_to_extract) %>% mutate(ticker = ticker)
+    ORATS_GEX[[ticker]] <- GEX_calculations(df,ticker)
+}
+
 # Merge them all
 all_GEXs <- do.call(rbind, ORATS_GEX)
 
 # All measures by ticker
-all_GEXs %>% dplyr::filter(ticker == "SPX") %>% 
-    dplyr::select(tradeDate, ret_1f, GEX, VEX, CEX, DEX) %>%  
+ticker_ <- "SPY"
+all_GEXs %>% dplyr::filter(ticker == ticker_) %>% 
+    dplyr::select(tradeDate, ret_1f, GEX, GEX_vl, VEX, CEX, DEX, volatility) %>%  
     pivot_longer(-c(tradeDate, ret_1f)) %>% 
     ggplot(aes(value, ret_1f)) + geom_vline(xintercept = 0)+ geom_point(size=0.1) + facet_wrap(~name, scales="free")
 
+# Measure correlation by ticker
+all_GEXs %>% dplyr::filter(ticker == ticker_) %>% dplyr::select(GEX, DEX, CEX, VEX, VIX1D, VIX9D, VIX, VIX3M, VIX6M, volatility, ret_1f_abs) %>% 
+    cor(use = "pairwise.complete.obs") %>% corrplot::corrplot(method = "number")
+
 # Return prediction by ticker
-all_GEXs %>% dplyr::filter(ticker == "SPX") %>% 
-    dplyr::select(tradeDate, ret_1f_abs, GEX, VEX, CEX, DEX) %>% 
+all_GEXs %>% dplyr::filter(ticker == ticker_) %>% 
+    dplyr::select(tradeDate, ret_1f_abs, GEX, VEX, CEX, DEX, VIX, volatility) %>% 
     pivot_longer(-c(tradeDate, ret_1f_abs)) %>% group_by(name) %>% 
     mutate(ntile_ret = ntile(ret_1f_abs, 8), bin=ntile(value,8), Year=year(tradeDate)) %>%
     group_by(name, bin) %>%
@@ -266,8 +271,9 @@ all_GEXs %>% dplyr::filter(ticker == "SPX") %>%
     ) %>% ggplot(aes(x=bin, y=avg_abs_ret, ymin = avg_abs_ret-sb_abs_ret*2, ymax=avg_abs_ret+sb_abs_ret*2)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~name)
 
 # Return prediction by measure
+measure <- "DEX"
 all_GEXs %>% 
-    mutate(P = GEX) %>% 
+    mutate(P = !!sym(measure)) %>% 
     dplyr::select(tradeDate, P, ticker, ret_1f_abs)%>% 
     pivot_longer(-c(tradeDate, ret_1f_abs, ticker)) %>% group_by(ticker) %>% 
     mutate(ntile_ret = ntile(ret_1f_abs, 8), bin=ntile(value,8)) %>%
@@ -276,14 +282,14 @@ all_GEXs %>%
         avg_abs_ret=mean(ntile_ret, na.rm=T), sb_abs_ret=sd(ntile_ret, na.rm=T)/sqrt(n())
     ) %>% ggplot(aes(x=bin, y=avg_abs_ret, ymin = avg_abs_ret-sb_abs_ret*2, ymax=avg_abs_ret+sb_abs_ret*2)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~ticker)
 
-all_GEXs %>% mutate(P = GEX_vl/spotPrice^2)  %>% ggplot(aes(tradeDate, P, color=ticker)) + geom_line(size=2) + scale_color_colorblind()
+all_GEXs %>% mutate(P = !!sym(measure))  %>% ggplot(aes(tradeDate, P, color=ticker)) + geom_line(size=2) + scale_color_colorblind()
 
 # Try to use SPX as predictor for all
-spx <- all_GEXs %>% filter(ticker == "SPX") %>% select(tradeDate, GEX, VEX, CEX, DEX) %>% rename(GEX_spx = GEX, CEX_spx = CEX, VEX_spx = VEX, DEX_spx = DEX)
+spx <- all_GEXs %>% filter(ticker == "SPY") %>% select(tradeDate, GEX, VEX, CEX, DEX) %>% rename(GEX_spx = GEX, CEX_spx = CEX, VEX_spx = VEX, DEX_spx = DEX)
 all_GEXs_spx <- all_GEXs %>% full_join(spx)
 # Binning
-all_GEXs_spx %>% dplyr::filter(ticker == "KO")  %>%
-    dplyr::select(tradeDate, ret_1, GEX, VEX, CEX, GEX_spx, VEX_spx, CEX_spx) %>% 
+all_GEXs_spx %>% dplyr::filter(ticker == "GLD")  %>%
+    dplyr::select(tradeDate, ret_1, GEX, VEX, CEX, DEX, GEX_spx, VEX_spx, CEX_spx, DEX_spx) %>% 
     pivot_longer(-c(tradeDate, ret_1)) %>% group_by(name) %>% 
     mutate(ntile_ret = ntile(abs(ret_1), 8), bin=ntile(value,8), Year=year(tradeDate)) %>%
     group_by(name, bin) %>%
@@ -291,12 +297,12 @@ all_GEXs_spx %>% dplyr::filter(ticker == "KO")  %>%
         avg_abs_ret=mean(ntile_ret, na.rm=T), sb_abs_ret=sd(ntile_ret, na.rm=T)/sqrt(n())
     ) %>% ggplot(aes(x=bin, y=avg_abs_ret, ymin = avg_abs_ret-sb_abs_ret*2, ymax=avg_abs_ret+sb_abs_ret*2)) + geom_line(color="gray") + geom_point() + geom_errorbar(width=0.1) + facet_wrap(~name)
 # Scatterplot
-all_GEXs_spx %>% dplyr::filter(ticker == "AMD") %>% 
+all_GEXs_spx %>% dplyr::filter(ticker == "GLD") %>% 
     dplyr::select(tradeDate, ret_1, GEX, VEX, CEX, GEX_spx, CEX_spx, VEX_spx) %>%  
     pivot_longer(-c(tradeDate, ret_1)) %>% 
     ggplot(aes(value, ret_1)) + geom_vline(xintercept = 0)+ geom_point(size=0.1) + facet_wrap(~name, scales="free")
 # All binning
-all_GEXs_spx %>% dplyr::filter(!ticker %in% c("SPX", "SPY")) %>% 
+all_GEXs_spx %>% dplyr::filter(!ticker %in% c( "SPY")) %>% 
     dplyr::select(tradeDate, ticker, ret_1f_abs, GEX, VEX, CEX, DEX, GEX_spx, VEX_spx, CEX_spx, DEX_spx) %>% 
     pivot_longer(-c(tradeDate, ret_1f_abs, ticker)) %>% group_by(name, ticker) %>% 
     mutate(ntile_ret = ntile(ret_1f_abs, 8), bin=ntile(value,8), Year=year(tradeDate)) %>%
@@ -371,15 +377,9 @@ df_m <- all_GEXs %>% filter(ticker=="GLD") %>%
 lm(log(abs(ret)+1e-4) ~ zGEX + zVEX + zCEX,
    data=df_m) %>% summary
 
-# all VIX vs ret
-GEXplus %>% dplyr::select(tradeDate, VIX1D:ret) %>% pivot_longer(-c(tradeDate, ret)) %>% 
-    ggplot(aes(log(value), abs(ret))) + geom_point() + geom_smooth(method="lm") + facet_wrap(~name, scales="free") #+ ylim(c(-0, 0.05))
 
-# intraday dips?
-{
-    df_intra <- read_csv("Downloads/amd_intraday-15min_historical-data-05-17-2026.csv")
-    df_intra <- df_intra %>% mutate(tradeDate=as.Date(Time)) %>% 
-        group_by(tradeDate) %>% reframe(dip = log(last(Latest)-min(Latest))) 
-    df_intra <- full_join(ORATS_GEX[["AMD"]], df_intra) %>% mutate(dip_1 = lead(dip))
-    plot(df_intra$VEX, df_intra$dip_1)
-}
+
+res_straddle <- backtest_short_strangle("SPY", 0.5, 30, 15, monthly_only = FALSE)
+trades_straddle <- summarize_trades(res_straddle)
+trades_straddle <- trades_straddle %>% 
+    left_join(all_GEXs %>% filter(ticker == "SPY") %>% select(tradeDate, GEX, VEX, CEX, DEX, VIX1D, VIX), by=c("entry_date" = "tradeDate"))

@@ -41,16 +41,19 @@ backtest_short_strangle <- function(ticker,
   if (!is.null(end_date))   { k <- dates <= as.Date(end_date);   files <- files[k]; dates <- dates[k] }
   if (!length(files)) stop("No files in date range")
 
-  # US equity monthlies expire on the 3rd Friday of the month, or the Thursday
-  # before when that Friday is a market holiday (e.g., Good Friday). We use the
-  # ORATS file calendar as ground truth for "trading day".
+  # US equity monthlies expire on the 3rd Friday of the month. ORATS, however,
+  # dates expirDate on the *Saturday after* the 3rd Friday for the pre-~Feb-2015
+  # settlement convention, and on the Friday itself afterwards. When that Friday
+  # is a market holiday (e.g., Good Friday) expiry rolls back to the Thursday
+  # before. We use the ORATS file calendar as ground truth for "trading day".
   trading_days_set <- dates
   is_monthly_expiry <- function(d) {
     first     <- as.Date(format(d, "%Y-%m-01"))
     wd        <- as.POSIXlt(first)$wday          # 0 = Sun, 5 = Fri
     third_fri <- first + ((5L - wd) %% 7L) + 14L
-    d == third_fri |
-      (d == (third_fri - 1L) & !(third_fri %in% trading_days_set))
+    d == third_fri |                              # Friday-dated (post-2015)
+      d == (third_fri + 1L) |                     # Saturday-dated (pre-2015)
+      (d == (third_fri - 1L) & !(third_fri %in% trading_days_set))  # holiday Friday
   }
 
   # ORATS `dte` is inclusive (expir - trade + 1). We override with calendar

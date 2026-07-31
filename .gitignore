@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.positai
+__pycache__/
+*.pyc
+
+# Large parquet extracts: SPX_strikes.pq (1.6G), Data/ORATS_core*.pq, Data/regime_iv.pq.
+# Rebuilt from the ORATS downloads under HistoricalData, so they stay out of git.
+*.pq
+# ...except the small regime model outputs, which are part of the module.
+!regime_timeline/results/*.pq

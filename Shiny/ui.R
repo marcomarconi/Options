@@ -13,6 +13,7 @@ library(DT)
 library(ggcorrplot)
 source("/home/marco/trading/Systems/Options/OptionsCommon.R")
 source("/home/marco/trading/Systems/Common/Common.R")
+source("/home/marco/trading/Systems/Options/regime_timeline/src/regime_shiny.R")
 }
 {
     initialize <- FALSE   
@@ -24,7 +25,7 @@ source("/home/marco/trading/Systems/Common/Common.R")
     ORATS_code_delayed_file <- paste0(delayed_dir, "orats_core_delayed.csv")
     days_to_load <- 500
 
-    etf_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-01-29-2026.csv", show_col_types = F)
+    etf_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-weekly-options.csv", show_col_types = F)
     stock_screener <- read_csv("/home/marco/trading/Systems/Options/stocks-screener-08-23-2025.csv", show_col_types = F)
     
 today_date <- Sys.Date() 
@@ -77,9 +78,8 @@ init_ORATS_core <- function(ORATS_core, screener) {
             VRPzscore = runZscore(VRP, 252),
             rvPctile1y = TTR::runPercentRank(clsHvXern20d, 252) * 100,
             steepness_30d90d = log(exErnIv30d/exErnIv90d) %>% na.locf(na.rm=F),
-            steepness_30d6m = log(exErnIv30d/exErnIv6m) %>% na.locf(na.rm=F),
-            slopeZscore = runZscore(slope, 252)
-            
+            steepness_30d6m = log(exErnIv30d/exErnIv6m) %>% na.locf(na.rm=F)
+
         )  
 }
 
@@ -124,16 +124,31 @@ append_ORATS_delayed <- function(ORATS_core, ORATS_code_delayed_file) {
 }
 }
 
-# Initialize some values
-if(initialize){
-    ORATS_core <- create_ORATS_core(core_dir)
+# Load ORATS_core on startup when missing from the session (or forced via
+# initialize=TRUE). Fast path: plain parquet load. Slow path (only when new
+# daily files or fresh delayed data exist): strip derived columns, append the
+# new days, recompute the derived columns once, and re-cache — but never
+# persist the provisional delayed rows, so the next real EOD file always
+# replaces them.
+if (initialize || !exists("ORATS_core")) {
     ORATS_core <- load_ORATS_core(ORATS_core_file)
-    ORATS_core <- update_ORATS_core(ORATS_core, core_dir)
-    #system(command = paste0("Rscript ", orats_dir, "orats_delayed.R"))
-    ORATS_core <- append_ORATS_delayed(ORATS_core, ORATS_code_delayed_file)
-    ORATS_core <- init_ORATS_core(ORATS_core, screener = etf_screener)
-    write_parquet(ORATS_core, ORATS_core_file) 
-    print("Initalization finished.")
+    files <- list.files(core_dir, "orats_core_202[0-9].*\\.csv\\.gz")
+    last_real_day <- max(as.Date(sub("orats_core_([0-9]{8})\\.csv\\.gz", "\\1",
+                                     basename(files)), format = "%Y%m%d"))
+    loaded_last_day <- max(as.Date(ORATS_core$tradeDate))
+    delayed_is_new <- file.exists(ORATS_code_delayed_file) &&
+        as.Date(file.mtime(ORATS_code_delayed_file)) > loaded_last_day
+    if (initialize || loaded_last_day < last_real_day || delayed_is_new) {
+        print(paste("Updating ORATS_core:", loaded_last_day, "->", last_real_day))
+        ORATS_core <- ORATS_core %>% ungroup() %>%
+            dplyr::select(any_of(cols_to_extract))
+        ORATS_core <- update_ORATS_core(ORATS_core, core_dir)
+        ORATS_core <- append_ORATS_delayed(ORATS_core, ORATS_code_delayed_file)
+        ORATS_core <- init_ORATS_core(ORATS_core, screener = etf_screener)
+        write_parquet(ORATS_core %>% dplyr::filter(as.Date(tradeDate) <= last_real_day),
+                      ORATS_core_file)
+    }
+    print(paste("ORATS_core ready, last day:", max(as.Date(ORATS_core$tradeDate))))
 }
 
 # The shinyapp
@@ -169,20 +184,13 @@ ui <- fillPage(
                                     #selectInput("rv_yvar", "Y variable", choices = RV_y_choices, selected = RV_y_choices[1]),
                                     selectInput("rv_time_window", "Time window", choices = c(20, 60, 90, 120, 252), selected = 20),
                                     actionButton("load", "Load file"),
-                                    # h3("Momentum plot"),
-                                    # textInput("mom_n_tickers", "Tickers to show", value = 50),
-                                    # selectInput("mom_xvar", "X variable", choices = c("Momentum"), selected = "Momentum"),
-                                    # selectInput("mom_yvar", "Y variable", choices = c("VolumePctile1y"), selected = "VolumePctile1y"),
-                                    # textInput("mom_time_window", "Time window", value = 25),
                                     h3("Calendars plot"),
                                     textInput("cal_n_tickers", "Tickers to show", value = 50),
                                     selectInput("cal_front", "Front Expiry",  choices = c(30, 60, 90, 180), selected = 30),
                                     selectInput("cal_back", "Back Expiry",  choices = c(30, 60, 90, 180), selected = 60),
-                                    h3("Skew plot"),
-                                    textInput("skew_n_tickers", "Tickers to show", value = 50)
-                                    #selectInput("skew_xvar", "X variable", choices = c("ivHvXernRatio"), selected = "ivHvXernRatio"),
-                                    #selectInput("skew_yvar", "Y variable", choices = c("slopeZscore", "slope"), selected = "slopeZscore"),
-                                   
+                                    h3("Ratio plot"),
+                                    textInput("ratio_n_tickers", "Tickers to show", value = 50)
+
                                 )
                          ),
                          column(width = 10, class = "main",
@@ -193,12 +201,10 @@ ui <- fillPage(
                                         plotOutput("iv_plot", height = "600px"),
                                         h1("RV Plot", style = "color: darkgray;"),
                                         plotOutput("rv_plot", height = "600px"),
-                                        h1("Skew Plot", style = "color: darkgray;"),
-                                        plotOutput("skew_plot", height = "600px"),
+                                        h1("Ratio Plot", style = "color: darkgray;"),
+                                        plotOutput("ratio_plot", height = "600px"),
                                         h1("Calendar Plot", style = "color: darkgray;"),
                                         plotOutput("cal_plot", height = "600px"),
-                                        # h1("Momentum Plot", style = "color: darkgray;"),
-                                        # plotOutput("mom_plot", height = "600px"),
                                         h1("Table", style = "color: darkgray;"),
                                         DTOutput("table_plot", height = "calc(100vh - 200px)")
                                     ),
@@ -206,32 +212,6 @@ ui <- fillPage(
                                 )
                          )
                          
-                     )
-                 )
-        ),
-        tabPanel("Fixed Delta IV Change",
-                 fluidRow(
-                     column(12,
-                            column(width = 3, class = "sidebar",
-                                   wellPanel(
-                                       h3("Fixed Delta IV Change"),
-                                       dateInput("fd_date", "Select date (this selects orats_core_YYYYMMDD.csv.gz)",
-                                                 value = today_date,
-                                                 format = "yyyy-mm-dd"
-                                       ),
-                                       textInput("fd_n_tickers", "Tickers to show", value = 50),
-                                       selectInput("fd_normalize", "Normalize", choices = c("10d", "30d", "90d", "180d", "365d")),
-                                       #selectInput("curr_delta", "Current Delta", choices = "50"),
-                                       selectInput("fd_ratio", "Ratio", choices = c("Ratio", "Clicks"))
-                                   )
-                            ),
-                            column(width = 9, class = "main",
-                                   div(style = "height:100vh; display:flex; flex-direction:column;",
-                                       div(style = "flex: 1 1 auto; overflow:auto; padding: 8px;",
-                                           DTOutput("strike_plot", height = "calc(100vh - 200px)")
-                                       )
-                                   )
-                            )
                      )
                  )
         )
@@ -257,14 +237,13 @@ ui <- fillPage(
 
                                            plotlyOutput("ticker_plot_1"),
                                            plotlyOutput("ticker_plot_2"),
+                                           plotlyOutput("ticker_plot_regime"),
                                            plotlyOutput("ticker_plot_3"),
                                            plotlyOutput("ticker_plot_4"),
                                            plotlyOutput("ticker_plot_5"),
                                            plotlyOutput("ticker_plot_6"),
                                            plotlyOutput("ticker_plot_7"),
-                                           plotlyOutput("ticker_plot_8"),
-                                           plotlyOutput("ticker_plot_9"),
-                                           plotlyOutput("ticker_plot_10")
+                                           plotlyOutput("ticker_plot_8")
                                        )
                                    )
                             )
@@ -295,48 +274,45 @@ ui <- fillPage(
                      )
                  )
         )
-        ,
-        tabPanel("Simulator",
-                 div(class = "container-fluid",
-                     fluidRow(
-                         column(width = 3, class = "sidebar",
-                                wellPanel(
-                                    h3("Strangle"),
-                                    textInput("sim_S0", "Stock Price", value = 100),
-                                    textInput("sim_dte", "Days to Expiration", value = 30),
-                                    dateInput("sim_endday", "Ending Date",
-                                              value = today_date+30,
-                                              format = "yyyy-mm-dd"
-                                    ),
-                                    textInput("sim_Xcall", "Call Strike", value = 100),
-                                    textInput("sim_Xput", "Call Strike", value = 100),
-                                    textInput("sim_pxcall", "Call Price", value = 1),
-                                    textInput("sim_pxput", "Call Price", value = 1),
-                                    textInput("sim_rv", "Realized Volatility", value = 30),
-                                    textInput("sim_pos", "Position", value = -1)
-                                )
-                         ),
-                         column(width = 9, class = "main",
-                                div(style = "height:100vh; display:flex; flex-direction:column;",
-                                    div(style = "flex: 1 1 auto; overflow:auto; padding: 8px;",
-                                        plotOutput("sim_strangle_plot", height = "calc(100vh - 200px)")
-                                    )
-                                )
-                         )
-
-                     )
-                 )
-        )
     )
 )
 
 # ---- Server ----
 server <- function(input, output, session) {
 
+    # ---- Ticker tab: one shared, debounced ticker slice ----
+    # debounce: typing "NVDA" fires once, not once per keystroke;
+    # shared reactive: the big frame is filtered once per ticker change
+    # instead of once per plot.
+    t_ticker_deb <- debounce(
+        reactive(toupper(trimws(as.character(input$t_ticker)))), 600)
+    ticker_df <- reactive({
+        req(nzchar(t_ticker_deb()))
+        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker_deb()) %>%
+            ungroup() %>% arrange(tradeDate)
+        req(nrow(df) > 0)
+        df
+    })
+
+    # ---- Pairs tab: debounced inputs + memoized correlation matrix ----
+    # the all-tickers return-correlation matrix is expensive and does not
+    # depend on any input -> computed lazily once per session, then cached
+    pair_1_deb <- debounce(
+        reactive(toupper(trimws(as.character(input$ticker_1)))), 600)
+    pair_2_deb <- debounce(
+        reactive(toupper(trimws(as.character(input$ticker_2)))), 600)
+    returns_cor_mat <- reactive({
+        wide_ret <- ORATS_core %>% group_by(ticker) %>%
+            mutate(log_ret = c(NA, diff(log(pxAtmIv)))) %>%
+            select(tradeDate, ticker, log_ret) %>%
+            pivot_wider(names_from = ticker, values_from = log_ret)
+        wide_ret %>% select(-tradeDate) %>% cor(use = "pairwise.complete.obs")
+    })
+
     # Reactive to build filename when user clicks Load
     file_reactive <- eventReactive(input$load, {
         folder <- if (nzchar(input$iv_dir)) input$iv_dir else core_dir
-        file_date <- format(as.Date(input$iv_date), "%Y%m%d")
+        file_date <- format(as.Date(input$date), "%Y%m%d")
         fname <- file.path(folder, paste0("orats_core_", file_date, ".csv.gz"))
         list(path = fname, date = file_date)
     }, ignoreNULL = FALSE)
@@ -406,6 +382,7 @@ server <- function(input, output, session) {
     })
     
     output$iv_plot <- renderPlot({
+        
         n_tickers <- as.numeric(input$iv_n_tickers)
         date <- input$date
         df <- ORATS_core %>% group_by(ticker) %>% 
@@ -435,6 +412,7 @@ server <- function(input, output, session) {
     
 
     output$rv_plot <- renderPlot({
+
         n_tickers <- as.numeric(input$rv_n_tickers)
         time_window <- as.numeric(input$rv_time_window)
         date <- input$date
@@ -451,7 +429,7 @@ server <- function(input, output, session) {
                 IV = case_when(
                     time_window == 20 ~ exErnIv30d,
                     time_window == 60 ~ exErnIv60d,
-                    time_window == 90 ~ exErnIv60d,
+                    time_window == 90 ~ exErnIv90d,
                     time_window == 120 ~ exErnIv6m,
                     time_window == 252 ~ exErnIv1yr,
                     TRUE ~ NA
@@ -476,41 +454,11 @@ server <- function(input, output, session) {
         p1 + p2
         
     })
-    
-    output$mom_plot <- renderPlot({
-        n_tickers <- as.numeric(input$mom_n_tickers)
-        time_window <- as.numeric(input$mom_time_window)
-        date <- input$date
-        
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
-            mutate(
-                Momentum = (stkPxChng1m / clsHvXern20d) %>% cap_forecast(1)
-            ) 
-        df <- df %>% group_by(ticker) %>% arrange(tradeDate) %>% mutate(
-            expiryDate1 = case_when(dtExM1 > 0 ~ tradeDate + dtExM1 - 1, TRUE ~ NA),
-            .after = tradeDate)
-        df <- df %>% arrange(tradeDate) %>% mutate(pxAtmIvM1 = pxAtmIv[match(expiryDate1, tradeDate)] ,.after = pxAtmIv) %>% ungroup
-        df <- df %>% arrange(tradeDate) %>% mutate(pxAtmIvM1 = case_when(is.na(pxAtmIvM1) ~ pxAtmIv[match(expiryDate1-1, tradeDate)], TRUE ~ pxAtmIvM1),.after = pxAtmIv) %>% ungroup
-        df <- df %>% mutate(
-            straProM1 = abs(pxAtmIvM1 - hiStrikeM1) - straPxM1, 
-            straRetM1 = straProM1 / pxAtmIv ) %>%  
-            mutate(
-                straRetM1 = case_when(abs(pxAtmIvM1 - hiStrikeM1)/pxAtmIvM1/sqrt(dtExM1+1) > 0.1 | straPxM1 > pxAtmIv*10 | straPxM1 == 0 | dtExM1 == 1 ~ NA, TRUE ~ straRetM1)
-            )
-        df <- df %>% group_by(ticker) %>% mutate(straRetM1 = if_else(dtExM1==time_window, straRetM1, NA), straRet = straRetM1 %>% na.locf(na.rm=F))
-        df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
-        p <- ggplot(df, aes(x = Momentum, y = straRet, label = ticker)) +
-            geom_point(alpha = 1, size = 1) +
-            geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 4) + geom_hline(yintercept = 0) +
-            labs(x = "Momentum", y = "Last Straddle Return") +scale_fill_brewer(palette = "Accent")  + theme_bw(base_size = 24) 
-        
-        p
-        
-    })
+
     
     
     output$etf_plot <- renderPlot({
+
         n_tickers <- as.numeric(input$etf_n_tickers)
         time_window_rv <- as.numeric(input$etf_time_window)
         date <- input$date
@@ -582,26 +530,29 @@ server <- function(input, output, session) {
     })
     
     
-    output$skew_plot <- renderPlot({
-        n_tickers <- as.numeric(input$skew_n_tickers)
+    output$ratio_plot <- renderPlot({
+        n_tickers <- as.numeric(input$ratio_n_tickers)
         date <- input$date
         df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                 ivHvXernRatio = ivHvXernRatio %>% log,
-                ivHvXernRatio_zscore = runZscore(ivHvXernRatio %>% na.locf(na.rm=F), 252)
+                ivHvXernRatio_zscore = runZscore(ivHvXernRatio %>% na.locf(na.rm=F), 252),
+                volOfIvol_w = ew_sd_roll(c(NA, diff(log(exErnIv30d))) %>% replace_na(0), 20),
+                IV_IVVOL = log(exErnIv30d/volOfIvol_w),
+                IV_IVVOL_zscore = runZscore(IV_IVVOL %>% na.locf(na.rm=F), 252)
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
-        p1 <- ggplot(df, aes(x = ivHvXernRatio, y = slope, label = ticker)) +
+        p1 <- ggplot(df, aes(x = ivHvXernRatio, y = IV_IVVOL, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
             geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 3.5) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
-            labs(x = "IV/RV log_ratio", y = "Slope") +scale_fill_brewer(palette = "Accent") + theme_bw(base_size = 18) + theme(legend.position = "None")
-        p2 <- ggplot(df, aes(x = ivHvXernRatio_zscore, y = slopeZscore, label = ticker)) +
+            labs(x = "IV/RV log_ratio", y = "IV/IVVOL log_ratio") +scale_fill_brewer(palette = "Accent") + theme_bw(base_size = 18) + theme(legend.position = "None")
+        p2 <- ggplot(df, aes(x = ivHvXernRatio_zscore, y = IV_IVVOL_zscore, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
             geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 3.5) + 
             geom_vline(xintercept = -2, linetype = 'dashed') + geom_vline(xintercept = 2, linetype = 'dashed') +
             geom_hline(yintercept = -2, linetype = 'dashed') + geom_hline(yintercept = 2, linetype = 'dashed') +
-            xlim(c(-4,4)) + ylim(c(-4,4)) + labs(x = "IV/RV log_ratio z-score", y = "Slope z-score") +scale_fill_brewer(palette = "Accent") + theme_bw(base_size = 18) + theme(legend.position = "None")
+            xlim(c(-4,4)) + ylim(c(-4,4)) + labs(x = "IV/RV log_ratio z-score", y = "IV/IVVOL log_ratio z-score") +scale_fill_brewer(palette = "Accent") + theme_bw(base_size = 18) + theme(legend.position = "None")
         
         p1 + p2
         
@@ -635,12 +586,16 @@ server <- function(input, output, session) {
         
     })
     
+    # Regime timeline (Sharpe Two replica): GMM regimes scored on the full
+    # ORATS history; see regime_timeline/src/regime_shiny.R
+    output$ticker_plot_regime <- renderPlotly({
+        regime_timeline_plotly(t_ticker_deb(), months = 12)
+    })
+
     output$ticker_plot_1 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_dte <- 25
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% ungroup
-        req(nrow(df) > 0)
-        
+        df <- ticker_df()
+
         # Stock Price
         p_price <- plot_ly(
             data = df,
@@ -737,12 +692,10 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_2 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_vol_window <- as.character(input$t_vol_window)
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% ungroup
-        req(nrow(df) > 0)
-        
-        
+        df <- ticker_df()
+
+
         p <- plot_ly(df %>% mutate(
                 IV = case_when(
                     t_vol_window == "30d" ~ exErnIv30d,
@@ -754,7 +707,7 @@ server <- function(input, output, session) {
                 RV = case_when(
                     t_vol_window == "30d" ~ clsHvXern20d,
                     t_vol_window == "60d" ~ clsHvXern60d,
-                    t_vol_window == "90d" ~ clsHvXern60d,
+                    t_vol_window == "90d" ~ clsHvXern90d,
                     t_vol_window == "6m" ~ clsHvXern120d,
                     t_vol_window == "1yr" ~ clsHvXern252d,
                     TRUE ~ NA)
@@ -770,11 +723,9 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_3 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_dte <- 25
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% arrange(tradeDate) %>% ungroup
-        req(nrow(df) > 0)
-        
+        df <- ticker_df()
+
         
         
         stats <- list(
@@ -906,16 +857,16 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_4 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_vol_window <- as.character(input$t_vol_window)
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% ungroup %>% 
-            mutate(VRP_30 = log(lag(exErnIv30d, 20) / clsHvXern20d),
-                   VRP_60 = log(lag(exErnIv60d, 60) / clsHvXern60d),
-                   VRP_90 = log(lag(exErnIv90d, 60) / clsHvXern60d), # there is no RV for 40 days
-                   VRP_120 = log(lag(exErnIv6m, 120) / clsHvXern120d),
-                   VRP_252 = log(lag(exErnIv1yr, 252) / clsHvXern252d)) 
-        req(nrow(df) > 0)
-       
+        df <- ticker_df() %>%
+            mutate(
+                VRP_10 = log(lag(exErnIv10d, 10) / clsHvXern10d),
+                VRP_30 = log(lag(exErnIv30d, 20) / clsHvXern20d),
+                VRP_60 = log(lag(exErnIv60d, 60) / clsHvXern60d),
+                VRP_90 = log(lag(exErnIv90d, 60) / clsHvXern60d), # there is no RV for 40 days
+                VRP_120 = log(lag(exErnIv6m, 120) / clsHvXern120d),
+                VRP_252 = log(lag(exErnIv1yr, 252) / clsHvXern252d))
+
         df <- df %>% mutate(VRP =  case_when(
                                                 t_vol_window == "30d" ~ VRP_30,
                                                 t_vol_window == "60d" ~ VRP_60,
@@ -940,7 +891,7 @@ server <- function(input, output, session) {
         
         
         vrp_term_structure <- df %>% 
-            dplyr::select(tradeDate, VRP_30:VRP_252) %>% pivot_longer(-tradeDate) %>% 
+            dplyr::select(tradeDate, VRP_10:VRP_252) %>% pivot_longer(-tradeDate) %>% 
             separate(name, sep="_", into=c("VRP", "horizon")) %>% 
             group_by(horizon) %>% mutate(value = if_else(is.infinite(value), NA, value)) %>% 
             reframe(q25=quantile(value, na.rm=T)[2],q75=quantile(value, na.rm=T)[3], current=last(value)) %>% 
@@ -978,27 +929,28 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_5 <- renderPlotly({
-        
-        t_ticker <- as.character(input$t_ticker)
-        #t_vol_window <- as.character(input$t_vol_window)
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% ungroup %>% 
+        df <- ticker_df() %>%
             mutate(
+                iv_hv_ratio = (exErnIv30d / clsHvXern20d) %>% log,
+                iv_hv_ratio_pct = runPercentRank(iv_hv_ratio %>% na.locf(na.rm=F), 252) * 100,
                 volOfIvol_w = ew_sd_roll(c(NA, diff(log(exErnIv30d))) %>% replace_na(0), 20) *100,
-                volOfvol_w = ew_sd_roll(c(NA, diff(log(clsHvXern20d))) %>% replace_na(0), 20) *100
+                IVVVOL_ratio = exErnIv30d / volOfIvol_w,
+                IVVVOL_ratio_pct = runPercentRank(IVVVOL_ratio, 252)
+
             )
-        req(nrow(df) > 0)
+
+        #### IV / IVVOL ratio
         p1_1 <- plot_ly(df ,
-                      x = ~tradeDate) %>%
-            add_lines(y = ~exErnIv30d, name = "IV", line = list(color = "blue")) %>%
-            add_lines(y = ~volOfIvol_w, name = "Vol of IV", line = list(color = "slateblue")) %>%
+                        x = ~tradeDate) %>%
+            add_lines(y = ~IVVVOL_ratio, name = "IV/VVOL ratio", line = list(color = "cyan3")) %>%
             layout(
-                xaxis = list(title = ""), yaxis = list(title = "IV and VVOL"),font = list(size = 16)
+                xaxis = list(title = ""), yaxis = list(title = "IV/VVOL ratio"),font = list(size = 16)
             )
         p1_2 <- plot_ly(df ,
                         x = ~tradeDate) %>%
-            add_lines(y = ~exErnIv30d/volOfIvol_w, name = "IV/VVOL ratio", line = list(color = "cyan3")) %>%
+            add_lines(y = ~IVVVOL_ratio_pct, name = "IV/VVOL ratio pct", line = list(color = "cyan3")) %>%
             layout(
-                xaxis = list(title = ""), yaxis = list(title = "IV/VVOL ratio"),font = list(size = 16)
+                xaxis = list(title = ""), yaxis = list(title = "IV/VVOL ratio pct"),font = list(size = 16)
             )
         p1 <- subplot(
             p1_1, p1_2,
@@ -1010,16 +962,20 @@ server <- function(input, output, session) {
         ) %>% layout(
             font = list(size = 16),showlegend = FALSE
         )
+        
+        ### IV / RV ratio
         p2_1 <- plot_ly(df ,
-                      x = ~tradeDate) %>%
-            add_lines(y = ~slope, name = "slope", line = list(color = "pink3")) %>%
+                        x = ~tradeDate) %>%
+            add_lines(y = ~iv_hv_ratio, name = "IV/RV ratio", line = list(color = "blue")) %>%
             layout(
-                xaxis = list(title = ""), yaxis = list(title = "Slope"))
+                xaxis = list(title = ""), yaxis = list(title = "IV/RV ratio"),font = list(size = 16)
+            )
         p2_2 <- plot_ly(df ,
-                      x = ~tradeDate) %>%
-            add_lines(y = ~slopeZscore, name = "slope z-score", line = list(color = "purple")) %>%
+                        x = ~tradeDate) %>%
+            add_lines(y = ~iv_hv_ratio_pct, name = "IV/RV ratio pct", line = list(color = "cyan3")) %>%
             layout(
-                xaxis = list(title = ""), yaxis = list(title = "Slope z-score"))
+                xaxis = list(title = ""), yaxis = list(title = "IV/RV ratio pct"),font = list(size = 16)
+            )
         p2 <- subplot(
             p2_1, p2_2,
             nrows = 2,
@@ -1030,6 +986,7 @@ server <- function(input, output, session) {
         ) %>% layout(
             font = list(size = 16),showlegend = FALSE
         )
+
         p <- subplot(
             p1, p2,
             titleX = TRUE,
@@ -1038,16 +995,15 @@ server <- function(input, output, session) {
         ) %>% layout(
             font = list(size = 16),showlegend = FALSE
         )
+        
         p
         
     })
     
     output$ticker_plot_6 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_dte <- 25
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% arrange(tradeDate) %>% ungroup
-        req(nrow(df) > 0)
-        
+        df <- ticker_df()
+
         df_ff <- df %>% mutate(
             ff_60_30 = exErnIv30d / fexErn60_30 - 1,
             ff_90_30 = exErnIv30d / fexErn90_30 - 1,
@@ -1107,12 +1063,10 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_7 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
         t_dte <- input$t_dte
         t_profit <- input$t_profit
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% arrange(tradeDate) %>% ungroup
-        req(nrow(df) > 0)
-        
+        df <- ticker_df()
+
         df <- df %>% tail(252) %>% mutate(trace_days = factor(round(as.numeric(last(tradeDate)-tradeDate)/90)))
         
         today_dot <- df %>% tail(1)
@@ -1185,16 +1139,41 @@ server <- function(input, output, session) {
     
     
     output$ticker_plot_8 <- renderPlotly({
-        t_ticker <- as.character(input$t_ticker)
-        df <- ORATS_core %>% dplyr::filter(ticker == t_ticker) %>% ungroup
-        req(nrow(df) > 0)
+        df <- ticker_df() %>%
+            mutate(
+                slope_pct = runPercentRank(slope %>% na.locf(na.rm=F), 252)
+            )
+
+        # SPY ratio
         p1 <- plot_ly(df ,
             x = ~tradeDate) %>%
             add_lines(y = ~ivSpyRatio, name = "ivSpyRatio", line = list(color = "brown")) %>%
             add_lines(y = ~correlSpy1m, name = "correlSpy1m", line = list(color = "darkcyan")) %>%
             layout(
                 xaxis = list(title = ""), yaxis = list(title = "IV ETF Ratios"))
-        p2 <- plot_ly(df)
+
+        
+        p2_1 <- plot_ly(df ,
+                        x = ~tradeDate) %>%
+            add_lines(y = ~slope, name = "slope", line = list(color = "pink3")) %>%
+            layout(
+                xaxis = list(title = ""), yaxis = list(title = "Slope"))
+        p2_2 <- plot_ly(df ,
+                        x = ~tradeDate) %>%
+            add_lines(y = ~slope_pct, name = "slope pct", line = list(color = "purple")) %>%
+            layout(
+                xaxis = list(title = ""), yaxis = list(title = "Slope pct"))
+        p2 <- subplot(
+            p2_1, p2_2,
+            nrows = 2,
+            shareX = TRUE,
+            titleX = TRUE,
+            titleY = TRUE,
+            margin = 0.06   
+        ) %>% layout(
+            font = list(size = 16),showlegend = FALSE
+        )
+        
         p <- subplot(
             p1, p2,
             titleX = TRUE,
@@ -1203,22 +1182,13 @@ server <- function(input, output, session) {
         ) %>% layout(
             font = list(size = 16),showlegend = FALSE
         )
-        p
-    })
-    
-    output$ticker_plot_9 <- renderPlotly({
         
-        
-    })
-    
-    output$ticker_plot_10 <- renderPlotly({
-        
-        
+        #p1
     })
     
     output$pairs_plot <- renderPlot({
-        ticker_1 <- as.character(input$ticker_1)
-        ticker_2 <- as.character(input$ticker_2)
+        ticker_1 <- pair_1_deb()
+        ticker_2 <- pair_2_deb()
         corr_window <- as.numeric(input$run_window)
         df1 <- ORATS_core %>% dplyr::filter(ticker == ticker_1) %>% ungroup %>% 
             mutate(retAtmIv = c(NA, diff(log(pxAtmIv))), retAtmIv = remove_outliers(retAtmIv) * 100) %>% 
@@ -1243,17 +1213,8 @@ server <- function(input, output, session) {
                                mutate(IV = value) , aes(tradeDate, IV, color=name)) +  
             geom_line(linewidth=2)  +  ggtitle("IV") 
         
-        p1 <- ggplot(df, aes(retAtmIv.x, retAtmIv.y)) + 
-            geom_point(color="blue") + geom_smooth(method="lm") + ggtitle("Returns Correlation")+ 
-            xlab(ticker_1) + ylab(ticker_2) +  annotate(
-                "label",
-                x = Inf, y = -Inf,
-                label = paste0("Corr = ", corr_price, "%"),
-                hjust = 1.05, vjust = -0.5,
-                size = 8
-            )
-        p1 <- ggplot(df, aes(retAtmIv.x, retAtmIv.y)) + 
-            geom_point(color="blue") + geom_smooth(method="lm") + ggtitle("Returns Correlation")+ 
+        p1 <- ggplot(df, aes(retAtmIv.x, retAtmIv.y)) +
+            geom_point(color="blue") + geom_smooth(method="lm") + ggtitle("Returns Correlation")+
             xlab(ticker_1) + ylab(ticker_2) +  annotate(
                 "label",
                 x = Inf, y = -Inf,
@@ -1298,20 +1259,11 @@ server <- function(input, output, session) {
     
     
     output$corr_plot <- renderPlot({
-        ticker_1 <- as.character(input$ticker_1)
-        ticker_2 <- as.character(input$ticker_2)
-        
-        # correlation matrices
-        wide_ret <- ORATS_core %>% group_by(ticker) %>% 
-            mutate(log_ret = c(NA, diff(log(pxAtmIv)))) %>%
-            select(tradeDate, ticker, log_ret) %>%
-            pivot_wider(
-                names_from = ticker,
-                values_from = log_ret
-            )
-        cor_mat <- wide_ret %>%
-            select(-tradeDate) %>%          # remove date
-            cor(use = "pairwise.complete.obs")
+        ticker_1 <- pair_1_deb()
+        ticker_2 <- pair_2_deb()
+
+        cor_mat <- returns_cor_mat()   # memoized: heavy, input-independent
+        req(ticker_1 %in% colnames(cor_mat), ticker_2 %in% colnames(cor_mat))
         # corr mat ticker 1
         ticker_col <- cor_mat[,ticker_1] %>% sort(decreasing = TRUE)
         ticker_closest <- names(ticker_col[c(1:25, (length(ticker_col)-25):length(ticker_col))]) 

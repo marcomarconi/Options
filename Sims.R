@@ -8,7 +8,7 @@
     bizdays.options$set(default.calendar='NYSE')
 }
 
-# Check options portfolio
+# Check options portfolio, saved in Portfolio_Strangles.csv or Portfolio_Calendars.csv
 {
     portfolio <- read_csv("/home/marco/trading/Systems/Options/Portfolio_Strangles.csv", show_col_types = F)
     for(i in 1:nrow(portfolio)) {
@@ -41,37 +41,37 @@
     }
 }
 
-# Quick simulations, with IV
+# Quick simulations of EV and std for several option structures, with IV
 {
     
     # Single option only
     {
-        S0 = 26450
-        start_date <- "2026-04-16"
-        end_date <- "2026-04-21"
+        S0 = 4
+        start_date <- "2026-06-18"
+        end_date <- "2026-07-17"
         expiry_days <- as.numeric(as.Date(end_date) -  as.Date(start_date))
         trading_days <- bizdays(start_date, end_date, "NYSE")
-        X <- 25600
-        px <- 32
-        sigma <- 21 / 100
+        X <- 3
+        px <- 0.35
+        sigma <- 67 / 100
         type <- "put"
-        pos <- -1
+        pos <- -3
         gbm <- gbm_vec(nsim = 10000, t = trading_days, mu = 0, sigma = sigma, S0 = S0, dt = 1./252)
-        res <- sim_single_profit(gbm = gbm, S0 = S0, X = X, px = px, expiry_days = expiry_days, pos = pos, contracts = 20, type = type, plotting = T, verbose = T)
+        res <- sim_single_profit(gbm = gbm, S0 = S0, X = X, px = px, expiry_days = expiry_days, pos = pos,  type = type, plotting = T, verbose = T)
         
     }
     # Strangle
     {
-        S0 = 38.69
-        start_date <- "2026-04-01"
-        end_date <- "2026-04-17"
+        S0 = 25.56
+        start_date <- "2026-07-23"
+        end_date <- "2026-08-21"
         expiry_days <- as.numeric(as.Date(end_date) -  as.Date(start_date))
         trading_days <- bizdays(start_date, end_date, "NYSE")
-        X_call <- 41
-        X_put <- 36
-        px_call <- 0.53
-        px_put <- 0.35
-        sigma <- 27.22 / 100
+        X_call <- 35
+        X_put <- 22
+        px_call <- 0.88
+        px_put <- 0.7
+        sigma <- 87 / 100
         pos <- -1
         cost <- 0
         gbm <- gbm_vec(nsim = 10000, t = trading_days, mu = 0, sigma = sigma, S0 = S0, dt = 1./252)
@@ -176,17 +176,17 @@
 
 # Sharpe ratio simulations 
 {
-    VRP <- 0.2
+    VRP <- 0.112
     mu = 0.0
-    sigma <- 0.2
-    DTE <- 25
+    sigma <- 0.10
+    DTE <- 21
     df <- simulate_option_prices(vrp_level = VRP, mu = mu, sigma = sigma)
     #df_dba <- ORATS_core_ds  %>% filter(ticker == "DBA") %>% collect
     #df_spy <- ORATS_core_ds  %>% filter(ticker == "SPY") %>% collect
     plot_option_summary(df)
     # Simulate 7 uncorrelated strategies
     res <- list()
-    for(i in 1:7){
+    for(i in 1:30){
         print(i)
         res[[i]] <- simulate_option_prices(vrp_level = VRP, mu = mu, sigma = sigma, end_date = "2010-01-01")
     }
@@ -198,7 +198,7 @@
     eqs <- apply(rets, 2, cumsum)
     matplot2(eqs)
     # Every simulation SR
-    apply(rets, 2, function(x) adj_sharpe_ratio(x, period = 252/DTE))
+    apply(rets, 2, function(x) adj_sharpe_ratio(x, period = 365/DTE))
     # All simulation SR
     rowMeans(rets) %>% adj_sharpe_ratio(., period = 252/DTE)
 }
