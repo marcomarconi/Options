@@ -50,8 +50,12 @@ load_orats_day <- function(filename, cols_to_extract) {
     print(filename)
     quiet_fread(glue::glue(core_dir, "{filename}")) %>%
         purrr::pluck("result")  %>%  
-        select(all_of(cols_to_extract)) %>%   
-        mutate(across(3:ncol(.), ~ as.single(.))) %>% # choose the right starting numeric column
+        select(all_of(cols_to_extract)) %>%
+        # everything except the key and the date columns is numeric; ernDate1
+        # is an m/d/Y string and as.single() would silently turn it into NA
+        mutate(across(-any_of(date_cols), ~ as.single(.))) %>%
+        mutate(across(any_of(setdiff(date_cols, c("ticker", "tradeDate"))),
+                      ~ as.Date(.x, format = "%m/%d/%Y"))) %>%
         mutate(across(
             where(~ inherits(., "IDate")),
             ~ as.Date(.)
@@ -68,8 +72,18 @@ cols_to_extract <- c('ticker', 'tradeDate', 'pxAtmIv', 'hiStrikeM1', 'hiStrikeM2
                      "clsHvXern10d", "clsHvXern20d", "clsHvXern60d", "clsHvXern90d", "clsHvXern120d", "clsHvXern252d",
                      "ivPctile1y", "ivHvXernRatio", "ivSpyRatio", "correlSpy1m",
                      "fexErn30_20", "fexErn60_30", "fexErn90_60", "fexErn180_90", "fexErn90_30",
-                     "slope", "contango", "deriv"
+                     "slope", "contango", "deriv",
+                     # Earnings. ORATS never populates nextErn/daysToNextErn in
+                     # this feed - both read 0000-00-00 and 0 for every ticker,
+                     # this year and last - and the earnings/ directory is
+                     # empty, so days-to-NEXT-earnings is simply not available.
+                     # ernDate1 is the last REPORTED date, which given the
+                     # quarterly cadence still tells you whether one is due.
+                     "ernDate1", "absAvgErnMv", "impliedIee"
 )
+
+# columns in cols_to_extract that must not be coerced to numeric on load
+date_cols <- c("ticker", "tradeDate", "ernDate1")
 
 
 # Widening the screener cannot be repaired by appending days: the new tickers
@@ -85,10 +99,11 @@ roll_safe <- function(x) {
     na.locf(x, na.rm = FALSE)
 }
 
+.as_sig <- function(x) if (is.list(x)) x else sort(unique(x))
 universe_changed <- function(sig_file, universe) {
-    !file.exists(sig_file) || !identical(readRDS(sig_file), sort(unique(universe)))
+    !file.exists(sig_file) || !identical(readRDS(sig_file), .as_sig(universe))
 }
-save_universe <- function(sig_file, universe) saveRDS(sort(unique(universe)), sig_file)
+save_universe <- function(sig_file, universe) saveRDS(.as_sig(universe), sig_file)
 
 create_ORATS_core <- function(core_dir){
     print("Force load ORATS core file")
@@ -119,6 +134,12 @@ init_ORATS_core <- function(ORATS_core, screener) {
             VRP = log(lag(iv30_clean, 20) / rv20_clean), # Realized VRP, NOT future VRP
             VRPzscore = runZscore(roll_safe(VRP), 252),
             rvPctile1y = TTR::runPercentRank(roll_safe(rv20_clean), 252) * 100,
+            # days since the last REPORTED earnings, not days until the next:
+            # see the note on cols_to_extract. On a quarterly reporter this
+            # still separates "just reported" from "about to report".
+            daysSinceErn = as.numeric(as.Date(tradeDate) - as.Date(ernDate1)),
+            daysSinceErn = if_else(is.na(daysSinceErn) | daysSinceErn < 0,
+                                   NA_real_, daysSinceErn),
             steepness_30d90d = log(iv30_clean/na_if(exErnIv90d, 0)) %>% na.locf(na.rm=F),
             steepness_30d6m = log(iv30_clean/na_if(exErnIv6m, 0)) %>% na.locf(na.rm=F)
 
@@ -204,7 +225,11 @@ update_ORATS_core <- function(ORATS_core, core_dir) {
 
 append_ORATS_delayed <- function(ORATS_core, ORATS_code_delayed_file) {
     if(file.exists(ORATS_code_delayed_file)) {
-        ORATS_code_delayed <- read_csv(ORATS_code_delayed_file, show_col_types = FALSE) %>% dplyr::select(all_of(cols_to_extract))
+        ORATS_code_delayed <- read_csv(ORATS_code_delayed_file, show_col_types = FALSE) %>%
+            dplyr::select(any_of(cols_to_extract))
+        missing_cols <- setdiff(cols_to_extract, names(ORATS_code_delayed))
+        if (length(missing_cols))   # a newly added column the delayed feed lacks
+            ORATS_code_delayed[missing_cols] <- NA
         core_last_day <- ORATS_core %>% arrange(tradeDate) %>% tail(1) %>% pull(tradeDate) %>% as.Date
         delayed_last_day <- ORATS_code_delayed %>% arrange(tradeDate) %>% tail(1) %>% pull(tradeDate) %>% as.Date
         if(delayed_last_day > core_last_day) {
@@ -231,7 +256,9 @@ if (initialize || !exists("ORATS_core")) {
     loaded_last_day <- max(as.Date(ORATS_core$tradeDate))
     delayed_is_new <- file.exists(ORATS_code_delayed_file) &&
         as.Date(file.mtime(ORATS_code_delayed_file)) > loaded_last_day
-    universe_grew <- universe_changed(ORATS_universe_file, combined_screener$Symbol)
+    core_sig <- list(universe = sort(unique(combined_screener$Symbol)),
+                     cols = sort(cols_to_extract))
+    universe_grew <- universe_changed(ORATS_universe_file, core_sig)
     if (initialize || universe_grew || loaded_last_day < last_real_day || delayed_is_new) {
         if (initialize || universe_grew) {
             # appending days would only extend the tickers already cached, so
@@ -248,7 +275,7 @@ if (initialize || !exists("ORATS_core")) {
         ORATS_core <- init_ORATS_core(ORATS_core, screener = combined_screener)
         write_parquet(ORATS_core %>% dplyr::filter(as.Date(tradeDate) <= last_real_day),
                       ORATS_core_file)
-        save_universe(ORATS_universe_file, combined_screener$Symbol)
+        save_universe(ORATS_universe_file, core_sig)
     }
     print(paste("ORATS_core ready, last day:", max(as.Date(ORATS_core$tradeDate))))
 }
@@ -271,7 +298,8 @@ screen_vars <- c("ivPctile1y", "rvPctile1y", "VRP", "VRPzscore",
                  "steepness_30d90d", "steepness_30d6m", "ivHvXernRatio",
                  "ivSpyRatio", "correlSpy1m", "slope", "contango",
                  "volOfVol", "volOfIvol", "avgOptVolu20d",
-                 "exErnIv30d", "clsHvXern20d")
+                 "exErnIv30d", "clsHvXern20d",
+                 "daysSinceErn", "absAvgErnMv", "impliedIee")
 
 # The shinyapp
 ui <- fillPage(
@@ -306,6 +334,10 @@ ui <- fillPage(
                                     selectInput("scr_yvar", "Screen Y", choices = screen_vars,
                                                 selected = "VRPzscore"),
                                     textInput("scr_n_tickers", "Tickers to show", value = 50),
+                                    # a floor screens on liquidity itself rather
+                                    # than just taking the N most liquid; median
+                                    # avgOptVolu20d is ~100, p90 ~4800
+                                    textInput("scr_min_volu", "Min avg opt volume (20d)", value = 0),
 
                                     h3("IV plot"),
                                     textInput("iv_n_tickers", "Tickers to show", value = 50),
@@ -478,12 +510,18 @@ server <- function(input, output, session) {
     # The day's slice, most liquid first. validate() rather than req() so an
     # empty day says so on the page instead of rendering a blank panel.
     dash_screen <- function(n) {
+        floor_volu <- suppressWarnings(as.numeric(trimws(input$scr_min_volu)))
+        if (!length(floor_volu) || is.na(floor_volu)) floor_volu <- 0
         df <- dash_core() %>% dplyr::ungroup() %>%
             dplyr::filter(tradeDate == input$date) %>%
             arrange(desc(avgOptVolu20d))
         validate(need(nrow(df) > 0,
                       paste0("No data for ", format(input$date),
                              ". Last day in the data is ", format(last_data_day), ".")))
+        df <- df %>% dplyr::filter(avgOptVolu20d >= floor_volu)
+        validate(need(nrow(df) > 0,
+                      paste0("No ticker in this universe trades ", floor_volu,
+                             " contracts a day. Lower the volume floor.")))
         if (is.finite(n) && n > 0) head(df, n = n) else df
     }
 
@@ -779,8 +817,18 @@ server <- function(input, output, session) {
     # ticker a selected row belongs to
     table_df <- reactive({
         dash_screen(as.numeric(input$table_n_tickers)) %>%
-            dplyr::select("ticker", "tradeDate", "steepness_30d6m", "ivPctile1y",
-                          "VRP", "rvPctile1y", "avgOptVolu20d")
+            dplyr::transmute(
+                ticker, tradeDate, class,
+                iv30 = round(exErnIv30d, 1), rv20 = round(clsHvXern20d, 1),
+                ivRvRatio = round(ivHvXernRatio, 2),
+                ivPctile1y = round(ivPctile1y, 0), rvPctile1y = round(rvPctile1y, 0),
+                VRP = round(VRP, 3), VRPz = round(VRPzscore, 2),
+                steep30d6m = round(steepness_30d6m, 3), slope = round(slope, 2),
+                # earnings proximity is inferred from the last reported date;
+                # see the note on cols_to_extract
+                daysSinceErn = round(daysSinceErn, 0),
+                ernMove = round(absAvgErnMv, 1), impliedIee = round(impliedIee, 2),
+                optVolu20d = round(avgOptVolu20d, 0))
     })
 
     output$table_plot <- renderDT({
