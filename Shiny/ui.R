@@ -371,6 +371,11 @@ server <- function(input, output, session) {
     })
     ticker_end <- reactive(max(ticker_df()$tradeDate, na.rm = TRUE))
 
+    # one title style for every chart on the tab, so nine stacked plots are
+    # identifiable without reading the code
+    plot_title <- function(txt) list(text = txt, x = 0, xanchor = "left",
+                                     font = list(size = 15))
+
     # DTE arrives from a textInput, so parse it once here instead of letting
     # each plot compare a number against a string - dtExM1 == "25" only works
     # by coercion, and silently matches nothing on " 25" or "25.0".
@@ -850,7 +855,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("Price, volume and momentum | IV change vs return")
         )
         p
         
@@ -882,7 +888,8 @@ server <- function(input, output, session) {
             add_lines(y = ~RV, name = "RV", line = list(color = "red")) %>%
             layout(
                 xaxis = list(title = ""), yaxis = list(title = ""),
-                legend = list(x = 0.1, y = 0.9),font = list(size = 16)
+                legend = list(x = 0.1, y = 0.9),font = list(size = 16),
+                title = plot_title("IV vs ORATS realized vol")
             )
         p
     })
@@ -934,14 +941,18 @@ server <- function(input, output, session) {
                 hovermode = "x unified",
                 legend = list(orientation = "h", x = 0.5, xanchor = "center",
                               y = -0.15),
-                font = list(size = 16)
+                font = list(size = 16),
+                title = plot_title("IV vs realized vol, five estimators")
             )
     })
 
     output$ticker_plot_3 <- renderPlotly({
-        # the cones are min/max/quartiles over the visible window, so the
-        # lookback follows the Time Range selector
-        df <- ticker_df() %>% t_win
+        # The cone is a distribution, not a time series: at a 3m Time Range it
+        # would be drawing min/max off ~63 observations. Pin it to 2y and
+        # ignore the selector, and say so in the title.
+        cone_years <- 2
+        df <- ticker_df() %>%
+            dplyr::filter(tradeDate >= ticker_end() - cone_years * 365.25)
 
 
 
@@ -1000,7 +1011,6 @@ server <- function(input, output, session) {
                 mode = "lines+markers"
             )%>%
             layout(
-                title = "Volatility Cone",
                 yaxis = list(title = "Implied Volatility (%)"),
                 xaxis = list(title = "")
             )
@@ -1031,7 +1041,6 @@ server <- function(input, output, session) {
                 mode = "lines+markers"
             )%>%
             layout(
-                title = "Volatility Cone",
                 yaxis = list(title = "Realized Volatility (%)"),
                 xaxis = list(title = "")
             )
@@ -1066,7 +1075,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("Volatility cone - fixed 2y lookback, ignores Time Range")
         )
         p
         
@@ -1141,7 +1151,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("Variance risk premium - level and term structure")
         )
         p
         
@@ -1212,7 +1223,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("IV/VVOL and IV/RV ratios, with 252d percentiles")
         )
         
         p
@@ -1275,7 +1287,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("Forward volatility factors")
         )
         p
     })
@@ -1334,10 +1347,26 @@ server <- function(input, output, session) {
                        PnL2 = cumsum(replace_na(straRetM2, 0))*100)
         } else {
             df <- df %>% filter(dtExM1 == t_dte) %>% 
-                mutate(PnL1 = cumsum(replace_na(straProM1, 0))*100, 
+                mutate(PnL1 = cumsum(replace_na(straProM1, 0))*100,
                        PnL2 = cumsum(replace_na(straProM2, 0))*100)
         }
-        
+
+        # Sharpe of the two PnL lines, computed on the increments actually
+        # drawn, so it always describes the curve on screen (periods with no
+        # usable straddle enter as a flat 0, exactly as they do in the cumsum).
+        # This series is one observation per expiry cycle at the chosen DTE,
+        # not daily, so annualise from the observed sampling frequency rather
+        # than assuming 252. Percentage and Dollars give slightly different
+        # numbers on purpose: Percentage divides each period by that day's
+        # price, so the two series are not proportional.
+        sharpe <- function(pnl) {
+            r <- diff(c(0, pnl)); r <- r[is.finite(r)]
+            yrs <- as.numeric(diff(range(df$tradeDate))) / 365.25
+            if (length(r) < 3 || yrs <= 0 || sd(r) == 0) return(NA_real_)
+            mean(r) / sd(r) * sqrt(length(r) / yrs)
+        }
+        sr <- sprintf("Sharpe  M1 %.2f   M2 %.2f", sharpe(df$PnL1), sharpe(df$PnL2))
+
         p2 <- plot_ly(df,
             x = ~tradeDate) %>%
             add_lines(y = ~PnL1, name = "PnL1", line = list(color = "darkgray")) %>%
@@ -1356,7 +1385,13 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("VRP vs RV percentile | cumulative straddle PnL"),
+            # Sharpe on the chart itself, over the PnL panel on the right
+            annotations = list(list(
+                text = sr, xref = "paper", yref = "paper",
+                x = 1, xanchor = "right", y = 1.02, yanchor = "bottom",
+                showarrow = FALSE, font = list(size = 14)))
         )
         p
     })
@@ -1404,7 +1439,8 @@ server <- function(input, output, session) {
             titleY = TRUE,
             margin = 0.06   
         ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
+            font = list(size = 16), showlegend = FALSE,
+            title = plot_title("SPY IV ratio and correlation | term-structure slope")
         )
         p
     })
