@@ -403,13 +403,24 @@ server <- function(input, output, session) {
         xts::xts(m, order.by = d$tradeDate)
     })
 
+    # Realized-vol lookback, in trading days, matched to the IV horizon at
+    # 21 trading days per month. Plot 2 cannot do this - ORATS ships
+    # clsHvXern 5/10/20/60/90/120/252d and nothing at 42d or 63d, so its 60d
+    # and 90d settings put a 2- and 3-month IV against a 3- and 4.3-month
+    # realized window. Computing RV ourselves frees the window, so here the
+    # two horizons actually line up. Consequence: on 30d this is a 21d window,
+    # so it no longer reproduces ORATS clsHvXern20d to the decimal.
+    rv_n <- reactive({
+        switch(as.character(input$t_vol_window),
+               "30d" = 21, "60d" = 42, "90d" = 63,
+               "6m" = 126, "1yr" = 252, 21)
+    })
+
     # the five estimators, annualised and in percent to match the ORATS scale
     rv_estimators <- reactive({
         x <- ticker_ohlc()
         if (is.null(x) || nrow(x) < 30) return(NULL)
-        n <- switch(as.character(input$t_vol_window),
-                    "30d" = 20, "60d" = 60, "90d" = 90,
-                    "6m" = 120, "1yr" = 252, 20)
+        n <- rv_n()
         calcs <- c("Close-to-close"  = "close",
                    "Parkinson"       = "parkinson",
                    "Garman-Klass"    = "garman.klass",
@@ -892,7 +903,9 @@ server <- function(input, output, session) {
                 hovertemplate = "%{y:.2f}<extra>%{fullData.name}</extra>") %>%
             layout(
                 xaxis = list(title = ""),
-                yaxis = list(title = "Annualised vol (%)"),
+                # name the window: plot 2 next door uses a different one at
+                # the 60d and 90d settings, and the two are easily confused
+                yaxis = list(title = paste0("Annualised vol (%) - ", rv_n(), "d")),
                 hovermode = "x unified",
                 legend = list(orientation = "h", x = 0.5, xanchor = "center",
                               y = -0.15),
