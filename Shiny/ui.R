@@ -113,7 +113,12 @@ update_ORATS_ohlc <- function(universe) {
     files <- files[keep]; dates <- dates[keep]
 
     have <- if (file.exists(ORATS_ohlc_file)) read_parquet(ORATS_ohlc_file) else NULL
-    todo <- if (is.null(have)) files else files[dates > max(have$tradeDate)]
+    # Load anything the store is missing at EITHER end: new days on the right,
+    # and older days on the left when days_to_load grows and the requested
+    # window reaches back past what was seeded. Appending only on the right
+    # would leave the estimators stopping short of the core's history.
+    todo <- if (is.null(have)) files
+            else files[dates > max(have$tradeDate) | dates < min(have$tradeDate)]
     if (length(todo)) {
         print(paste("Loading", length(todo), "ORATS dailies for OHLC"))
         have <- rbind(have, purrr::map_df(todo, load_orats_daily, universe)) %>%
@@ -365,6 +370,15 @@ server <- function(input, output, session) {
         if (length(m) != 1 || is.na(m) || m <= 0) Inf else m
     })
     ticker_end <- reactive(max(ticker_df()$tradeDate, na.rm = TRUE))
+
+    # DTE arrives from a textInput, so parse it once here instead of letting
+    # each plot compare a number against a string - dtExM1 == "25" only works
+    # by coercion, and silently matches nothing on " 25" or "25.0".
+    t_dte_num <- reactive({
+        v <- suppressWarnings(as.numeric(trimws(as.character(input$t_dte))))
+        req(is.finite(v), v > 0)
+        v
+    })
     t_win <- function(d) {
         m <- t_range_months()
         if (is.infinite(m) || nrow(d) == 0) return(d)
@@ -744,7 +758,7 @@ server <- function(input, output, session) {
     })
 
     output$ticker_plot_1 <- renderPlotly({
-        t_dte <- 25
+        t_dte <- t_dte_num()
         df <- ticker_df()
 
         # Stock Price
@@ -925,7 +939,6 @@ server <- function(input, output, session) {
     })
 
     output$ticker_plot_3 <- renderPlotly({
-        t_dte <- 25
         # the cones are min/max/quartiles over the visible window, so the
         # lookback follows the Time Range selector
         df <- ticker_df() %>% t_win
@@ -937,8 +950,7 @@ server <- function(input, output, session) {
             max   = ~max(.x, na.rm = TRUE),
             q25  = ~quantile(.x, 0.25, na.rm = TRUE),
             q75  = ~quantile(.x, 0.75, na.rm = TRUE),
-            current = ~last(.x),
-            previous = ~head(tail(.x, 30), 1)
+            current = ~last(.x)
         )
         
         IV_expiries <- c("10d","30d","60d","90d","6m","1y")
@@ -948,7 +960,7 @@ server <- function(input, output, session) {
         }, .id = "stat") %>% t %>% as.data.frame() 
         colnames(cone_df_IV) <- cone_df_IV[1,]; cone_df_IV <- cone_df_IV[-1,]
         cone_df_IV$horizon <-  factor(IV_expiries, levels = IV_expiries)
-        cone_df_IV <- cone_df_IV %>% mutate(across(min:previous, ~as.numeric(.x)))
+        cone_df_IV <- cone_df_IV %>% mutate(across(min:current, ~as.numeric(.x)))
         
         RV_expiries <- c("10d","20d", "60d","90d","120d","252d")
         cone_df_RV <- map_dfr(stats, function(f) {
@@ -1208,7 +1220,6 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_6 <- renderPlotly({
-        t_dte <- 25
         df <- ticker_df()
 
         df_ff <- df %>% mutate(
@@ -1270,7 +1281,7 @@ server <- function(input, output, session) {
     })
     
     output$ticker_plot_7 <- renderPlotly({
-        t_dte <- input$t_dte
+        t_dte <- t_dte_num()
         t_profit <- input$t_profit
         df <- ticker_df()
 
@@ -1332,7 +1343,12 @@ server <- function(input, output, session) {
             add_lines(y = ~PnL1, name = "PnL1", line = list(color = "darkgray")) %>%
             add_lines(y = ~PnL2, name = "PnL2", line = list(color = "lightgray")) %>%
             layout(
-                xaxis = list(title = ""), yaxis = list(title = "Straddle Returns")            )
+                xaxis = list(title = ""),
+                # both branches scale by 100: percent for returns, the 100x
+                # contract multiplier for dollars. Name which one is on screen.
+                yaxis = list(title = if (t_profit == "Percentage")
+                                 "Straddle PnL (%)" else "Straddle PnL ($/contract)")
+            )
         
         p <- subplot(
             p1, p2,
@@ -1390,8 +1406,7 @@ server <- function(input, output, session) {
         ) %>% layout(
             font = list(size = 16),showlegend = FALSE
         )
-        
-        #p1
+        p
     })
     
     output$pairs_plot <- renderPlot({
@@ -1483,9 +1498,6 @@ server <- function(input, output, session) {
         p7 <-  ggcorrplot(cor_mat_closest1, show.legend = FALSE, type = "upper") 
         p8 <-  ggcorrplot(cor_mat_closest2, show.legend = FALSE, type = "upper")
         (p7 + p8)
-    })
-    
-    output$sim_strangle_plot <- renderPlot({
     })
 }
 
