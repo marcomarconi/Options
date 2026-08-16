@@ -11,3 +11,7 @@ __pycache__/
 *.pq
 # ...except the small regime model outputs, which are part of the module.
 !regime_timeline/results/*.pq
+
+# Universe signatures next to the parquet caches: generated, not source.
+Data/ORATS_universe.rds
+Data/ORATS_ohlc_universe.rds

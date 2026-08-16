@@ -23,11 +23,25 @@ source("/home/marco/trading/Systems/Options/regime_timeline/src/regime_shiny.R")
     options_dir <- "/home/marco/trading/Systems/Options/Data/"
     ORATS_core_file <- paste0(options_dir, "ORATS_core.pq")
     ORATS_code_delayed_file <- paste0(delayed_dir, "orats_core_delayed.csv")
+    # a cached parquet holds whatever universe was current when it was
+    # written; these record it so a widened screener can be detected
+    ORATS_universe_file <- paste0(options_dir, "ORATS_universe.rds")
+    ORATS_ohlc_universe_file <- paste0(options_dir, "ORATS_ohlc_universe.rds")
     days_to_load <- 500
 
     etf_screener <- read_csv("/home/marco/trading/Systems/Options/etf-screener-weekly-options.csv", show_col_types = F)
     stock_screener <- read_csv("/home/marco/trading/Systems/Options/stocks-screener-08-23-2025.csv", show_col_types = F)
-    
+
+    # The app was ETF-only because init_ORATS_core joined the ETF screener
+    # alone and stock_screener was loaded but never used. Single names come in
+    # here. The ETF list carries an Asset Class and the stock list does not,
+    # so label those "Stock"; distinct() keeps the ETF row for the 9 symbols
+    # that appear on both lists and stops the join fanning out.
+    combined_screener <- bind_rows(
+        etf_screener   %>% dplyr::select(Symbol, `Asset Class`),
+        stock_screener %>% dplyr::select(Symbol) %>% mutate(`Asset Class` = "Stock")
+    ) %>% distinct(Symbol, .keep_all = TRUE)
+
 today_date <- Sys.Date() 
 
 # function for loading an ORATS core data file and returning a subset of columns
@@ -58,6 +72,24 @@ cols_to_extract <- c('ticker', 'tradeDate', 'pxAtmIv', 'hiStrikeM1', 'hiStrikeM2
 )
 
 
+# Widening the screener cannot be repaired by appending days: the new tickers
+# have no history in the cache at all. Compare the universe a cache was built
+# for against the one being asked for, so the rebuild triggers itself.
+# TTR's rolling functions reject a series with interior NAs outright, and NaN
+# counts as NA to them. Across ~4k single names there are many ways to produce
+# one (a 0 or a negative through a log, a ratio of two 0s, a gap in coverage),
+# so normalise instead of chasing each cause: anything non-finite becomes NA
+# and is carried forward, leaving only leading NAs.
+roll_safe <- function(x) {
+    x[!is.finite(x)] <- NA
+    na.locf(x, na.rm = FALSE)
+}
+
+universe_changed <- function(sig_file, universe) {
+    !file.exists(sig_file) || !identical(readRDS(sig_file), sort(unique(universe)))
+}
+save_universe <- function(sig_file, universe) saveRDS(sort(unique(universe)), sig_file)
+
 create_ORATS_core <- function(core_dir){
     print("Force load ORATS core file")
     files <- list.files(core_dir, "orats_core_202[0-9].*gz")
@@ -73,14 +105,24 @@ init_ORATS_core <- function(ORATS_core, screener) {
         rename(class = `Asset Class`)%>% 
         group_by(ticker) %>% arrange(tradeDate) %>% dplyr::filter(n() >= days_to_load) %>% 
         mutate(
-            class = if_else(is.na(class), "Stock", class),    
-            VRP = log(lag(exErnIv30d, 20) / clsHvXern20d), # Realized VRP, NOT future VRP
-            VRPzscore = runZscore(VRP, 252),
-            rvPctile1y = TTR::runPercentRank(clsHvXern20d, 252) * 100,
-            steepness_30d90d = log(exErnIv30d/exErnIv90d) %>% na.locf(na.rm=F),
-            steepness_30d6m = log(exErnIv30d/exErnIv6m) %>% na.locf(na.rm=F)
+            class = if_else(is.na(class), "Stock", class),
+            # Single names carry 0s in these columns where the ETF universe
+            # did not, and 0 through a log() or a ratio becomes NaN mid-series
+            # - which TTR's runSum/runPercentRank reject outright ("series
+            # contains non-leading NAs"). Treat 0 as the missing value it is
+            # and carry the last observation forward, the same way steepness
+            # below has always been handled, so only leading NAs survive.
+            iv30_clean = na.locf(na_if(exErnIv30d, 0), na.rm = FALSE),
+            rv20_clean = na.locf(na_if(clsHvXern20d, 0), na.rm = FALSE),
+            # VRP keeps its honest gaps; only what feeds a rolling window is
+            # filled, so the plotted series is not silently carried forward
+            VRP = log(lag(iv30_clean, 20) / rv20_clean), # Realized VRP, NOT future VRP
+            VRPzscore = runZscore(roll_safe(VRP), 252),
+            rvPctile1y = TTR::runPercentRank(roll_safe(rv20_clean), 252) * 100,
+            steepness_30d90d = log(iv30_clean/na_if(exErnIv90d, 0)) %>% na.locf(na.rm=F),
+            steepness_30d6m = log(iv30_clean/na_if(exErnIv6m, 0)) %>% na.locf(na.rm=F)
 
-        )  
+        ) %>% dplyr::select(-iv30_clean, -rv20_clean)
 }
 
 
@@ -113,6 +155,13 @@ update_ORATS_ohlc <- function(universe) {
     files <- files[keep]; dates <- dates[keep]
 
     have <- if (file.exists(ORATS_ohlc_file)) read_parquet(ORATS_ohlc_file) else NULL
+    # A store built for a narrower universe holds no rows at all for the new
+    # tickers, and the date-range check below cannot see that - every date it
+    # wants is already there. Drop it and reseed.
+    if (!is.null(have) && universe_changed(ORATS_ohlc_universe_file, universe)) {
+        print("OHLC universe changed - reseeding the store")
+        have <- NULL
+    }
     # Load anything the store is missing at EITHER end: new days on the right,
     # and older days on the left when days_to_load grows and the requested
     # window reaches back past what was seeded. Appending only on the right
@@ -125,6 +174,7 @@ update_ORATS_ohlc <- function(universe) {
             arrange(ticker, tradeDate)
         write_parquet(have, ORATS_ohlc_file)
     }
+    save_universe(ORATS_ohlc_universe_file, universe)
     have
 }
 
@@ -181,15 +231,24 @@ if (initialize || !exists("ORATS_core")) {
     loaded_last_day <- max(as.Date(ORATS_core$tradeDate))
     delayed_is_new <- file.exists(ORATS_code_delayed_file) &&
         as.Date(file.mtime(ORATS_code_delayed_file)) > loaded_last_day
-    if (initialize || loaded_last_day < last_real_day || delayed_is_new) {
-        print(paste("Updating ORATS_core:", loaded_last_day, "->", last_real_day))
-        ORATS_core <- ORATS_core %>% ungroup() %>%
-            dplyr::select(any_of(cols_to_extract))
-        ORATS_core <- update_ORATS_core(ORATS_core, core_dir)
+    universe_grew <- universe_changed(ORATS_universe_file, combined_screener$Symbol)
+    if (initialize || universe_grew || loaded_last_day < last_real_day || delayed_is_new) {
+        if (initialize || universe_grew) {
+            # appending days would only extend the tickers already cached, so
+            # re-derive the whole thing from the raw core files (~2-10 min)
+            print("ORATS_core universe changed - rebuilding from the core files")
+            ORATS_core <- create_ORATS_core(core_dir)
+        } else {
+            print(paste("Updating ORATS_core:", loaded_last_day, "->", last_real_day))
+            ORATS_core <- ORATS_core %>% ungroup() %>%
+                dplyr::select(any_of(cols_to_extract))
+            ORATS_core <- update_ORATS_core(ORATS_core, core_dir)
+        }
         ORATS_core <- append_ORATS_delayed(ORATS_core, ORATS_code_delayed_file)
-        ORATS_core <- init_ORATS_core(ORATS_core, screener = etf_screener)
+        ORATS_core <- init_ORATS_core(ORATS_core, screener = combined_screener)
         write_parquet(ORATS_core %>% dplyr::filter(as.Date(tradeDate) <= last_real_day),
                       ORATS_core_file)
+        save_universe(ORATS_universe_file, combined_screener$Symbol)
     }
     print(paste("ORATS_core ready, last day:", max(as.Date(ORATS_core$tradeDate))))
 }
@@ -373,7 +432,10 @@ server <- function(input, output, session) {
 
     # one title style for every chart on the tab, so nine stacked plots are
     # identifiable without reading the code
-    plot_title <- function(txt) list(text = txt, x = 0, xanchor = "left",
+    # plotly renders HTML in title text, and its title font has no weight
+    # property, so bold via the tag rather than the font spec
+    plot_title <- function(txt) list(text = paste0("<b>", txt, "</b>"),
+                                     x = 0, xanchor = "left",
                                      font = list(size = 15))
 
     # DTE arrives from a textInput, so parse it once here instead of letting
@@ -555,9 +617,9 @@ server <- function(input, output, session) {
         date <- input$date
         df <- ORATS_core %>% group_by(ticker) %>% 
             mutate(
-                IV_mom = RSI2(exErnIv30d %>% na.locf(na.rm=F), 20, maType="EMA"), 
-                steepness_30d90d_mom = RSI2(steepness_30d90d %>% replace(., is.infinite(.), NA) %>% na.locf(na.rm=F), 20, maType="EMA"), 
-                steepness_30d90d_Pctile1y = runPercentRank(steepness_30d90d, 252) * 100,
+                IV_mom = RSI2(roll_safe(exErnIv30d), 20, maType="EMA"), 
+                steepness_30d90d_mom = RSI2(roll_safe(steepness_30d90d), 20, maType="EMA"), 
+                steepness_30d90d_Pctile1y = runPercentRank(roll_safe(steepness_30d90d), 252) * 100,
             ) %>% ungroup()
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         if(nrow(df) == 0)
@@ -603,9 +665,9 @@ server <- function(input, output, session) {
                     TRUE ~ NA
                 ),
                 VRP = log(lag(IV, time_window) / RV),
-                VRPzscore = runZscore(VRP %>% na.locf(na.rm=F), 252), 
-                RV_mom = RSI2(RV %>% na.locf(na.rm=F), 20, maType="EMA"), 
-                rvPctile1y = TTR::runPercentRank(RV %>% na.locf(na.rm=F), 252) * 100
+                VRPzscore = runZscore(roll_safe(VRP), 252), 
+                RV_mom = RSI2(roll_safe(RV), 20, maType="EMA"), 
+                rvPctile1y = TTR::runPercentRank(roll_safe(RV), 252) * 100
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
@@ -632,7 +694,7 @@ server <- function(input, output, session) {
         date <- input$date
         df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
-                ivSpyRatioPctile1y = TTR::runPercentRank(ivSpyRatio, 252) * 100
+                ivSpyRatioPctile1y = TTR::runPercentRank(roll_safe(ivSpyRatio), 252) * 100
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
@@ -704,10 +766,10 @@ server <- function(input, output, session) {
         df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                 ivHvXernRatio = ivHvXernRatio %>% log,
-                ivHvXernRatio_zscore = runZscore(ivHvXernRatio %>% na.locf(na.rm=F), 252),
+                ivHvXernRatio_zscore = runZscore(roll_safe(ivHvXernRatio), 252),
                 volOfIvol_w = ew_sd_roll(c(NA, diff(log(exErnIv30d))) %>% replace_na(0), 20),
                 IV_IVVOL = log(exErnIv30d/volOfIvol_w),
-                IV_IVVOL_zscore = runZscore(IV_IVVOL %>% na.locf(na.rm=F), 252)
+                IV_IVVOL_zscore = runZscore(roll_safe(IV_IVVOL), 252)
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
@@ -1162,10 +1224,10 @@ server <- function(input, output, session) {
         df <- ticker_df() %>%
             mutate(
                 iv_hv_ratio = (exErnIv30d / clsHvXern20d) %>% log,
-                iv_hv_ratio_pct = runPercentRank(iv_hv_ratio %>% na.locf(na.rm=F), 252) * 100,
+                iv_hv_ratio_pct = runPercentRank(roll_safe(iv_hv_ratio), 252) * 100,
                 volOfIvol_w = ew_sd_roll(c(NA, diff(log(exErnIv30d))) %>% replace_na(0), 20) *100,
                 IVVVOL_ratio = exErnIv30d / volOfIvol_w,
-                IVVVOL_ratio_pct = runPercentRank(IVVVOL_ratio, 252)
+                IVVVOL_ratio_pct = runPercentRank(roll_safe(IVVVOL_ratio), 252)
 
             ) %>% t_win   # 252d ranks computed on the full history first
 
@@ -1400,7 +1462,7 @@ server <- function(input, output, session) {
     output$ticker_plot_8 <- renderPlotly({
         df <- ticker_df() %>%
             mutate(
-                slope_pct = runPercentRank(slope %>% na.locf(na.rm=F), 252)
+                slope_pct = runPercentRank(roll_safe(slope), 252)
             ) %>% t_win   # 252d rank computed on the full history first
 
         # SPY ratio
