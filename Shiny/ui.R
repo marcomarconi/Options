@@ -79,16 +79,22 @@ cols_to_extract <- c('ticker', 'tradeDate', 'pxAtmIv', 'hiStrikeM1', 'hiStrikeM2
                      # empty, so days-to-NEXT-earnings is simply not available.
                      # ernDate1 is the last REPORTED date, which given the
                      # quarterly cadence still tells you whether one is due.
-                     "ernDate1", "absAvgErnMv", "impliedIee"
+                     "ernDate1", "absAvgErnMv", "impliedIee",
+                     # Screener additions. mktWidthVol is the bid/ask width in
+                     # vol points - what crossing costs, which volume does not
+                     # tell you. fcstStraPxM1 and orIvFcst20d give ORATS's own
+                     # forecast to price against, the forward-looking
+                     # counterpart to VRP (which compares IV to REALIZED vol).
+                     # confidence/error gate the fit quality. ivPctileSpy is a
+                     # real cross-sectional rank, unlike ivSpyRatio.
+                     "mktWidthVol", "fcstStraPxM1", "orIvFcst20d",
+                     "confidence", "error", "ivPctileSpy"
 )
 
 # columns in cols_to_extract that must not be coerced to numeric on load
 date_cols <- c("ticker", "tradeDate", "ernDate1")
 
 
-# Widening the screener cannot be repaired by appending days: the new tickers
-# have no history in the cache at all. Compare the universe a cache was built
-# for against the one being asked for, so the rebuild triggers itself.
 # TTR's rolling functions reject a series with interior NAs outright, and NaN
 # counts as NA to them. Across ~4k single names there are many ways to produce
 # one (a 0 or a negative through a log, a ratio of two 0s, a gap in coverage),
@@ -99,6 +105,10 @@ roll_safe <- function(x) {
     na.locf(x, na.rm = FALSE)
 }
 
+# A cached parquet holds the universe AND the column set it was built for.
+# Widening either cannot be repaired by appending days - the new tickers have
+# no history in the cache, and the new columns no values - so record the
+# signature next to the cache and rebuild when it changes.
 .as_sig <- function(x) if (is.list(x)) x else sort(unique(x))
 universe_changed <- function(sig_file, universe) {
     !file.exists(sig_file) || !identical(readRDS(sig_file), .as_sig(universe))
@@ -294,9 +304,10 @@ if (initialize || !exists("ORATS_ohlc")) {
 last_data_day <- max(as.Date(ORATS_core$tradeDate))
 
 # what the free-form screen scatter can plot against what
-screen_vars <- c("ivPctile1y", "rvPctile1y", "VRP", "VRPzscore",
-                 "steepness_30d90d", "steepness_30d6m", "ivHvXernRatio",
-                 "ivSpyRatio", "correlSpy1m", "slope", "contango",
+screen_vars <- c("richScore", "straRich", "ivFcstRatio",
+                 "ivPctile1y", "rvPctile1y", "ivPctileSpy", "VRPzscore",
+                 "steepness_30d6m", "ivHvXernRatio", "slope", "contango",
+                 "mktWidthVol", "confidence", "correlSpy1m",
                  "volOfVol", "volOfIvol", "avgOptVolu20d",
                  "exErnIv30d", "clsHvXern20d",
                  "daysSinceErn", "absAvgErnMv", "impliedIee")
@@ -338,6 +349,9 @@ ui <- fillPage(
                                     # than just taking the N most liquid; median
                                     # avgOptVolu20d is ~100, p90 ~4800
                                     textInput("scr_min_volu", "Min avg opt volume (20d)", value = 0),
+                                    # bid/ask width in vol points; median is
+                                    # ~6.8, so 0 (off) or something above that
+                                    textInput("scr_max_width", "Max spread (vol pts, 0 = off)", value = 0),
 
                                     h3("IV plot"),
                                     textInput("iv_n_tickers", "Tickers to show", value = 50),
@@ -522,7 +536,39 @@ server <- function(input, output, session) {
         validate(need(nrow(df) > 0,
                       paste0("No ticker in this universe trades ", floor_volu,
                              " contracts a day. Lower the volume floor.")))
-        if (is.finite(n) && n > 0) head(df, n = n) else df
+
+        max_width <- suppressWarnings(as.numeric(trimws(input$scr_max_width)))
+        if (length(max_width) && !is.na(max_width) && max_width > 0) {
+            df <- df %>% dplyr::filter(is.finite(mktWidthVol), mktWidthVol <= max_width)
+            validate(need(nrow(df) > 0,
+                          paste0("Nothing quotes tighter than ", max_width,
+                                 " vol points here. Raise the spread cap.")))
+        }
+
+        # liquidity gate first, then rank within what survived
+        if (is.finite(n) && n > 0) df <- head(df, n = n)
+
+        # Richness score: where a name sits, 0-100, across axes that are not
+        # rotations of one another - what the straddle costs vs forecast, IV vs
+        # forecast, the realized VRP z-score, and IV's own 1y percentile. High
+        # = vol looks rich here, low = cheap. Ranked inside the current
+        # universe and day, so it answers "relative to what I am screening",
+        # not against some absolute scale. Tradability is deliberately NOT in
+        # the score - a wide market is a reason to exclude a name, not a
+        # reason to call it interesting, so it filters above instead.
+        pct <- function(z) {
+            z[!is.finite(z)] <- NA
+            n_ok <- sum(!is.na(z))
+            if (n_ok < 2) return(rep(NA_real_, length(z)))
+            100 * (rank(z, na.last = "keep", ties.method = "average") - 0.5) / n_ok
+        }
+        df %>% mutate(
+            straRich    = straPxM1 / fcstStraPxM1,
+            ivFcstRatio = exErnIv30d / orIvFcst20d,
+            richScore   = rowMeans(cbind(pct(straRich), pct(ivFcstRatio),
+                                         pct(VRPzscore), pct(ivPctile1y)),
+                                   na.rm = TRUE)
+        ) %>% arrange(desc(richScore))
     }
 
     # Dashboard -> Ticker tab. Screening is only useful if you can go straight
@@ -818,16 +864,20 @@ server <- function(input, output, session) {
     table_df <- reactive({
         dash_screen(as.numeric(input$table_n_tickers)) %>%
             dplyr::transmute(
-                ticker, tradeDate, class,
+                ticker, class,
+                rich = round(richScore, 0),
+                straRich = round(straRich, 3), ivFcst = round(ivFcstRatio, 3),
+                VRPz = round(VRPzscore, 2),
+                ivPct1y = round(ivPctile1y, 0), rvPct1y = round(rvPctile1y, 0),
+                ivPctSpy = round(ivPctileSpy, 0),
                 iv30 = round(exErnIv30d, 1), rv20 = round(clsHvXern20d, 1),
-                ivRvRatio = round(ivHvXernRatio, 2),
-                ivPctile1y = round(ivPctile1y, 0), rvPctile1y = round(rvPctile1y, 0),
-                VRP = round(VRP, 3), VRPz = round(VRPzscore, 2),
                 steep30d6m = round(steepness_30d6m, 3), slope = round(slope, 2),
+                # tradability: what crossing costs, in vol points
+                widthVol = round(mktWidthVol, 2), conf = round(confidence, 0),
                 # earnings proximity is inferred from the last reported date;
                 # see the note on cols_to_extract
                 daysSinceErn = round(daysSinceErn, 0),
-                ernMove = round(absAvgErnMv, 1), impliedIee = round(impliedIee, 2),
+                ernMove = round(absAvgErnMv, 1),
                 optVolu20d = round(avgOptVolu20d, 0))
     })
 
