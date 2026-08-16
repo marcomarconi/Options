@@ -226,7 +226,14 @@ ui <- fillPage(
                                        textInput("t_ticker", "Ticker", value = "SPY"),
                                        textInput("t_dte", "DTE", value = "25"),
                                        selectInput("t_vol_window", "Volatility Window", choices = c("30d", "60d", "90d", "6m", "1yr")),
-                                       selectInput("t_profit", "Profit", choices = c("Percentage", "Dollars"))
+                                       selectInput("t_profit", "Profit", choices = c("Percentage", "Dollars")),
+                                       # Display window for the time-series plots. Rolling stats are
+                                       # always computed on the full history; this only trims what is
+                                       # drawn (and the lookback of the cones / percentile ribbons).
+                                       selectInput("t_range", "Time Range",
+                                                   choices = c("3m" = 3, "6m" = 6, "1y" = 12,
+                                                               "2y" = 24, "Max" = 0),
+                                                   selected = 24)
 
                                    )
                             ),
@@ -293,6 +300,22 @@ server <- function(input, output, session) {
         req(nrow(df) > 0)
         df
     })
+
+    # ---- Ticker tab: display time range ----
+    # t_range is a number of months ("Max" = 0 = whole loaded history).
+    # Rolling quantities (252d percent ranks, z-scores, lags, EMAs, cumulative
+    # PnL) stay computed on the full ticker history; t_win() is applied only
+    # to what a plot draws, so a 3m window never truncates a 252d lookback.
+    t_range_months <- reactive({
+        m <- suppressWarnings(as.numeric(input$t_range))
+        if (length(m) != 1 || is.na(m) || m <= 0) Inf else m
+    })
+    ticker_end <- reactive(max(ticker_df()$tradeDate, na.rm = TRUE))
+    t_win <- function(d) {
+        m <- t_range_months()
+        if (is.infinite(m) || nrow(d) == 0) return(d)
+        dplyr::filter(d, tradeDate >= ticker_end() - m * 30.5)
+    }
 
     # ---- Pairs tab: debounced inputs + memoized correlation matrix ----
     # the all-tickers return-correlation matrix is expensive and does not
@@ -589,7 +612,9 @@ server <- function(input, output, session) {
     # Regime timeline (Sharpe Two replica): GMM regimes scored on the full
     # ORATS history; see regime_timeline/src/regime_shiny.R
     output$ticker_plot_regime <- renderPlotly({
-        regime_timeline_plotly(t_ticker_deb(), months = 12)
+        # the regime store goes back to 2015, so "Max" is capped at 100 years
+        # (i.e. everything) rather than passed as Inf
+        regime_timeline_plotly(t_ticker_deb(), months = min(t_range_months(), 1200))
     })
 
     output$ticker_plot_1 <- renderPlotly({
@@ -598,7 +623,7 @@ server <- function(input, output, session) {
 
         # Stock Price
         p_price <- plot_ly(
-            data = df,
+            data = t_win(df),
             x = ~tradeDate,
             y = ~pxAtmIv,
             type = "scatter",
@@ -616,7 +641,7 @@ server <- function(input, output, session) {
         
         # Volume
         p_vol <- plot_ly(
-            df,
+            t_win(df),
             x = ~tradeDate,
             y = ~cVolu+pVolu,
             type = "bar",
@@ -634,7 +659,7 @@ server <- function(input, output, session) {
                 mom_m = (stkPxChng1m * 0.12) %>% EMA,
                 mom_w = (stkPxChng1wk * 0.52) %>% EMA,
                 mom_6m = (stkPxChng6m * 0.02) %>% EMA,
-            ),
+            ) %>% t_win,
             x = ~tradeDate,
             hovertemplate = "Date: %{x}<br>Momentum: %{y:,}<extra></extra>"
         ) %>%  
@@ -662,7 +687,7 @@ server <- function(input, output, session) {
         
         # Return/IV correlation
         p2 <- plot_ly(
-            data = df %>% mutate(iv_chg = c(0,diff(exErnIv30d)), log_ret = c(0, diff(log(pxAtmIv)))) %>% filter(dtExM1 <= t_dte),
+            data = df %>% mutate(iv_chg = c(0,diff(exErnIv30d)), log_ret = c(0, diff(log(pxAtmIv)))) %>% filter(dtExM1 <= t_dte) %>% t_win,
             x = ~log_ret,
             y = ~iv_chg,
             text = ~tradeDate,
@@ -711,7 +736,7 @@ server <- function(input, output, session) {
                     t_vol_window == "6m" ~ clsHvXern120d,
                     t_vol_window == "1yr" ~ clsHvXern252d,
                     TRUE ~ NA)
-        ),
+        ) %>% t_win,
         x = ~tradeDate) %>%
             add_lines(y = ~IV, name = "IV", line = list(color = "blue")) %>%
             add_lines(y = ~RV, name = "RV", line = list(color = "red")) %>%
@@ -724,10 +749,12 @@ server <- function(input, output, session) {
     
     output$ticker_plot_3 <- renderPlotly({
         t_dte <- 25
-        df <- ticker_df()
+        # the cones are min/max/quartiles over the visible window, so the
+        # lookback follows the Time Range selector
+        df <- ticker_df() %>% t_win
 
-        
-        
+
+
         stats <- list(
             min = ~min(.x, na.rm = TRUE),
             max   = ~max(.x, na.rm = TRUE),
@@ -867,6 +894,9 @@ server <- function(input, output, session) {
                 VRP_120 = log(lag(exErnIv6m, 120) / clsHvXern120d),
                 VRP_252 = log(lag(exErnIv1yr, 252) / clsHvXern252d))
 
+        # lags need the full history; trim only once they are computed
+        df <- t_win(df)
+
         df <- df %>% mutate(VRP =  case_when(
                                                 t_vol_window == "30d" ~ VRP_30,
                                                 t_vol_window == "60d" ~ VRP_60,
@@ -937,7 +967,7 @@ server <- function(input, output, session) {
                 IVVVOL_ratio = exErnIv30d / volOfIvol_w,
                 IVVVOL_ratio_pct = runPercentRank(IVVVOL_ratio, 252)
 
-            )
+            ) %>% t_win   # 252d ranks computed on the full history first
 
         #### IV / IVVOL ratio
         p1_1 <- plot_ly(df ,
@@ -1009,8 +1039,8 @@ server <- function(input, output, session) {
             ff_90_30 = exErnIv30d / fexErn90_30 - 1,
             ff_90_60 = exErnIv60d / fexErn90_60 - 1,
             ff_180_90 = exErnIv90d / fexErn180_90 - 1
-        )
-        
+        ) %>% t_win
+
         p1 <- plot_ly(df_ff %>% tail(1) %>% dplyr::select(ticker,ff_60_30:ff_180_90) %>% pivot_longer(-ticker) %>% 
             mutate(name=factor(name, levels=c("ff_60_30", "ff_90_30", "ff_90_60", "ff_180_90"))),
         x = ~name, y = ~value, type = "bar") %>%
@@ -1039,11 +1069,11 @@ server <- function(input, output, session) {
             layout(
                 shapes = list(
                     list(type = "line",
-                         x0 = min(df$tradeDate), x1 = max(df$tradeDate),
+                         x0 = min(df_ff$tradeDate), x1 = max(df_ff$tradeDate),
                          y0 = 0.2, y1 = 0.2,
                          line = list(color = "red", dash = "dash")),
                     list(type = "line",
-                         x0 = min(df$tradeDate), x1 = max(df$tradeDate),
+                         x0 = min(df_ff$tradeDate), x1 = max(df_ff$tradeDate),
                          y0 = -0.2, y1 = -0.2,
                          line = list(color = "red", dash = "dash"))
                 ),
@@ -1067,7 +1097,8 @@ server <- function(input, output, session) {
         t_profit <- input$t_profit
         df <- ticker_df()
 
-        df <- df %>% tail(252) %>% mutate(trace_days = factor(round(as.numeric(last(tradeDate)-tradeDate)/90)))
+        # was a hardcoded 1y tail; now follows the Time Range selector
+        df <- df %>% t_win %>% mutate(trace_days = factor(round(as.numeric(last(tradeDate)-tradeDate)/90)))
         
         today_dot <- df %>% tail(1)
         p1 <-  plot_ly( df,
@@ -1142,7 +1173,7 @@ server <- function(input, output, session) {
         df <- ticker_df() %>%
             mutate(
                 slope_pct = runPercentRank(slope %>% na.locf(na.rm=F), 252)
-            )
+            ) %>% t_win   # 252d rank computed on the full history first
 
         # SPY ratio
         p1 <- plot_ly(df ,
