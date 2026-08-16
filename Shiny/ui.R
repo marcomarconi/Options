@@ -426,8 +426,19 @@ server <- function(input, output, session) {
                    "Garman-Klass"    = "garman.klass",
                    "Rogers-Satchell" = "rogers.satchell",
                    "Yang-Zhang"      = "yang.zhang")
-        est <- lapply(calcs, function(cc)
-            as.numeric(TTR::volatility(x, n = n, calc = cc, N = 252)) * 100)
+        est <- lapply(calcs, function(cc) {
+            v <- as.numeric(suppressWarnings(
+                TTR::volatility(x, n = n, calc = cc, N = 252))) * 100
+            # Rogers-Satchell's daily terms are each >= 0, so a window of flat
+            # days (O=H=L=C, common in thin ETFs - BNDD prints 101 of them)
+            # sums to exactly zero in theory and to a tiny negative in
+            # floating point, and sqrt() of that is NaN. Yang-Zhang embeds RS
+            # and inherits the holes. The true value there is zero vol, so say
+            # zero rather than leaving a gap in the line. Only NaN is touched;
+            # the leading NAs before the window fills stay NA.
+            v[is.nan(v)] <- 0
+            v
+        })
         dplyr::bind_cols(tibble(tradeDate = as.Date(zoo::index(x))),
                          tibble::as_tibble(est))
     })
