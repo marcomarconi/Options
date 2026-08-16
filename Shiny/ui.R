@@ -260,6 +260,19 @@ if (initialize || !exists("ORATS_ohlc")) {
     print(paste("ORATS_ohlc ready, last day:", max(ORATS_ohlc$tradeDate)))
 }
 
+# The Dashboard filters on an exact tradeDate, so its date box has to default
+# to the last day in the data rather than the calendar date: on any weekend,
+# holiday, or morning before the file lands, Sys.Date() matches nothing and
+# every plot on the tab renders empty with no explanation.
+last_data_day <- max(as.Date(ORATS_core$tradeDate))
+
+# what the free-form screen scatter can plot against what
+screen_vars <- c("ivPctile1y", "rvPctile1y", "VRP", "VRPzscore",
+                 "steepness_30d90d", "steepness_30d6m", "ivHvXernRatio",
+                 "ivSpyRatio", "correlSpy1m", "slope", "contango",
+                 "volOfVol", "volOfIvol", "avgOptVolu20d",
+                 "exErnIv30d", "clsHvXern20d")
+
 # The shinyapp
 ui <- fillPage(
     tags$head(
@@ -271,24 +284,30 @@ ui <- fillPage(
         ))
     ),
     tabsetPanel(
+        id = "tabs",
         tabPanel("Dashboard",
                  div(class = "container-fluid",
                      fluidRow(
                          column(width = 2, class = "sidebar",
                                 wellPanel(
-                                    checkboxInput("hide_center","Hide points in central region",value = FALSE ),
+                                    h3("Screen"),
                                     # single names dominate option volume, so
                                     # without this every top-N list is stocks
                                     selectInput("dash_universe", "Universe",
                                                 choices = c("ETFs", "Single names", "All"),
                                                 selected = "ETFs"),
-
-                                    h3("IV plot"),
-                                    dateInput("date", "Select date (this selects orats_core_YYYYMMDD.csv.gz)",
-                                              value = today_date,
+                                    dateInput("date", "Date",
+                                              value = last_data_day,
                                               format = "yyyy-mm-dd"
                                     ),
-                                    textInput("iv_dir", "Data directory (optional)", value = core_dir),
+                                    checkboxInput("hide_center","Hide points in central region",value = FALSE ),
+                                    selectInput("scr_xvar", "Screen X", choices = screen_vars,
+                                                selected = "ivPctile1y"),
+                                    selectInput("scr_yvar", "Screen Y", choices = screen_vars,
+                                                selected = "VRPzscore"),
+                                    textInput("scr_n_tickers", "Tickers to show", value = 50),
+
+                                    h3("IV plot"),
                                     textInput("iv_n_tickers", "Tickers to show", value = 50),
                                     # selectInput("iv_xvar", "X variable", choices = IV_x_choices, selected = IV_x_choices[1]),
                                     # selectInput("iv_yvar", "Y variable", choices = IV_y_choices, selected = IV_y_choices[1]),
@@ -297,20 +316,27 @@ ui <- fillPage(
                                     #selectInput("rv_xvar", "X variable", choices = RV_x_choices, selected = RV_x_choices[1]),
                                     #selectInput("rv_yvar", "Y variable", choices = RV_y_choices, selected = RV_y_choices[1]),
                                     selectInput("rv_time_window", "Time window", choices = c(20, 60, 90, 120, 252), selected = 20),
-                                    actionButton("load", "Load file"),
                                     h3("Calendars plot"),
                                     textInput("cal_n_tickers", "Tickers to show", value = 50),
                                     selectInput("cal_front", "Front Expiry",  choices = c(30, 60, 90, 180), selected = 30),
                                     selectInput("cal_back", "Back Expiry",  choices = c(30, 60, 90, 180), selected = 60),
                                     h3("Ratio plot"),
-                                    textInput("ratio_n_tickers", "Tickers to show", value = 50)
+                                    textInput("ratio_n_tickers", "Tickers to show", value = 50),
+                                    h3("Tables"),
+                                    textInput("table_n_tickers", "Rows to show", value = 200),
+                                    selectInput("fd_ratio", "Term structure change",
+                                                choices = c("Clicks", "Ratio"), selected = "Clicks"),
+                                    textInput("fd_n_tickers", "Tickers to show", value = 50)
 
                                 )
                          ),
                          column(width = 10, class = "main",
                                 div(style = "height:100vh; display:flex; flex-direction:column;",
-                                    div(style = "flex: 0 0 auto; padding: 8px;", verbatimTextOutput("file_info")),
                                     div(style = "flex: 1 1 auto; overflow:auto; padding: 8px;",
+                                        h1("Screen", style = "color: darkgray;"),
+                                        helpText("Click any point or table row to open that ticker in the Ticker tab."),
+                                        plotlyOutput("test_plot", height = "600px"),
+                                        plotlyOutput("screen_plot", height = "600px"),
                                         h1("IV Plot", style = "color: darkgray;"),
                                         plotOutput("iv_plot", height = "600px"),
                                         h1("RV Plot", style = "color: darkgray;"),
@@ -320,9 +346,10 @@ ui <- fillPage(
                                         h1("Calendar Plot", style = "color: darkgray;"),
                                         plotOutput("cal_plot", height = "600px"),
                                         h1("Table", style = "color: darkgray;"),
-                                        DTOutput("table_plot", height = "calc(100vh - 200px)")
-                                    ),
-                                    div(style = "flex: 0 0 auto; padding: 8px;", DT::dataTableOutput("table"))
+                                        DTOutput("table_plot", height = "calc(100vh - 200px)"),
+                                        h1("Term structure change", style = "color: darkgray;"),
+                                        DTOutput("strike_plot", height = "calc(100vh - 200px)")
+                                    )
                                 )
                          )
                          
@@ -440,6 +467,46 @@ server <- function(input, output, session) {
     # else is an ETF asset class (Equity, Fixed Income, Commodity, ...).
     # Defaults to ETFs, which is what this tab ranked before single names
     # were added.
+    # an empty day should say so, not render a blank panel
+    need_rows <- function(df) {
+        validate(need(nrow(df) > 0,
+                      paste0("No data for ", format(input$date),
+                             ". Last day in the data is ", format(last_data_day), ".")))
+        df
+    }
+
+    # The day's slice, most liquid first. validate() rather than req() so an
+    # empty day says so on the page instead of rendering a blank panel.
+    dash_screen <- function(n) {
+        df <- dash_core() %>% dplyr::ungroup() %>%
+            dplyr::filter(tradeDate == input$date) %>%
+            arrange(desc(avgOptVolu20d))
+        validate(need(nrow(df) > 0,
+                      paste0("No data for ", format(input$date),
+                             ". Last day in the data is ", format(last_data_day), ".")))
+        if (is.finite(n) && n > 0) head(df, n = n) else df
+    }
+
+    # Dashboard -> Ticker tab. Screening is only useful if you can go straight
+    # from a hit to the deep dive, so a click on any screen point or table row
+    # loads that ticker there.
+    # one piece of state both entry points write to, rather than each firing
+    # its own pair of update calls
+    selected_ticker <- reactiveVal(NULL)
+    open_in_ticker <- function(tkr) {
+        tkr <- as.character(tkr)
+        if (!length(tkr) || is.na(tkr[1]) || !nzchar(tkr[1])) return(invisible(NULL))
+        selected_ticker(tkr[1])
+    }
+    observeEvent(selected_ticker(), {
+        updateTextInput(session, "t_ticker", value = selected_ticker())
+        updateTabsetPanel(session, "tabs", selected = "Ticker")
+    })
+    observeEvent(event_data("plotly_click", source = "screen"), {
+        e <- event_data("plotly_click", source = "screen")
+        open_in_ticker(e$customdata)
+    })
+
     dash_core <- reactive({
         switch(as.character(input$dash_universe),
                "Single names" = dplyr::filter(ORATS_core, class == "Stock"),
@@ -556,23 +623,13 @@ server <- function(input, output, session) {
         wide_ret %>% select(-tradeDate) %>% cor(use = "pairwise.complete.obs")
     })
 
-    # Reactive to build filename when user clicks Load
-    file_reactive <- eventReactive(input$load, {
-        folder <- if (nzchar(input$iv_dir)) input$iv_dir else core_dir
-        file_date <- format(as.Date(input$date), "%Y%m%d")
-        fname <- file.path(folder, paste0("orats_core_", file_date, ".csv.gz"))
-        list(path = fname, date = file_date)
-    }, ignoreNULL = FALSE)
 
 
     
     
     output$test_plot<- renderPlotly({
-        n_tickers <- as.numeric(input$iv_n_tickers)
-        date <- input$date
-        df <- dash_core() %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
-        
+        df <- dash_screen(as.numeric(input$scr_n_tickers))
+
         # ---- Optional: hide points in central box ----
         if (input$hide_center) {
             df <- df |>
@@ -587,6 +644,8 @@ server <- function(input, output, session) {
             mode = "markers",
             text = ~ticker,   # <-- column to show
             color = ~class,
+            customdata = ~ticker,   # what the click handler reads
+            source = "screen",
             hovertemplate = paste(
                 "Ticker: %{text}<br>",
                 "x: %{x}<br>",
@@ -616,16 +675,8 @@ server <- function(input, output, session) {
                      line=list(dash="dash"))
             )
         )
-        p <- subplot(
-            p1, p1,
-            titleX = TRUE,
-            titleY = TRUE,
-            margin = 0.06   
-        ) %>% layout(
-            font = list(size = 16),showlegend = FALSE
-        )
-        p
-        
+        p1 %>% layout(font = list(size = 16), showlegend = TRUE,
+                      title = plot_title("Screen: IV percentile vs VRP z-score"))
     })
     
     output$iv_plot <- renderPlot({
@@ -641,7 +692,7 @@ server <- function(input, output, session) {
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         if(nrow(df) == 0)
             print("Empty data frame after filtering")
-        req(nrow(df) > 0)
+        need_rows(df)
         p1 <- ggplot(df, aes(x = ivPctile1y, y = IV_mom, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
             geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 3.5) + geom_hline(yintercept = 0) + #ylim(c(0,100))+
@@ -687,7 +738,7 @@ server <- function(input, output, session) {
                 rvPctile1y = TTR::runPercentRank(roll_safe(RV), 252) * 100
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
+        need_rows(df)
         p1 <- ggplot(df, aes(x = VRP, y = VRPzscore, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
             geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 3.5) + geom_hline(yintercept = 0) +
@@ -704,40 +755,41 @@ server <- function(input, output, session) {
 
     
     
-    output$etf_plot <- renderPlot({
-
-        n_tickers <- as.numeric(input$etf_n_tickers)
-        time_window_rv <- as.numeric(input$etf_time_window)
-        date <- input$date
-        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
-            mutate(
-                ivSpyRatioPctile1y = TTR::runPercentRank(roll_safe(ivSpyRatio), 252) * 100
-            ) 
-        df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
-        xcol <- input$etf_xvar
-        ycol <- input$etf_yvar
-        
-        p <- ggplot(df, aes_string(x = xcol, y = ycol, label = "ticker")) +
-            geom_point(alpha = 1, size = 1) +
-            geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 4) + geom_hline(yintercept = 0) + #xlim(c(0,100)) +
-            labs(x = xcol, y = ycol) +scale_fill_brewer(palette = "Accent")  + theme_bw(base_size = 24)
-        
-        p
-        
+    # Free-form screen: any column against any other, across the universe.
+    # Native plot_ly rather than ggplotly(), which this app's ggplot2 breaks,
+    # and native is what carries the click events through to the Ticker tab.
+    output$screen_plot <- renderPlotly({
+        n_tickers <- as.numeric(input$scr_n_tickers)
+        xcol <- input$scr_xvar; ycol <- input$scr_yvar
+        req(nzchar(xcol), nzchar(ycol), is.finite(n_tickers))
+        df <- dash_screen(n_tickers)
+        plot_ly(df, x = ~.data[[xcol]], y = ~.data[[ycol]],
+                type = "scatter", mode = "markers",
+                text = ~ticker, color = ~class, customdata = ~ticker,
+                source = "screen",
+                hovertemplate = paste0("%{text}<br>", xcol, ": %{x:.2f}<br>",
+                                       ycol, ": %{y:.2f}<extra></extra>"),
+                marker = list(size = 11, opacity = 0.9)) %>%
+            layout(xaxis = list(title = xcol), yaxis = list(title = ycol),
+                   font = list(size = 16),
+                   title = plot_title(paste(ycol, "vs", xcol)))
     })
-    
-    output$table_plot <- renderDT({
-        n_tickers <- as.numeric(input$table_n_tickers)
-        n_tickers <- 200
-        date <- input$date
-        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
-            select("ticker", "tradeDate",  "steepness_30d6m", "ivPctile1y", "VRP", "rvPctile1y", "avgOptVolu20d")
-        df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
 
-        DT::datatable(df, options = list(pageLength = n_tickers), rownames = FALSE) 
-        
+    # kept as its own reactive so the row-click handler can look up which
+    # ticker a selected row belongs to
+    table_df <- reactive({
+        dash_screen(as.numeric(input$table_n_tickers)) %>%
+            dplyr::select("ticker", "tradeDate", "steepness_30d6m", "ivPctile1y",
+                          "VRP", "rvPctile1y", "avgOptVolu20d")
+    })
+
+    output$table_plot <- renderDT({
+        DT::datatable(table_df(), rownames = FALSE, selection = "single",
+                      options = list(pageLength = 25))
+    })
+
+    observeEvent(input$table_plot_rows_selected, {
+        open_in_ticker(table_df()$ticker[input$table_plot_rows_selected])
     })
     
     output$cal_plot <- renderPlot({
@@ -764,7 +816,7 @@ server <- function(input, output, session) {
                     )
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
+        need_rows(df)
 
         p <- ggplot(df, aes(x = back_ratio, y = ff, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
@@ -789,7 +841,7 @@ server <- function(input, output, session) {
                 IV_IVVOL_zscore = runZscore(roll_safe(IV_IVVOL), 252)
             ) 
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
-        req(nrow(df) > 0)
+        need_rows(df)
         p1 <- ggplot(df, aes(x = ivHvXernRatio, y = IV_IVVOL, label = ticker)) +
             geom_point(alpha = 1, size = 1) +
             geom_label_repel(aes(fill=class), max.overlaps = Inf, size = 3.5) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
@@ -808,7 +860,7 @@ server <- function(input, output, session) {
     output$strike_plot <- DT::renderDT({
         type <- input$fd_ratio
         n_tickers <- as.numeric(input$fd_n_tickers)
-        date <- input$fd_date
+        date <- input$date
         if(type == "Ratio") vals <- c(-10, 0, 10) else vals <- c(-20, 0, 20)
         brks <- quantile(vals, probs = seq(0, 1, length.out = 5), na.rm = TRUE)
         cols <- colorRampPalette(c("#d20231", "orange1", "lightblue", "#218be7"))(4)
@@ -822,7 +874,7 @@ server <- function(input, output, session) {
                                                       TRUE ~ NA
                                                       ))) 
         df_table <- df_table %>% dplyr::filter(tradeDate == date) %>% ungroup
-        req(nrow(df_table) > 0)
+        need_rows(df_table)
         DT::datatable(df_table, options = list(pageLength = n_tickers), rownames = FALSE) %>%  formatStyle(
             c("exErnIv10d", "exErnIv30d", "exErnIv60d", "exErnIv90d", "exErnIv6m", "exErnIv1yr"),
             backgroundColor = styleInterval(
