@@ -277,7 +277,12 @@ ui <- fillPage(
                          column(width = 2, class = "sidebar",
                                 wellPanel(
                                     checkboxInput("hide_center","Hide points in central region",value = FALSE ),
-                                    
+                                    # single names dominate option volume, so
+                                    # without this every top-N list is stocks
+                                    selectInput("dash_universe", "Universe",
+                                                choices = c("ETFs", "Single names", "All"),
+                                                selected = "ETFs"),
+
                                     h3("IV plot"),
                                     dateInput("date", "Select date (this selects orats_core_YYYYMMDD.csv.gz)",
                                               value = today_date,
@@ -430,6 +435,18 @@ server <- function(input, output, session) {
     })
     ticker_end <- reactive(max(ticker_df()$tradeDate, na.rm = TRUE))
 
+    # ---- Dashboard: which universe the top-N lists rank over ----
+    # class comes from the screener join: single names are "Stock", everything
+    # else is an ETF asset class (Equity, Fixed Income, Commodity, ...).
+    # Defaults to ETFs, which is what this tab ranked before single names
+    # were added.
+    dash_core <- reactive({
+        switch(as.character(input$dash_universe),
+               "Single names" = dplyr::filter(ORATS_core, class == "Stock"),
+               "All"          = ORATS_core,
+               dplyr::filter(ORATS_core, class != "Stock"))
+    })
+
     # one title style for every chart on the tab, so nine stacked plots are
     # identifiable without reading the code
     # plotly renders HTML in title text, and its title font has no weight
@@ -553,7 +570,7 @@ server <- function(input, output, session) {
     output$test_plot<- renderPlotly({
         n_tickers <- as.numeric(input$iv_n_tickers)
         date <- input$date
-        df <- ORATS_core %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
+        df <- dash_core() %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
         
         # ---- Optional: hide points in central box ----
@@ -615,7 +632,7 @@ server <- function(input, output, session) {
         
         n_tickers <- as.numeric(input$iv_n_tickers)
         date <- input$date
-        df <- ORATS_core %>% group_by(ticker) %>% 
+        df <- dash_core() %>% group_by(ticker) %>% 
             mutate(
                 IV_mom = RSI2(roll_safe(exErnIv30d), 20, maType="EMA"), 
                 steepness_30d90d_mom = RSI2(roll_safe(steepness_30d90d), 20, maType="EMA"), 
@@ -646,7 +663,7 @@ server <- function(input, output, session) {
         n_tickers <- as.numeric(input$rv_n_tickers)
         time_window <- as.numeric(input$rv_time_window)
         date <- input$date
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
+        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                 RV = case_when(
                     time_window == 20 ~ clsHvXern20d,
@@ -692,7 +709,7 @@ server <- function(input, output, session) {
         n_tickers <- as.numeric(input$etf_n_tickers)
         time_window_rv <- as.numeric(input$etf_time_window)
         date <- input$date
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
+        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                 ivSpyRatioPctile1y = TTR::runPercentRank(roll_safe(ivSpyRatio), 252) * 100
             ) 
@@ -714,7 +731,7 @@ server <- function(input, output, session) {
         n_tickers <- as.numeric(input$table_n_tickers)
         n_tickers <- 200
         date <- input$date
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
+        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             select("ticker", "tradeDate",  "steepness_30d6m", "ivPctile1y", "VRP", "rvPctile1y", "avgOptVolu20d")
         df <- df %>% filter(tradeDate == date) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         req(nrow(df) > 0)
@@ -728,7 +745,7 @@ server <- function(input, output, session) {
         cal_front <- as.numeric(input$cal_front)
         cal_back <- as.numeric(input$cal_back)
         date <- input$date
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
+        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                     ff = case_when(
                         cal_front == 30 & cal_back == 60 ~ exErnIv30d / fexErn60_30 - 1,
@@ -763,7 +780,7 @@ server <- function(input, output, session) {
     output$ratio_plot <- renderPlot({
         n_tickers <- as.numeric(input$ratio_n_tickers)
         date <- input$date
-        df <- ORATS_core  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
+        df <- dash_core()  %>% group_by(ticker)%>% arrange(tradeDate) %>% 
             mutate(
                 ivHvXernRatio = ivHvXernRatio %>% log,
                 ivHvXernRatio_zscore = runZscore(roll_safe(ivHvXernRatio), 252),
@@ -795,7 +812,7 @@ server <- function(input, output, session) {
         if(type == "Ratio") vals <- c(-10, 0, 10) else vals <- c(-20, 0, 20)
         brks <- quantile(vals, probs = seq(0, 1, length.out = 5), na.rm = TRUE)
         cols <- colorRampPalette(c("#d20231", "orange1", "lightblue", "#218be7"))(4)
-        df <- ORATS_core %>% group_by(ticker) %>% arrange(tradeDate) #%>% slice_tail(n=2)
+        df <- dash_core() %>% group_by(ticker) %>% arrange(tradeDate) #%>% slice_tail(n=2)
         tops <- df %>% group_by(ticker) %>% slice_tail(n=1) %>% arrange(desc(avgOptVolu20d)) %>% head(n = n_tickers)
         df_table <- df %>% dplyr::filter(ticker %in% tops$ticker) %>% 
             dplyr::select(ticker, tradeDate, class, exErnIv10d:exErnIv1yr) %>% 
