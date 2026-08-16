@@ -85,6 +85,44 @@ init_ORATS_core <- function(ORATS_core, screener) {
 
 
 
+# Slim OHLC store for the realized-vol estimators. The core file carries
+# closes only; the dailies carry open/hi/lo, from the same downloader and the
+# same trade dates. Seeded once from the last days_to_load + 300 dailies (the
+# extra days warm up a 252d estimator at the left edge of the widest window),
+# then only new days are appended on each app start - the regime_iv.pq
+# pattern. Restricted to the core universe (~1.2k tickers of the 6.3k in a
+# daily file), so it stays a few tens of MB.
+dailies_dir <- paste0(orats_dir, "dailies/")
+ORATS_ohlc_file <- paste0(options_dir, "ORATS_ohlc.pq")
+ohlc_cols <- c("ticker", "tradeDate", "open", "hiPx", "loPx", "clsPx")
+
+load_orats_daily <- function(filename, universe) {
+    quiet_fread(glue::glue(dailies_dir, "{filename}")) %>%
+        purrr::pluck("result") %>%
+        dplyr::select(all_of(ohlc_cols)) %>%
+        dplyr::filter(ticker %in% universe) %>%
+        mutate(tradeDate = as.Date(tradeDate))
+}
+
+update_ORATS_ohlc <- function(universe) {
+    files <- list.files(dailies_dir, "orats_dailies_[0-9]{8}\\.csv\\.gz")
+    dates <- as.Date(sub("orats_dailies_([0-9]{8})\\.csv\\.gz", "\\1", files),
+                     format = "%Y%m%d")
+    files <- files[order(dates)]; dates <- sort(dates)
+    keep  <- tail(seq_along(files), days_to_load + 300)
+    files <- files[keep]; dates <- dates[keep]
+
+    have <- if (file.exists(ORATS_ohlc_file)) read_parquet(ORATS_ohlc_file) else NULL
+    todo <- if (is.null(have)) files else files[dates > max(have$tradeDate)]
+    if (length(todo)) {
+        print(paste("Loading", length(todo), "ORATS dailies for OHLC"))
+        have <- rbind(have, purrr::map_df(todo, load_orats_daily, universe)) %>%
+            arrange(ticker, tradeDate)
+        write_parquet(have, ORATS_ohlc_file)
+    }
+    have
+}
+
 load_ORATS_core <- function(ORATS_core_file) {
     print(paste("Load ORATS core file", ORATS_core_file))
     ORATS_core <- read_parquet(ORATS_core_file) %>% arrange(tradeDate)
@@ -149,6 +187,13 @@ if (initialize || !exists("ORATS_core")) {
                       ORATS_core_file)
     }
     print(paste("ORATS_core ready, last day:", max(as.Date(ORATS_core$tradeDate))))
+}
+
+# OHLC for the realized-vol estimators. First run seeds the store (~30s);
+# afterwards it is an append of whatever days are new.
+if (initialize || !exists("ORATS_ohlc")) {
+    ORATS_ohlc <- update_ORATS_ohlc(unique(ORATS_core$ticker))
+    print(paste("ORATS_ohlc ready, last day:", max(ORATS_ohlc$tradeDate)))
 }
 
 # The shinyapp
@@ -243,7 +288,12 @@ ui <- fillPage(
                                            #plotlyOutput("ticker_plot", height = "calc(100vh - 200px)")
 
                                            plotlyOutput("ticker_plot_1"),
-                                           plotlyOutput("ticker_plot_2"),
+                                           # IV vs ORATS RV on the left, the same IV against the
+                                           # OHLC range estimators on the right
+                                           fluidRow(
+                                               column(6, plotlyOutput("ticker_plot_2")),
+                                               column(6, plotlyOutput("ticker_plot_rv_est"))
+                                           ),
                                            plotlyOutput("ticker_plot_regime"),
                                            plotlyOutput("ticker_plot_3"),
                                            plotlyOutput("ticker_plot_4"),
@@ -298,7 +348,11 @@ server <- function(input, output, session) {
         df <- ORATS_core %>% dplyr::filter(ticker == t_ticker_deb()) %>%
             ungroup() %>% arrange(tradeDate)
         req(nrow(df) > 0)
-        df
+        # ORATS sometimes publishes 0 rather than NA for a missing ex-earnings
+        # IV (QQQ's exErnIv1yr is 0 for its last 25 days). Plotted as-is the
+        # IV line drops to the axis, and log(0/x) poisons the VRP panels, so
+        # treat a zero IV as the missing value it actually is.
+        df %>% mutate(across(exErnIv10d:exErnIv1yr, ~ na_if(.x, 0)))
     })
 
     # ---- Ticker tab: display time range ----
@@ -316,6 +370,56 @@ server <- function(input, output, session) {
         if (is.infinite(m) || nrow(d) == 0) return(d)
         dplyr::filter(d, tradeDate >= ticker_end() - m * 30.5)
     }
+
+    # ---- Ticker tab: OHLC-based realized-vol estimators ----
+    # The range estimators (Parkinson, Garman-Klass, Rogers-Satchell,
+    # Yang-Zhang) need the open/hi/lo the core file does not carry, so they
+    # read ORATS_ohlc (built from the dailies at startup). Same downloader and
+    # same trade dates as the core, so no second data provenance to reconcile.
+    # Cross-check: TTR close-to-close on this OHLC reproduces ORATS
+    # clsHvXern20d to 2dp on SPY (13.62 both).
+    # TTR wants an OHLC object, so hand it an xts with the canonical names.
+    # xts is NOT attached on purpose - it would mask dplyr's first()/last(),
+    # which the plots below rely on.
+    ticker_ohlc <- reactive({
+        tkr <- t_ticker_deb()
+        req(nzchar(tkr))
+        d <- ORATS_ohlc %>% dplyr::filter(ticker == tkr) %>% arrange(tradeDate)
+        if (nrow(d) < 30) return(NULL)
+        # The dailies carry the odd mangled high/low - SPY 2026-02-02 prints a
+        # low of 69 against a 695 close, a dropped digit. Close-to-close never
+        # reads it, but one such row blows up every range estimator for the
+        # whole n-day window around it, so bound a high/low that contradicts
+        # the day's own open/close back onto them. Deliberately conservative:
+        # it narrows that one day's range rather than discarding the row and
+        # taking an NA hole through the next n days.
+        d <- d %>% mutate(
+            hiPx = if_else(hiPx < pmax(open, clsPx) | hiPx > 2 * clsPx,
+                           pmax(open, clsPx), hiPx),
+            loPx = if_else(loPx > pmin(open, clsPx) | loPx < 0.5 * clsPx,
+                           pmin(open, clsPx), loPx))
+        m <- as.matrix(d[, c("open", "hiPx", "loPx", "clsPx")])
+        colnames(m) <- c("Open", "High", "Low", "Close")
+        xts::xts(m, order.by = d$tradeDate)
+    })
+
+    # the five estimators, annualised and in percent to match the ORATS scale
+    rv_estimators <- reactive({
+        x <- ticker_ohlc()
+        if (is.null(x) || nrow(x) < 30) return(NULL)
+        n <- switch(as.character(input$t_vol_window),
+                    "30d" = 20, "60d" = 60, "90d" = 90,
+                    "6m" = 120, "1yr" = 252, 20)
+        calcs <- c("Close-to-close"  = "close",
+                   "Parkinson"       = "parkinson",
+                   "Garman-Klass"    = "garman.klass",
+                   "Rogers-Satchell" = "rogers.satchell",
+                   "Yang-Zhang"      = "yang.zhang")
+        est <- lapply(calcs, function(cc)
+            as.numeric(TTR::volatility(x, n = n, calc = cc, N = 252)) * 100)
+        dplyr::bind_cols(tibble(tradeDate = as.Date(zoo::index(x))),
+                         tibble::as_tibble(est))
+    })
 
     # ---- Pairs tab: debounced inputs + memoized correlation matrix ----
     # the all-tickers return-correlation matrix is expensive and does not
@@ -746,7 +850,56 @@ server <- function(input, output, session) {
             )
         p
     })
-    
+
+    # Same IV as plot 2, against realized vol measured five different ways off
+    # OHLC. All six series are annualised vol in %, so they share one axis.
+    # The range estimators (Parkinson onwards) read intraday range and so sit
+    # below close-to-close whenever moves are trending rather than gapping.
+    output$ticker_plot_rv_est <- renderPlotly({
+        est <- rv_estimators()
+        if (is.null(est))
+            return(plot_ly() %>% layout(
+                title = list(text = paste("No OHLC available for", t_ticker_deb()),
+                             font = list(size = 14)),
+                font = list(size = 16)))
+
+        t_vol_window <- as.character(input$t_vol_window)
+        iv <- ticker_df() %>% dplyr::transmute(
+            tradeDate,
+            IV = case_when(
+                t_vol_window == "30d" ~ exErnIv30d,
+                t_vol_window == "60d" ~ exErnIv60d,
+                t_vol_window == "90d" ~ exErnIv90d,
+                t_vol_window == "6m" ~ exErnIv6m,
+                t_vol_window == "1yr" ~ exErnIv1yr,
+                TRUE ~ NA))
+
+        # fixed slot order, so a series keeps its colour no matter which ones
+        # are on screen; IV stays blue to match plot 2 on the left
+        cols <- c("IV"              = "#2a78d6",
+                  "Close-to-close"  = "#eb6834",
+                  "Parkinson"       = "#1baf7a",
+                  "Garman-Klass"    = "#eda100",
+                  "Rogers-Satchell" = "#e87ba4",
+                  "Yang-Zhang"      = "#008300")
+
+        long <- est %>% left_join(iv, by = "tradeDate") %>% t_win %>%
+            pivot_longer(-tradeDate, names_to = "series", values_to = "vol") %>%
+            mutate(series = factor(series, levels = names(cols)))
+
+        plot_ly(long, x = ~tradeDate, y = ~vol, color = ~series, colors = cols,
+                type = "scatter", mode = "lines", line = list(width = 2),
+                hovertemplate = "%{y:.2f}<extra>%{fullData.name}</extra>") %>%
+            layout(
+                xaxis = list(title = ""),
+                yaxis = list(title = "Annualised vol (%)"),
+                hovermode = "x unified",
+                legend = list(orientation = "h", x = 0.5, xanchor = "center",
+                              y = -0.15),
+                font = list(size = 16)
+            )
+    })
+
     output$ticker_plot_3 <- renderPlotly({
         t_dte <- 25
         # the cones are min/max/quartiles over the visible window, so the
