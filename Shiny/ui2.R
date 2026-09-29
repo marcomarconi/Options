@@ -2714,12 +2714,17 @@ server <- function(input, output, session) {
     # --- cross-asset implied vol: is this an equity event, or everyone's?
     #
     # Two panes on one date axis. Levels on top, because "OVX at 56 while VIX
-    # sits at 16" is itself the reading - but only for the %-vol indices; MOVE
-    # is basis points on yields and would put a 100-handle line over a 16-handle
-    # one, so it appears in the percentile pane only. Percentiles below put all
-    # six on one scale, ranked on the sidebar lookback like everything else.
-    XASSET_COL <- c(VIX = "#c2410c", VXTLT = "#0369a1", MOVE = "#7c3aed",
-                    GVZ = "#ca8a04", OVX = "#15803d", VXEEM = "#64748b")
+    # sits at 16" is itself the reading; percentiles below, ranked on the
+    # sidebar lookback like everything else, for "is each one high for itself".
+    #
+    # Okabe-Ito hues, so the five stay apart under colour-blindness. Even so the
+    # two closest pairs (OVX/VXEEM for deutans, GVZ/VIX in normal vision) sit
+    # near the floor, so one of each pair is also dashed - identity never rests
+    # on hue alone.
+    XASSET_COL  <- c(VIX = "#D55E00", VXTLT = "#0072B2", GVZ = "#E69F00",
+                     OVX = "#009E73", VXEEM = "#CC79A7")
+    XASSET_DASH <- c(VIX = "solid", VXTLT = "solid", GVZ = "dash",
+                     OVX = "solid", VXEEM = "dot")
     output$vix_plot_xasset <- renderPlotly({
         d  <- vix_win()
         xa <- VIX_XASSET %>% dplyr::filter(key %in% names(d))
@@ -2735,16 +2740,14 @@ server <- function(input, output, session) {
         })
         top <- plot_ly(); bot <- plot_ly()
         for (i in seq_len(nrow(xa))) {
-            k <- xa$key[i]; col <- XASSET_COL[[k]]
-            if (xa$level[i])
-                top <- top %>% add_lines(x = d$date, y = d[[k]], name = lab[i],
-                                         legendgroup = k, connectgaps = FALSE,
-                                         line = list(color = col, width = 1.3),
-                                         hovertemplate = paste0("%{y:.1f}<extra>", k, "</extra>"))
+            k <- xa$key[i]; col <- XASSET_COL[[k]]; dsh <- XASSET_DASH[[k]]
+            top <- top %>% add_lines(x = d$date, y = d[[k]], name = lab[i],
+                                     legendgroup = k, connectgaps = FALSE,
+                                     line = list(color = col, width = 1.3, dash = dsh),
+                                     hovertemplate = paste0("%{y:.1f}<extra>", k, "</extra>"))
             bot <- bot %>% add_lines(x = d$date, y = d[[paste0(k, "_pct")]],
-                                     name = lab[i], legendgroup = k,
-                                     showlegend = !xa$level[i],
-                                     line = list(color = col, width = 1.3),
+                                     name = lab[i], legendgroup = k, showlegend = FALSE,
+                                     line = list(color = col, width = 1.3, dash = dsh),
                                      hovertemplate = paste0("%{y:.0f}<extra>", k, "</extra>"))
         }
         bot <- bot %>%
@@ -2764,6 +2767,7 @@ server <- function(input, output, session) {
     })
 
     # --- every ratio as a percentile of its own history, one panel per kind
+    RATIO_COL <- c("#0072B2", "#D55E00", "#009E73")
     output$vix_plot_ratios <- renderPlotly({
         d <- vix_win()
         shown <- VIX_RATIOS %>% dplyr::filter(plot)
@@ -2774,14 +2778,18 @@ server <- function(input, output, session) {
             for (i in seq_len(nrow(ks))) {
                 y <- d[[paste0(ks$key[i], "_pct")]]
                 if (all(!is.finite(y))) next
+                # the same three validated colour-blind-safe hues in every
+                # pane, by position, instead of plotly's default red/green cycle
                 p <- p %>% add_lines(x = d$date, y = y, name = ks$label[i],
-                                     legendgroup = g, line = list(width = 1.3),
+                                     legendgroup = g,
+                                     line = list(width = 1.3,
+                                                 color = RATIO_COL[(i - 1) %% 3 + 1]),
                                      hovertemplate = "%{y:.0f}<extra>%{fullData.name}</extra>")
             }
             p %>% add_lines(x = d$date, y = rep(5, nrow(d)), showlegend = FALSE,
-                            line = list(color = "grey70", width = 0.8, dash = "dot")) %>%
+                            line = list(color = "#b3b3b3", width = 0.8, dash = "dot")) %>%
                 add_lines(x = d$date, y = rep(95, nrow(d)), showlegend = FALSE,
-                          line = list(color = "grey70", width = 0.8, dash = "dot")) %>%
+                          line = list(color = "#b3b3b3", width = 0.8, dash = "dot")) %>%
                 layout(yaxis = list(title = VIX_PANE[[g]], range = c(0, 100)))
         })
         subplot(panes, nrows = length(panes), shareX = TRUE, titleY = TRUE) %>%

@@ -41,19 +41,18 @@ VIX_SPOT <- "SPX"
 # out of VIX_ALL so the monitor table does not grow a row per asset; they ride
 # in the same cache and get a percentile like the ratios do.
 #
-# All CBOE except MOVE, which is ICE's and only on Yahoo. MOVE is a normal
-# (basis-point) vol on Treasury yields, not a % vol on a price, so it is never
-# drawn on the same level axis as the others - VXTLT (TLT options, % vol) is the
-# bond leg that is comparable in units. TYVIX, EVZ and the sector VXs are
-# discontinued (the CBOE endpoint returns AccessDenied), hence not here.
+# All CBOE, all % vol on a price, so their levels share one axis. The bond leg
+# is VXTLT (TLT options) rather than ICE's MOVE: MOVE is a basis-point vol on
+# yields, so its level is not comparable, and it tracks VXTLT closely anyway.
+# TYVIX, EVZ and the sector VXs are discontinued (the CBOE endpoint returns
+# AccessDenied), hence not here.
 VIX_XASSET <- tibble::tribble(
-    ~key,    ~label,                  ~src,    ~level,
-    "VIX",   "VIX (SPX)",             "cboe",  TRUE,
-    "VXTLT", "VXTLT (20y+ Treasury)", "cboe",  TRUE,
-    "MOVE",  "MOVE (UST, bp vol)",    "yahoo", FALSE,
-    "GVZ",   "GVZ (gold)",            "cboe",  TRUE,
-    "OVX",   "OVX (crude)",           "cboe",  TRUE,
-    "VXEEM", "VXEEM (EM equity)",     "cboe",  TRUE
+    ~key,    ~label,
+    "VIX",   "VIX (SPX)",
+    "VXTLT", "VXTLT (20y+ Treasury)",
+    "GVZ",   "GVZ (gold)",
+    "OVX",   "OVX (crude)",
+    "VXEEM", "VXEEM (EM equity)"
 )
 
 # the ETF whose realised vol stands in for each index's underlying, so an
@@ -100,9 +99,9 @@ update_vix_complex <- function(cache_file, force = FALSE) {
         all(want %in% unique(have$series))
     if (fresh && !force) return(have)
     print("Fetching the CBOE volatility index complex...")
-    xa_cboe <- setdiff(VIX_XASSET$key[VIX_XASSET$src == "cboe"], VIX_ALL)
-    got <- purrr::map(c(VIX_ALL, xa_cboe), fetch_cboe_index) %>% purrr::compact()
-    got <- c(got, list(fetch_spx(), fetch_yahoo("^MOVE", "MOVE"))) %>% purrr::compact()
+    xa <- setdiff(VIX_XASSET$key, VIX_ALL)
+    got <- purrr::map(c(VIX_ALL, xa), fetch_cboe_index) %>% purrr::compact()
+    got <- c(got, list(fetch_spx())) %>% purrr::compact()
     if (length(got) == 0) {
         if (is.null(have)) stop("no CBOE data and no cache")
         warning("CBOE unreachable - using the cached VIX complex")
