@@ -107,7 +107,16 @@ update_vix_complex <- function(cache_file, force = FALSE) {
         warning("CBOE unreachable - using the cached VIX complex")
         return(have)
     }
-    out <- dplyr::bind_rows(got) %>% dplyr::arrange(series, date)
+    out <- dplyr::bind_rows(got)
+    # one series timing out (VIX1D, 2026-10-25) must not drop it from the
+    # cache: build_vix_derived needs every series and the app would not start.
+    # Keep the cached rows of whatever failed this time.
+    lost <- if (is.null(have)) character() else setdiff(unique(have$series), unique(out$series))
+    if (length(lost)) {
+        warning("CBOE fetch failed for ", paste(lost, collapse = ", "), " - keeping the cached history")
+        out <- dplyr::bind_rows(out, dplyr::filter(have, series %in% lost))
+    }
+    out <- out %>% dplyr::arrange(series, date)
     arrow::write_parquet(out, cache_file)
     out
 }
