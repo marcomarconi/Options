@@ -314,7 +314,11 @@ update_ORATS_ohlc <- function(universe) {
 
 load_ORATS_core <- function(ORATS_core_file) {
     print(paste("Load ORATS core file", ORATS_core_file))
-    ORATS_core <- read_parquet(ORATS_core_file) %>% arrange(tradeDate)
+    ORATS_core <- read_parquet(ORATS_core_file)
+    # written sorted by tradeDate (init_ORATS_core), and arrange() on the
+    # 4.6k-group frame it reads back as costs ~2.5s even when there is
+    # nothing to move
+    if (is.unsorted(ORATS_core$tradeDate)) ORATS_core <- arrange(ORATS_core, tradeDate)
     return(ORATS_core)
 }
 
@@ -338,8 +342,15 @@ update_ORATS_core <- function(ORATS_core, core_dir) {
 
 append_ORATS_delayed <- function(ORATS_core, ORATS_code_delayed_file) {
     if(file.exists(ORATS_code_delayed_file)) {
-        ORATS_code_delayed <- read_csv(ORATS_code_delayed_file, show_col_types = FALSE) %>%
-            dplyr::select(any_of(cols_to_extract))
+        # read only what is kept: the unused nextErn/lastErn/divDate carry
+        # ORATS's 0000-00-00 for "none", which readr reports as parse failures
+        ORATS_code_delayed <- read_csv(ORATS_code_delayed_file, show_col_types = FALSE,
+                                       col_select = any_of(cols_to_extract)) %>%
+            # ernDate1 arrives as an m/d/Y string, as in the core files; left
+            # as character, rbind() onto the Date column dies in charToDate
+            mutate(across(any_of(setdiff(date_cols, c("ticker", "tradeDate"))),
+                          ~ as.Date(as.character(.x), format = "%m/%d/%Y")),
+                   tradeDate = as.Date(tradeDate))
         missing_cols <- setdiff(cols_to_extract, names(ORATS_code_delayed))
         if (length(missing_cols))   # a newly added column the delayed feed lacks
             ORATS_code_delayed[missing_cols] <- NA
@@ -387,7 +398,9 @@ if (initialize || !exists("ORATS_core") || !all(cols_to_extract %in% names(ORATS
             print("ORATS_core universe changed - rebuilding from the core files")
             ORATS_core <- create_ORATS_core(core_dir)
         } else {
-            print(paste("Updating ORATS_core:", loaded_last_day, "->", last_real_day))
+            print(if (loaded_last_day < last_real_day)
+                      paste("Updating ORATS_core:", loaded_last_day, "->", last_real_day)
+                  else paste("ORATS_core current at", loaded_last_day, "- appending the delayed snapshot"))
             ORATS_core <- ORATS_core %>% ungroup() %>%
                 dplyr::select(any_of(cols_to_extract))
             ORATS_core <- update_ORATS_core(ORATS_core, core_dir)
@@ -437,7 +450,7 @@ screen_vars <- c("richScore", "vrpScore", "q_ivrv", "q_vov", "q_ffr", "ivrvNow",
                  "volOfVol", "volOfIvol", "avgOptVolu20d",
                  "exErnIv30d", "clsHvXern20d",
                  "daysSinceErn", "absAvgErnMv", "impliedIee",
-                 "rv5_20", "rv20_252", "iv_z", "skewPct", "termPct")
+                 "rv5_20", "rv20_252", "iv_pct", "iv_z", "skewPct", "termPct")
 
 # ---- CHAIN BEGIN ----
 # Chain tab: the live strikes chain from the ORATS delayed feed.
@@ -718,7 +731,7 @@ ui <- fillPage(
                                                             "Put skew percentile (25d RR / ATM)" = "skewPct",
                                                             "Term percentile (30d / 90d IV)" = "termPct"),
                                                 selected = "vrpScore"),
-                                    textInput("cand_n_labels", "Tickers to label", value = 12),
+                                    textInput("cand_n_labels", "Tickers to label", value = 20),
                                     checkboxInput("cand_hide_wide", "Hide wide markets (width > 2x median)", value = FALSE),
                                     h3("Screen"),
                                     # single names dominate option volume, so
@@ -757,7 +770,7 @@ ui <- fillPage(
                                         h1("Candidates", style = "color: darkgray;"),
                                         helpText("Both panels: log(IV30 / RV20) ranked against each name's own history (y, ",
                                                  "lookback in the sidebar) - the same IV/RV as the Ticker tab. Left x: where ",
-                                                 "IV itself sits (ORATS ivPctile1y, or IV's z over the lookback) - is vol rich ",
+                                                 "IV30 itself sits against its own history, same IV and lookback as y - is vol rich ",
                                                  "AND high? Right x: RV5/RV20 on ORATS' intraday HV - will it hurt before it ",
                                                  "pays? Above ~1.4 realized tends to keep rising over the next 20 sessions ",
                                                  "(vrp_etf_v2: t -5.3), so expect early marks against - but it does NOT predict ",
@@ -1253,16 +1266,21 @@ server <- function(input, output, session) {
                              termPct = list(lab = "term pct", lo = 0, hi = 100, fmt = ".0f"),
                              list(lab = "vrp score", lo = 0, hi = 1, fmt = ".2f"))
         ycol <- if (z) "ivrv_z" else "ivrv_pct"
-        xcol <- if (side == "right") "rv5_20" else if (z) "iv_z" else "ivPctile1y"
+        xcol <- if (side == "right") "rv5_20" else if (z) "iv_z" else "iv_pct"
         df <- cand_df() %>% mutate(xv = .data[[xcol]], yv = .data[[ycol]]) %>%
             dplyr::filter(is.finite(xv), is.finite(yv), side == "left" | xv > 0)
         validate(need(nrow(df) > 0, paste0("No ", xcol, " / ", ycol, " on this day (need ", n, " sessions of history).")))
-        n_lab <- suppressWarnings(as.integer(input$cand_n_labels)); if (!isTRUE(n_lab >= 0)) n_lab <- 12
+        n_lab <- suppressWarnings(as.integer(input$cand_n_labels)); if (!isTRUE(n_lab >= 0)) n_lab <- 20
         y_ext <- if (z) abs(df$yv) >= 2 else df$yv <= 5 | df$yv >= 95
         x_ext <- if (side == "right") df$xv >= 1.4 | df$xv <= 0.7
                  else if (z) abs(df$xv) >= 2 else df$xv <= 5 | df$xv >= 95
         df <- df %>% mutate(label = if_else(ticker %in% head(ticker, n_lab) | y_ext | x_ext, ticker, ""),
                             sz = 6 + 3 * pmax(log10(pmax(avgOptVolu20d, 1)) - 2, 0))
+        # right x axis stops at RV5/RV20 = 2.5; names beyond it sit on the edge
+        # (the hover keeps the true ratio)
+        rv_max <- 2.5
+        if (side == "right") df <- df %>% mutate(xv = pmin(xv, rv_max))
+        rngx <- if (side == "right") log10(c(min(0.5, min(df$xv)) * 0.95, rv_max * 1.02)) else NULL
         stat_lab <- if (z) "z-score" else "percentile"
         # guides: the y tails on both panels; x tails on the left, the RV5/RV20
         # thresholds on the right
@@ -1281,16 +1299,16 @@ server <- function(input, output, session) {
             list(x = log10(0.7), y = 1, yref = "paper", text = "< realized cooling", showarrow = FALSE,
                  xanchor = "right", yanchor = "top", font = list(color = "seagreen"))) else list()
         xlab <- if (side == "right") "RV5 / RV20, ORATS intraday HV (log scale)"
-                else if (z) paste0("IV30 z-score vs own ", n, "d") else "IV percentile, 1y (ORATS ivPctile1y)"
+                else if (z) paste0("IV30 z-score vs own ", n, "d") else paste0("IV30 percentile vs own ", n, "d")
         rngy <- if (z) c(-4, 4) else c(-5, 105)
         plot_ly(df, x = ~xv, y = ~yv, type = "scatter", mode = "markers+text",
                 text = ~label, textposition = "top center", textfont = list(size = 11),
                 hovertext = ~sprintf(paste0("%s  (%s)<br>IV/RV %.2f: pct %.0f, z %+.1f   iv30 %.1f<br>",
                                             "rv5 (intraday) %.1f  rv20 %.1f  rv252 %.1f   RV5/RV20 (intraday) %.2f  RV20/RV252 %.2f<br>",
-                                            "IV pct1y %.0f   IV/IVVOL pct %.0f   skew pct %.0f   width %.1f   %s"),
+                                            "IV pct %.0f (ORATS 1y %.0f)   IV/IVVOL pct %.0f   skew pct %.0f   width %.1f   %s"),
                                      ticker, class, exp(ivrvNow), ivrv_pct, ivrv_z, exErnIv30d,
                                      orHvXern5d, clsHvXern20d, clsHvXern252d, rv5_20, rv20_252,
-                                     ivPctile1y, iv_ivvol_pct, skewPct, mktWidthVol, flags),
+                                     iv_pct, ivPctile1y, iv_ivvol_pct, skewPct, mktWidthVol, flags),
                 customdata = ~ticker, source = "cand",
                 marker = list(size = ~sz, opacity = 0.85, color = df[[cv]],
                               colorscale = "Viridis", cmin = cscale$lo, cmax = cscale$hi,
@@ -1299,7 +1317,7 @@ server <- function(input, output, session) {
                 hovertemplate = paste0("%{hovertext}<br>", cscale$lab, " %{marker.color:", cscale$fmt, "}<extra></extra>")) %>%
             layout(xaxis = list(title = xlab, zeroline = FALSE,
                                 type = if (side == "right") "log" else "linear",
-                                range = if (side == "right") NULL else rngy),
+                                range = if (side == "right") rngx else rngy),
                    yaxis = list(title = paste0("log(IV30/RV20), ", stat_lab, " vs own ", n, "d"),
                                 range = rngy, zeroline = FALSE),
                    shapes = shp, annotations = ann, font = list(size = 13),
@@ -1317,7 +1335,7 @@ server <- function(input, output, session) {
             `IV/RV` = round(exp(ivrvNow), 2), ivrvPct = round(ivrv_pct, 0), ivrvZ = round(ivrv_z, 1),
             iv30 = round(exErnIv30d, 1), `rv5 intraday` = round(orHvXern5d, 1), rv20 = round(clsHvXern20d, 1),
             `RV5/RV20 intraday` = round(rv5_20, 2),
-            ivPct1y = round(ivPctile1y, 0), rvPct1y = round(rvPctile1y, 0),
+            ivPct = round(iv_pct, 0), ivZ = round(iv_z, 1), ivPct1y = round(ivPctile1y, 0), rvPct1y = round(rvPctile1y, 0),
             `1m sig` = round(move1mSig, 1),
             `1w%` = round(stkPxChng1wk, 1), `1m%` = round(stkPxChng1m, 1), `6m%` = round(stkPxChng6m, 1),
             fwd30_60 = round(fwdRatio, 2), slope = round(slope, 2),
@@ -1454,29 +1472,48 @@ server <- function(input, output, session) {
         reactive(toupper(trimws(as.character(input$ticker_1)))), 600)
     pair_2_deb <- debounce(
         reactive(toupper(trimws(as.character(input$ticker_2)))), 600)
-    returns_cor_mat <- reactive({
+    # dates x tickers matrix of daily log returns, built once per session. The
+    # full pairwise cor() of it (4.6k x 4.6k) took ~35s, and the plot reads one
+    # column per ticker plus a 51 x 51 block, so those are all it computes;
+    # pairwise-complete correlation is per pair, so the values are the same.
+    returns_wide <- reactive({
         # split-adjusted per ticker, or one -69% split day dominates the pair
         wide_ret <- ORATS_core %>% group_by(ticker) %>% arrange(tradeDate, .by_group = TRUE) %>%
             mutate(log_ret = c(NA, diff(log(split_adjust(tradeDate, na_if(pxAtmIv, 0), cur_group()$ticker))))) %>%
             select(tradeDate, ticker, log_ret) %>%
             pivot_wider(names_from = ticker, values_from = log_ret)
-        wide_ret %>% select(-tradeDate) %>% cor(use = "pairwise.complete.obs")
+        as.matrix(select(wide_ret, -tradeDate))
     })
 
 
 
     
     
-    # ---- Dashboard: rolling stats, computed ONCE per universe ----
-    # The panels these feed used to each re-run 252-day z-scores and percent
-    # ranks over the whole 500-day panel on every render. One pass, keyed on
-    # the universe, and the date filter is applied afterwards.
+    # ---- Dashboard: rolling stats, only for the names on screen ----
+    # Everything that reads these joins them onto dash_screen()'s top-N, so
+    # ranking every ticker in the universe was ~20ms x 1.3k ETFs (x 4.6k on
+    # "All") of work thrown away on each universe or lookback change. Each
+    # ticker's series is its own group, so computing it alone gives the same
+    # numbers; results are memoised per (lookback, ticker), and a new date or
+    # a wider N only computes the names not seen yet this session.
     norm_n <- reactive({
         n <- suppressWarnings(as.integer(input$norm_lookback)); if (!isTRUE(n >= 20)) 252L else n
     })
+    roll_cache <- new.env(parent = emptyenv())
     dash_rolling <- reactive({
         n <- norm_n()
-        dash_core() %>% group_by(ticker) %>% arrange(tradeDate) %>%
+        tk <- unique(dash_screen(as.numeric(input$scr_n_tickers))$ticker)
+        keys <- paste(n, tk)
+        todo <- tk[!vapply(keys, exists, logical(1), envir = roll_cache, inherits = FALSE)]
+        if (length(todo)) {
+            new <- dash_rolling_calc(dplyr::filter(ORATS_core, ticker %in% todo), n)
+            for (g in split(new, new$ticker)) assign(paste(n, g$ticker[1]), g, envir = roll_cache)
+        }
+        dplyr::bind_rows(mget(keys[vapply(keys, exists, logical(1), envir = roll_cache, inherits = FALSE)],
+                              envir = roll_cache))
+    })
+    dash_rolling_calc <- function(core, n) {
+        core %>% group_by(ticker) %>% arrange(tradeDate) %>%
             mutate(
                 # the app's one IV/RV: 30d ex-earnings IV over 20d close-to-close
                 # ex-earnings HV, as in the Candidates axis and the Ticker tab's
@@ -1485,7 +1522,9 @@ server <- function(input, output, session) {
                 ivrv_log = roll_safe(log(na_if(exErnIv30d, 0) / na_if(clsHvXern20d, 0))),
                 ivrv_z   = runZscore(ivrv_log, n),
                 ivrv_pct = TTR::runPercentRank(ivrv_log, n) * 100,
-                # IV's own z over the lookback, the z-mode partner of ivPctile1y
+                # IV's own percentile and z over the lookback, on the same IV as
+                # ivrv_*; ORATS' ivPctile1y is a fixed 1y on orIvXern20d instead
+                iv_pct   = TTR::runPercentRank(roll_safe(na_if(exErnIv30d, 0)), n) * 100,
                 iv_z     = runZscore(roll_safe(log(na_if(exErnIv30d, 0))), n),
                 iv_ivvol_log = {
                     w <- ew_sd_roll(replace_na(c(NA, diff(log(na_if(exErnIv30d, 0)))), 0), 20)
@@ -1513,9 +1552,9 @@ server <- function(input, output, session) {
                 termPct  = tryCatch(TTR::runPercentRank(roll_safe(log(na_if(exErnIv30d, 0) / na_if(exErnIv90d, 0))), n) * 100,
                                     error = function(e) NA_real_)
             ) %>% ungroup() %>%
-            dplyr::select(ticker, tradeDate, ivrv_z, ivrv_pct, iv_z, iv_ivvol_z, iv_ivvol_pct,
+            dplyr::select(ticker, tradeDate, ivrv_z, ivrv_pct, iv_pct, iv_z, iv_ivvol_z, iv_ivvol_pct,
                           starts_with("ff_"), starts_with("back_pct_"), skew_rr, skewPct, termPct)
-    })
+    }
     # the day's screen (liquidity/width gated, vrp-scored) joined to its rolling stats
     dash_day <- reactive({
         dash_screen(as.numeric(input$scr_n_tickers)) %>%
@@ -1536,7 +1575,7 @@ server <- function(input, output, session) {
         # dash_day carries the rolling z-scores and forward factors as well
         df <- dash_day() %>% dplyr::filter(is.finite(.data[[xcol]]), is.finite(.data[[ycol]]))
         validate(need(nrow(df) > 0, paste0("Nothing finite for ", xcol, " vs ", ycol, " on this day.")))
-        n_lab <- suppressWarnings(as.integer(input$cand_n_labels)); if (!isTRUE(n_lab >= 0)) n_lab <- 12
+        n_lab <- suppressWarnings(as.integer(input$cand_n_labels)); if (!isTRUE(n_lab >= 0)) n_lab <- 20
         # same convention as the panels above: the top of the vrp score plus
         # the 5% tails of whichever two columns are on the axes
         xv <- df[[xcol]]; yv <- df[[ycol]]
@@ -1945,6 +1984,7 @@ server <- function(input, output, session) {
                           ~ if_else(is.finite(.x), .x, NA_real_)))
 
         # leads need the full history; trim only once they are computed
+        df_full <- df
         df <- t_win(df)
 
         h <- switch(t_vol_window, "30d" = "30", "60d" = "60", "90d" = "90",
@@ -1965,16 +2005,28 @@ server <- function(input, output, session) {
 
         last_fin <- function(x) { x <- x[is.finite(x)]; if (length(x)) x[length(x)] else NA_real_ }
         hs <- c("10", "30", "60", "90", "120", "252")
-        # band: 25-75% of the realized premium over the displayed window
+        # band: 25-75% of the realized premium over a window as long as the
+        # displayed one, but ending at each horizon's last COMPLETE value. The
+        # realized n-session premium stops n sessions before today, so cut at
+        # the displayed window the 1y horizon had no values at all under a 1y
+        # range (6m had 7), the quantiles came back NA and the ribbon broke.
+        m <- t_range_months()
+        realized_win <- function(k) {
+            d <- df_full[is.finite(df_full[[paste0("VRP_", k)]]), ]
+            if (!is.infinite(m) && nrow(d)) d <- d[d$tradeDate >= max(d$tradeDate) - m * 30.5, ]
+            d[[paste0("VRP_", k)]]
+        }
         vrp_term_structure <- tibble(
             horizon = factor(hs, levels = hs),
-            q25 = sapply(hs, function(k) quantile(df[[paste0("VRP_", k)]], 0.25, na.rm = TRUE, names = FALSE)),
-            q75 = sapply(hs, function(k) quantile(df[[paste0("VRP_", k)]], 0.75, na.rm = TRUE, names = FALSE)),
+            q25 = sapply(hs, function(k) quantile(realized_win(k), 0.25, na.rm = TRUE, names = FALSE)),
+            q75 = sapply(hs, function(k) quantile(realized_win(k), 0.75, na.rm = TRUE, names = FALSE)),
             current = sapply(hs, function(k) last_fin(df[[paste0("VRP_", k)]])),
             now = sapply(hs, function(k) last_fin(df[[paste0("NOW_", k)]])))
 
+        # an NA corner (a horizon with no history at all) tears the fill polygon
         p2 <- plot_ly(vrp_term_structure, x = ~horizon) %>%
-            add_ribbons(ymin = ~q25, ymax = ~q75,
+            add_ribbons(data = dplyr::filter(vrp_term_structure, is.finite(q25), is.finite(q75)),
+                        ymin = ~q25, ymax = ~q75,
                         name = "realized IQR (25-75%)",
                         line = list(width = 0),
                         fillcolor = "rgba(0,255,0,0.3)",
@@ -2794,16 +2846,17 @@ server <- function(input, output, session) {
         ticker_1 <- pair_1_deb()
         ticker_2 <- pair_2_deb()
 
-        cor_mat <- returns_cor_mat()   # memoized: heavy, input-independent
-        req(ticker_1 %in% colnames(cor_mat), ticker_2 %in% colnames(cor_mat))
-        # corr mat ticker 1
-        ticker_col <- cor_mat[,ticker_1] %>% sort(decreasing = TRUE)
-        ticker_closest <- names(ticker_col[c(1:25, (length(ticker_col)-25):length(ticker_col))]) 
-        cor_mat_closest1 <- cor_mat[ticker_closest,ticker_closest %>% rev]
-        # corr mat ticker 1
-        ticker_col <- cor_mat[,ticker_2] %>% sort(decreasing = TRUE)
-        ticker_closest <- names(ticker_col[c(1:25, (length(ticker_col)-25):length(ticker_col))])
-        cor_mat_closest2 <- cor_mat[ticker_closest,ticker_closest %>% rev]
+        W <- returns_wide()   # memoized: heavy, input-independent
+        req(ticker_1 %in% colnames(W), ticker_2 %in% colnames(W))
+        # the 25 most and 26 least correlated names to the ticker, and their
+        # correlations with each other
+        closest_block <- function(tkr) {
+            ticker_col <- cor(W, W[, tkr], use = "pairwise.complete.obs")[, 1] %>% sort(decreasing = TRUE)
+            ticker_closest <- names(ticker_col[c(1:25, (length(ticker_col)-25):length(ticker_col))])
+            cor(W[, ticker_closest], use = "pairwise.complete.obs")[ticker_closest, rev(ticker_closest)]
+        }
+        cor_mat_closest1 <- closest_block(ticker_1)
+        cor_mat_closest2 <- closest_block(ticker_2)
         p7 <-  ggcorrplot(cor_mat_closest1, show.legend = FALSE, type = "upper") 
         p8 <-  ggcorrplot(cor_mat_closest2, show.legend = FALSE, type = "upper")
         (p7 + p8)
