@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Options Dashboard
+Comment=Start the Shiny options dashboard (ui2.R) and open it in the browser
+Exec=/home/marco/trading/Systems/Options/run_dashboard.sh
+Icon=utilities-system-monitor
+Terminal=false
+Categories=Office;Finance;

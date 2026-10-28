@@ -63,7 +63,7 @@ regime_model <- function() {
 # Ensure REGIME_IV exists and is current. Safe to call on every app start:
 # builds once if missing, otherwise appends only daily files newer than the
 # last stored day. Wrapped by callers in tryCatch so a data hiccup never
-# blocks startup. Returns invisibly; side effect is the refreshed parquet.
+# blocks startup. Returns NULL invisibly; the side effect is the refreshed parquet.
 regime_iv_update <- function(verbose = TRUE) {
   say <- function(...) if (verbose) message("[regime_iv] ", ...)
   if (!file.exists(REGIME_IV)) {
@@ -79,21 +79,24 @@ regime_iv_update <- function(verbose = TRUE) {
     }
     arrow::write_parquet(g, REGIME_IV)
   }
-  g <- arrow::read_parquet(REGIME_IV)
-  g$tradeDate <- as.Date(g$tradeDate)
-  last_day <- suppressWarnings(max(g$tradeDate, na.rm = TRUE))
+  # the freshness check needs one column; the full store is read only when
+  # there is something to append (it ran on every app start, ~1.5s)
+  last_day <- suppressWarnings(max(as.Date(
+    arrow::read_parquet(REGIME_IV, col_select = "tradeDate")$tradeDate), na.rm = TRUE))
   files  <- .regime_iv_files()
   fdates <- as.Date(sub("orats_core_([0-9]{8})\\.csv\\.gz", "\\1", files), "%Y%m%d")
   new    <- files[!is.na(fdates) & fdates > last_day]
   if (length(new)) {
     say("appending ", length(new), " new day(s): ",
         format(last_day), " -> ", format(max(fdates, na.rm = TRUE)))
+    g <- arrow::read_parquet(REGIME_IV)
+    g$tradeDate <- as.Date(g$tradeDate)
     g <- dplyr::bind_rows(g, .regime_iv_read_days(new))
     arrow::write_parquet(g, REGIME_IV)
   } else {
     say("already current at ", format(last_day))
   }
-  invisible(g)
+  invisible(NULL)
 }
 
 .regime_roll_pct <- function(x, win = 504, minp = 252) {

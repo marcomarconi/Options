@@ -91,11 +91,19 @@ fetch_spx <- function() fetch_yahoo("^GSPC", VIX_SPOT)
 
 update_vix_complex <- function(cache_file, force = FALSE) {
     have <- if (file.exists(cache_file)) arrow::read_parquet(cache_file) else NULL
-    # CBOE posts after the close, so "yesterday or later" is fresh enough; this
-    # keeps the app from re-downloading on every restart during a session.
+    # CBOE posts after the close, so "the previous session or later" is fresh
+    # enough; this keeps the app from re-downloading on every restart during a
+    # session. Sessions, not calendar days: "yesterday" made a Friday close
+    # stale all weekend and all Monday, and every start re-fetched (~5s).
     # a cache written before a series was added to the lists is stale too
     want <- unique(c(VIX_ALL, VIX_SPOT, VIX_XASSET$key))
-    fresh <- !is.null(have) && max(have$date) >= (Sys.Date() - 1) &&
+    prev_session <- local({
+        hol <- as.Date(timeDate::holidayNYSE(as.numeric(format(Sys.Date(), "%Y")) + (-1:0)))
+        d <- Sys.Date() - 1
+        while (format(d, "%u") %in% c("6", "7") || d %in% hol) d <- d - 1
+        d
+    })
+    fresh <- !is.null(have) && max(have$date) >= prev_session &&
         all(want %in% unique(have$series))
     if (fresh && !force) return(have)
     print("Fetching the CBOE volatility index complex...")
